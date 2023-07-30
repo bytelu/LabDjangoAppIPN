@@ -9,6 +9,11 @@ html {
 }
 
 body {
+  display: flex;
+  justify-content: center; /* Centrar horizontalmente */
+  align-items: center; /* Centrar verticalmente */
+  min-height: 100vh; /* Establecer el alto mínimo de la página para ocupar toda la altura de la pantalla */
+  margin: 0; /* Eliminar los márgenes predeterminados del body */
   background-image: url('../img/espiro_pink.jpg');
   font-family: "Titillium Web", sans-serif;
   background-repeat: no-repeat;
@@ -27,12 +32,12 @@ a:hover {
 }
 
 .form {
-  background: rgba(19, 35, 54, 0.7); /* Hace opacidad al form con el 0.7*/
+  background: rgba(19, 35, 54, 0.7);
   background-image: url('../img/ic_logosin.png');
+  background-position: center;
   padding: 40px;
-  max-width: 600px;
+  width: 600px;
   height: 550px;
-  margin: 40px auto;
   border-radius: 4px;
   box-shadow: 0 4px 10px 4px rgba(19, 35, 47, 0.3);
   background-blend-mode: multiply; 
@@ -79,7 +84,7 @@ h1 {
   font-weight: 300;
   margin: 0 0 40px;
 }
-h3{
+h4{
   color: white;
 }
 label {
@@ -132,7 +137,8 @@ textarea {
 }
 .field-wrap {
   position: relative;
-  margin-bottom: 40px;
+  margin-bottom: 15px;
+  width: 80%;
 }
 .top-row:after {
   content: "";
@@ -185,7 +191,7 @@ textarea {
 /* Estilo para la notificación de mensaje de error */
 .notification {
   position: absolute;
-  top: 35px;
+  top: 0;
   left: 0;
   right: 0;
   padding: 10px;
