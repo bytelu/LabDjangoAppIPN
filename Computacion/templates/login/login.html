@@ -1,0 +1,92 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Página de Inicio de Sesión</title>
+    <link rel="stylesheet" href="{% static 'css/login.css' %}"> 
+</head>
+<body>
+    <div class="form">
+        <ul class="tab-group">
+            <li class="tab active"><a href="#login">Inicio de Sesion</a></li>
+            <li class="tab"><a href="#signup">Registrarse</a></li>
+        </ul>
+        <div class="tab-content">
+            <!-- Aquí se muestra el bloque de mensajes utilizando el código que te proporcioné antes -->
+            <div class="notification-container">
+                {% for message in messages %}
+                    <div class="notification error-message">{{ message }}</div>
+                {% endfor %}
+            </div>
+            <div id="login">
+                <h1>Bienvenido!</h1>
+                <h3>Ingresa tus datos para ingresar...</h3>
+                <br>
+                <form action="{% url 'conn' %}" method="post">
+                    {% csrf_token %}
+                    <div class="field-wrap">
+                        <label>
+                            Usuario<span class="req">*</span>
+                        </label>
+                        <input type="text" name="usuario" required autocomplete="off" />
+                    </div>
+                    <div class="field-wrap">
+                        <label>
+                            Contraseña<span class="req">*</span>
+                        </label>
+                        <input type="password" name="contrasenia" required autocomplete="off" />
+                    </div>
+                    <p class="forgot"><a href="#">Olvidaste la contraseña?</a></p>
+                    <br>
+                    <button class="button button-block" type="submit">Ingresar</button>
+                </form>
+            </div>
+            <div id="signup">
+                <h1>Registrarse</h1>
+                <br>
+                <form action="/" method="post">
+                    <div class="top-row">
+                        <div class="field-wrap">
+                            <label>
+                                Apellido Paterno<span class="req">*</span>
+                            </label>
+                            <input type="text" required autocomplete="off" />
+                        </div>
+                        <div class="field-wrap">
+                            <label>
+                                Apellido Materno<span class="req">*</span>
+                            </label>
+                            <input type="text" required autocomplete="off" />
+                        </div>
+                        <div class="field-wrap">
+                            <label>
+                                Nombre(s)<span class="req">*</span>
+                            </label>
+                            <input type="text" required autocomplete="off" />
+                        </div>
+                    </div>
+                    <div class="field-wrap">
+                        <label>
+                            Usuario<span class="req">*</span>
+                        </label>
+                        <input type="email" required autocomplete="off" />
+                    </div>
+                    <div class="field-wrap">
+                        <label>
+                            Contraseña<span class="req">*</span>
+                        </label>
+                        <input type="password" required autocomplete="off" />
+                    </div>
+                    <button type="submit" class="button button-block">Crear Cuenta</button>
+                </form>
+            </div>
+        </div><!-- tab-content -->
+    </div> <!-- /form -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="{% static 'js/login.js' %}"></script>
+</body>
+</html>
+
