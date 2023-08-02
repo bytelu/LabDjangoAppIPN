@@ -1,3 +1,4 @@
 # .gitignore
 venv/
-__pycache__/
+Computacion/__pycache__
+Laboratorio/__pycache__
