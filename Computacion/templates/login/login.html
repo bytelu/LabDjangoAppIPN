@@ -56,46 +56,65 @@
                 <br>
                 <!-- Agregar clases de Bootstrap para hacer que los elementos sean responsivos -->
                 <form class="container">
-                    <div class="d-flex justify-content-between w-80 mx-auto"> <!-- Agregamos las clases d-flex, justify-content-between, w-80 y mx-auto -->
-                        <div class="field-wrap mb-3"> <!-- No es necesario agregar la clase w-80 y mx-auto a los elementos internos -->
-                            <label>
-                                Apellido Paterno<span class="req">*</span>
-                            </label>
-                            <input type="text" name="a_paterno" required autocomplete="off" />
+                    <div class="row">
+                        <!-- Primera columna -->
+                        <div class="col-md-6">
+                            <div class="form-row mb-3">
+                                <div class="field-wrap w-100">
+                                    <label>
+                                        Apellido Paterno<span class="req">*</span>
+                                    </label>
+                                    <input type="text" name="a_paterno" required autocomplete="off" />
+                                </div>
+                                <div class="field-wrap w-100"></div>
+                                <div class="field-wrap w-100"></div>
+                                <div class="field-wrap w-100">
+                                    <label>
+                                        Apellido Materno<span class="req">*</span>
+                                    </label>
+                                    <input type="text" name="a_materno" required autocomplete="off" />
+                                </div>
+                                <div class="field-wrap w-100"></div>
+                                <div class="field-wrap w-100"></div>
+                                <div class="field-wrap w-100">
+                                    <label>
+                                        Nombre(s)<span class="req">*</span>
+                                    </label>
+                                    <input type="text" name="nombre" required autocomplete="off" />
+                                </div>
+                            </div>
                         </div>
-                        <div class="field-wrap mb-3"> <!-- No es necesario agregar la clase w-80 y mx-auto a los elementos internos -->
-                            <label>
-                                Apellido Materno<span class="req">*</span>
-                            </label>
-                            <input type="text" name="a_materno" required autocomplete="off" />
+                        <!-- Segunda columna -->
+                        <div class="col-md-6">
+                            <div class="form-row mb-3">
+                                <div class="field-wrap w-100">
+                                    <label>
+                                        Usuario<span class="req">*</span>
+                                    </label>
+                                    <input type="text" name="usuario" required autocomplete="off" />
+                                </div>
+                                <div class="field-wrap w-100"></div>
+                                <div class="field-wrap w-100"></div>
+                                <div class="field-wrap w-100">
+                                    <label>
+                                        Contraseña<span class="req">*</span>
+                                    </label>
+                                    <input type="password" name="contrasenia" required autocomplete="off" />
+                                </div>
+                                <div class="field-wrap w-100"></div>
+                                <div class="field-wrap w-100"></div>
+                                <div class="field-wrap w-100">
+                                    <label>
+                                        Repetir Contraseña<span class="req">*</span>
+                                    </label>
+                                    <input type="password" name="contrasenia" required autocomplete="off" />
+                                </div>
+                            </div>
                         </div>
                     </div>
-                    <div class="field-wrap w-80 mx-auto">
-                        <label>
-                            Nombre(s)<span class="req">*</span>
-                        </label>
-                        <input type="text" name="nombre" required autocomplete="off" />
-                    </div>
-                    <div class="field-wrap w-80 mx-auto">
-                        <label>
-                            Usuario<span class="req">*</span>
-                        </label>
-                        <input type="text" name="usuario" required autocomplete="off" />
-                    </div>
-                    <div class="field-wrap w-80 mx-auto">
-                        <label>
-                            Contraseña<span class="req">*</span>
-                        </label>
-                        <input type="password" name="contrasenia" required autocomplete="off" />
-                    </div>
-                    <div class="field-wrap w-80 mx-auto">
-                        <label>
-                            Repetir Contraseña<span class="req">*</span>
-                        </label>
-                        <input type="password" name="contrasenia" required autocomplete="off" />
-                    </div>
-                    <button type="submit" class="button button-block">Crear Cuenta</button>
-                </form>                             
+                    <!-- Botón de envío -->
+                    <button type="submit" class="button button-block mt-3">Crear Cuenta</button>
+                </form>                                            
             </div>
         </div><!-- tab-content -->
     </div> <!-- /form -->
