@@ -14,9 +14,16 @@
 <body>
     <!-- Mantener la clase "form" para el formulario -->
     <div class="form">
+        {% csrf_token %}
         <ul class="tab-group">
-            <li class="tab active"><a href="#login">Inicio de Sesion</a></li>
-            <li class="tab"><a href="#signup">Registrarse</a></li>
+            <li class="tab {% if not es_registro %} active{% endif %}">
+                <a href="#login">Inicio de Sesion</a>
+            </li>
+        
+            <!-- Pestaña Registrarse -->
+            <li class="tab {% if es_registro %} active{% endif %}">
+                <a href="#signup">Registrarse</a>
+            </li>
         </ul>
         <div class="tab-content">
             <!-- Aquí se muestra el bloque de mensajes utilizando el código que te proporcioné antes -->
@@ -25,7 +32,7 @@
                     <div class="notification error-message">{{ message }}</div>
                 {% endfor %}
             </div>
-            <div id="login">
+            <div class="tab-content" id="login">
                 <h1>Bienvenido!</h1>
                 <h4>Ingresa tus datos para comenzar...</h4>
                 <br>
@@ -51,11 +58,12 @@
                     <button class="button button-block" type="submit">Ingresar</button>
                 </form>                              
             </div>
-            <div id="signup">
+            <div class="tab-content" id="signup">
                 <h1>Registrarse</h1>
                 <br>
                 <!-- Agregar clases de Bootstrap para hacer que los elementos sean responsivos -->
-                <form class="container">
+                <form class="container" action="{% url 'registro' %}" method="post">
+                    {% csrf_token %}
                     <div class="row">
                         <!-- Primera columna -->
                         <div class="col-md-6">
@@ -64,7 +72,7 @@
                                     <label>
                                         Apellido Paterno<span class="req">*</span>
                                     </label>
-                                    <input type="text" name="a_paterno" required autocomplete="off" />
+                                    <input type="text" id="a_paterno" name="a_paterno" required autocomplete="off" />
                                 </div>
                                 <div class="field-wrap w-100"></div>
                                 <div class="field-wrap w-100"></div>
@@ -72,7 +80,7 @@
                                     <label>
                                         Apellido Materno<span class="req">*</span>
                                     </label>
-                                    <input type="text" name="a_materno" required autocomplete="off" />
+                                    <input type="text" id="a_materno" name="a_materno" required autocomplete="off" />
                                 </div>
                                 <div class="field-wrap w-100"></div>
                                 <div class="field-wrap w-100"></div>
@@ -80,7 +88,7 @@
                                     <label>
                                         Nombre(s)<span class="req">*</span>
                                     </label>
-                                    <input type="text" name="nombre" required autocomplete="off" />
+                                    <input type="text" id="nombre" name="nombre" required autocomplete="off" />
                                 </div>
                             </div>
                         </div>
@@ -91,7 +99,7 @@
                                     <label>
                                         Usuario<span class="req">*</span>
                                     </label>
-                                    <input type="text" name="usuario" required autocomplete="off" />
+                                    <input type="text" id="usuario" name="usuario" required autocomplete="off" />
                                 </div>
                                 <div class="field-wrap w-100"></div>
                                 <div class="field-wrap w-100"></div>
@@ -99,7 +107,7 @@
                                     <label>
                                         Contraseña<span class="req">*</span>
                                     </label>
-                                    <input type="password" name="contrasenia" required autocomplete="off" />
+                                    <input type="password" id="contrasenia" name="contrasenia" required autocomplete="off" />
                                 </div>
                                 <div class="field-wrap w-100"></div>
                                 <div class="field-wrap w-100"></div>
@@ -107,7 +115,7 @@
                                     <label>
                                         Repetir Contraseña<span class="req">*</span>
                                     </label>
-                                    <input type="password" name="contrasenia" required autocomplete="off" />
+                                    <input type="password" id="contraseniados" name="contraseniados" required autocomplete="off" />
                                 </div>
                             </div>
                         </div>
@@ -123,5 +131,3 @@
 </body>
 
 </html>
-
-
