@@ -34,4 +34,4 @@ def conn(request):
     return render(request, 'login/login.html')
 
 def acceso(request):
-    return render(request, 'index/acceso.html')
+    return render(request, 'adminlte/index.html')
