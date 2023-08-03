@@ -35,3 +35,9 @@ def conn(request):
 
 def acceso(request):
     return render(request, 'adminlte/index.html')
+
+def crearsesion_indiv(request):
+    return render(request, 'interfazencargado/individual.html')
+
+def crearsesion_grupal(request):
+    return render(request, 'interfazencargado/grupo.html')

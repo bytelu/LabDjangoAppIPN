@@ -1,16 +1,5 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sesión Individual</title>
-
-    <!-- Estilos de AdminLTE - Asegúrate de cambiar las rutas si estás usando archivos locales -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/adminlte@3.1.0/dist/css/adminlte.min.css">
-</head>
-<body class="hold-transition sidebar-mini">
-
-    <div class="wrapper">
+{% extends "adminlte/acceso.html" %} {% load static %} {% block body %}
+<div class="wrapper">
 
         <!-- Encabezado de la página -->
         <header class="main-header">
@@ -39,6 +28,7 @@
                                     </thead>
                                     <tbody>
                                         <!-- Aquí puedes agregar las filas con los datos -->
+                                        <!-- Ejemplo con 20 filas -->
                                         <tr>
                                             <td>Apellido1</td>
                                             <td>Apellido2</td>
@@ -56,9 +46,15 @@
                     <div class="col-md-6">
                         <div class="card">
                             <div class="card-body text-center">
+                                <!-- Aquí puedes agregar la imagen del código QR -->
+                                <img src="{% static 'img/qr.jpg' %}" alt="Código QR" class="brand-image img-circle elevation-3" style="opacity: .8">
+
                                 <button class="btn btn-primary">Acceder a Web Scraping</button>
                                 <p>Numero de Laboratorio</p>
                                 <p>Nombre del Encargado</p>
+
+                                <!-- Aquí puedes agregar la imagen del encargado -->
+                                <img src="ruta_de_la_foto_del_encargado.png" alt="Foto del Encargado">
                             </div>
                         </div>
                     </div>
@@ -68,9 +64,4 @@
         </div>
 
     </div>
-
-    <!-- Scripts de AdminLTE - Asegúrate de cambiar las rutas si estás usando archivos locales -->
-    <script src="https://cdn.jsdelivr.net/npm/adminlte@3.1.0/dist/js/adminlte.min.js"></script>
-</body>
-</html>
-
+{% endblock %}
