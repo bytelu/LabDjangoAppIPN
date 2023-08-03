@@ -77,3 +77,8 @@ def registro(request):
     # sin datos ingresados, para que el usuario pueda comenzar a registrarse.
     return render(request, 'login/login.html', {'es_registro': True})
 
+def crearsesion_indiv(request):
+    return render(request, 'interfazencargado/individual.html')
+
+def crearsesion_grupal(request):
+    return render(request, 'interfazencargado/grupo.html')
