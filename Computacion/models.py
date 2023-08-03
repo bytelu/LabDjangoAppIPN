@@ -19,9 +19,12 @@ class Carrera(models.Model):
     
 class Computadora(models.Model):
     #llave primaria por defecto
-    numero = models.IntegerField(max_length=50, null=False, verbose_name='Numero de Computadora')
+    numero = models.IntegerField(null=False, verbose_name='Numero de Computadora')
     estado = models.BooleanField(default=True, verbose_name='Estado de computadora')
-    laboratorio = models.IntegerField(max_length=2 ,null=False, verbose_name='Laboratorio')
+    laboratorio = models.IntegerField(null=False, verbose_name='Laboratorio')
+    ##AGREGUE ESTOS DOS DE ABAJO
+    cod_monitor = models.CharField(max_length=100, null=True, verbose_name='Codigo Monitor')
+    cod_cpu = models.CharField(max_length=100, null=True, verbose_name='Codigo CPU')
     
     def __str__(self):
         return self.numero #laboratorio | numero de computadora
@@ -61,6 +64,8 @@ class Reportes (models.Model):
     seguimiento = models.TextField(max_length=2000, null=True, blank=True,unique=False,verbose_name='Seguimiento')
     #llave foranea 1 encargado tiene muchos reportes
     encargado = models.ForeignKey(Encargado, on_delete=models.CASCADE, null=False, blank=False, verbose_name='Encargado')
+    #AGREGUE ESTE POR SI LAS DUDDAS
+    computadora = models.ForeignKey(Computadora, verbose_name=("Computadora"), on_delete=models.CASCADE, null=True, blank=True)
     
     def __str__(self):
         return f"Reporte: {self.id}, Titulo: {self.titulo}"
@@ -76,7 +81,9 @@ class Profesor (models.Model):
     nombre = models.CharField(max_length=100, null=False, verbose_name='Nombre')
     apellido_p = models.CharField(max_length=100, null=False,verbose_name='Apellido Paterno')
     apellido_m = models.CharField(max_length=100,null=False, verbose_name='Apellido Materno')
-    boleta = models.IntegerField(max_length=50, null=False, unique=True, verbose_name='Boleta')
+    boleta = models.IntegerField(null=False, unique=True, verbose_name='Boleta')
+    #AGREGUE QR
+    qr = models.CharField(max_length=200, null=True, blank=True, unique=True, verbose_name='QR')
     
     def __str__(self):
         return f"Profesor: {self.nombre} {self.apellido_p} {self.apellido_m}"
@@ -92,8 +99,10 @@ class Alumno(models.Model):
     nombre = models.CharField(max_length=100, null=False,verbose_name='Nombre')
     apellido_p = models.CharField(max_length=100, null=False,verbose_name='Apellido Paterno')
     apellido_m = models.CharField(max_length=100, null=False,verbose_name='Apellido Materno')
-    boleta = models.IntegerField(max_length=50, null=False, unique=True, verbose_name='Boleta')
-    semestre = models.IntegerField(max_length=50, null=False, verbose_name='Semestre')
+    boleta = models.IntegerField(null=False, unique=True, verbose_name='Boleta')
+    semestre = models.IntegerField(null=False, verbose_name='Semestre')
+    #AGRGUE QR
+    qr = models.CharField(max_length=200, null=True, blank=True, unique=True, verbose_name='QR')
     #llave foranea, 1 carrera tiene muchos alumnos
     carrera = models.ForeignKey(Carrera, on_delete=models.CASCADE, null=False, blank=False, verbose_name='Carrera')
     
@@ -117,6 +126,8 @@ class Sesion(models.Model):
     alumno = models.ForeignKey(Alumno, verbose_name=("Alumno"), on_delete=models.CASCADE)
     #Llave forane, 1 profesor tiene muchas sesiones
     profesor = models.ForeignKey(Profesor, verbose_name=("Profesor"), on_delete=models.CASCADE, null=True, blank=True)
+    #Llave forane, 1 computadora tiene muchas sesiones
+    computadora = models.ForeignKey(Computadora, verbose_name=("Computadora"), on_delete=models.CASCADE, null=True, blank=True)
     
     def __str__(self):
         return f"Sesion No: {self.id}, Fecha: {self.fecha}"
