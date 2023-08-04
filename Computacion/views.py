@@ -35,3 +35,6 @@ def conn(request):
 
 def acceso(request):
     return render(request, 'adminlte/index.html')
+
+def qr_reader_view(request):
+    return render(request, 'qr/qr_reader.html')

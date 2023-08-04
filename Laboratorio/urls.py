@@ -23,5 +23,6 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('', login, name='login'),
     path('conn/', conn, name='conn'),
-    path('acceso/', include('Computacion.urls'))
+    path('acceso/', include('Computacion.urls')),
+    path('qr-reader/', qr_reader_view, name='qr_reader'),
 ]
