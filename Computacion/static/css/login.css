@@ -43,6 +43,9 @@ a:hover {
   background-blend-mode: multiply; 
   background-size: cover;
 }
+.form-row {
+  margin-bottom: 10px;
+}
 
 .tab-group {
   list-style: none;
