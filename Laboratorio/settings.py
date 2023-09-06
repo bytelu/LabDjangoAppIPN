@@ -78,12 +78,12 @@ WSGI_APPLICATION = 'Laboratorio.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'Laboratorio',
-        'USER': 'postgres',
-        'PASSWORD': 'laboratorio',
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'db_laboratorio',
+        'USER': 'Encargado',
+        'PASSWORD': 'ENCARGADO',
         'HOST': 'localhost',
-        'DATABASE_PORT': '5432'
+        'DATABASE_PORT': '3306'
     }
 }
 

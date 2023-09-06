@@ -1,0 +1,46 @@
+{% extends "adminlte/acceso.html" %} {% load static %} {% block body %}
+
+{% block content %}
+<div class="row">
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title"><i class="ion ion-clipboard mr-1"></i> Lista de Encargados</h3>
+        </div>
+        <div class="card-body">
+            <table class="table table-bordered table-hover">
+                <thead>
+                    <tr>
+                        <th>Nombre</th>
+                        <th>Apellido Paterno</th>
+                        <th>Apellido Materno</th>
+                        <th>Hora de entrada</th>
+                        <th>Hora de salida</th>
+                        <th>Usuario</th>
+                        <th>Activo</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for encargado in encargados %}
+                    <tr>
+                        <td>{{ encargado.nombre }}</td>
+                        <td>{{ encargado.apellido_p }}</td>
+                        <td>{{ encargado.apellido_m }}</td>
+                        <td>{{ encargado.hora_entrada }}</td>
+                        <td>{{ encargado.hora_salida }}</td>
+                        <td>{{ encargado.usuario }}</td>
+                        <td>{{ encargado.estado }}</td>
+                        <!-- Agrega más columnas según los campos de tu modelo Encargado -->
+                        <td>
+                            <a href="{% url 'editar_encargado' encargado.id %}" class="btn btn-primary">Editar</a>
+                            <a href="{% url 'eliminar_encargado' encargado.id %}" class="btn btn-danger">Eliminar</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            <a href="{% url 'agregar_encargado' %}" class="btn btn-success">Agregar Encargado</a>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% endblock %}

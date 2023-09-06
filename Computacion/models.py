@@ -1,140 +1,98 @@
+# This is an auto-generated Django model module.
+# You'll have to do the following manually to clean this up:
+#   * Rearrange models' order
+#   * Make sure each model has one field with primary_key=True
+#   * Make sure each ForeignKey and OneToOneField has `on_delete` set to the desired behavior
+#   * Remove `managed = False` lines if you wish to allow Django to create, modify, and delete the table
+# Feel free to rename the models, but don't rename db_table values or field names.
 from django.db import models
-from datetime import timedelta
-from django.forms import Select
 
-# Create your models here.
 
 class Carrera(models.Model):
-    #llave primaria por defecto
-    carrera = models.CharField(max_length=50, null=False, unique=True, verbose_name='Programa Academico')
-    
-    def __str__(self):
-        return self.carrera
-    
+    carrera = models.CharField(unique=True, max_length=50)
+
     class Meta:
-        db_table = 'career'
-        verbose_name = 'Carrera'
-        verbose_name_plural = 'Carreras'
-        ordering = ['id']
-    
+        managed = False
+        db_table = 'carrera'
+
+
 class Computadora(models.Model):
-    #llave primaria por defecto
-    numero = models.IntegerField(null=False, verbose_name='Numero de Computadora')
-    estado = models.BooleanField(default=True, verbose_name='Estado de computadora')
-    laboratorio = models.IntegerField(null=False, verbose_name='Laboratorio')
-    ##AGREGUE ESTOS DOS DE ABAJO
-    cod_monitor = models.CharField(max_length=100, null=True, verbose_name='Codigo Monitor')
-    cod_cpu = models.CharField(max_length=100, null=True, verbose_name='Codigo CPU')
-    
-    def __str__(self):
-        return self.numero #laboratorio | numero de computadora
-    
+    numero = models.IntegerField()
+    estado = models.IntegerField()
+    laboratorio = models.IntegerField()
+    cod_monitor = models.CharField(max_length=150, blank=True, null=True)
+    cod_cpu = models.CharField(max_length=150, blank=True, null=True)
+    ocupada = models.IntegerField()
+
     class Meta:
-        db_table = 'computer'
-        verbose_name = 'Computadora'
-        verbose_name_plural = 'Computadoras'
-        ordering = ['numero'] #por laboratorio y por numero de computadoras
-    
+        managed = False
+        db_table = 'computadora'
+
+
 class Encargado(models.Model):
-    #llave primaria por defecto
-    nombre = models.CharField(max_length=100, null=False,verbose_name='Nombre')
-    apellido_p = models.CharField(max_length=100, null=False,verbose_name='Apellido Paterno')
-    apellido_m = models.CharField(max_length=100, null=False,verbose_name='Apellido Materno')
-    hora_entrada = models.TimeField(null=True, blank=True, verbose_name='Hora de Entrada')
-    hora_salida = models.TimeField(null=True, blank=True, verbose_name='Hora de Salida')
-    usuario = models.CharField(max_length=50, null=False, unique=True, verbose_name='Usuario')
-    contrasenia = models.CharField(max_length=128, null=False, verbose_name='Contraseña')
-    estado = models.BooleanField(default=True, verbose_name='Estado')
-    
-    def __str__(self):
-        return f"Encargado: {self.nombre} {self.apellido_p} {self.apellido_m}"
-    
+    nombre = models.CharField(max_length=50)
+    apellido_p = models.CharField(max_length=40)
+    apellido_m = models.CharField(max_length=40)
+    hora_entrada = models.DateTimeField(blank=True, null=True)
+    hora_salida = models.DateTimeField(blank=True, null=True)
+    usuario = models.CharField(unique=True, max_length=25)
+    contrasenia = models.CharField(max_length=25)
+    estado = models.IntegerField()
+
     class Meta:
-        db_table = 'manager'
-        verbose_name = 'Encargado'
-        verbose_name_plural = 'Encargados'
-        ordering = ['id']
-    
-class Reportes (models.Model):
-    #Llave primaria por defecto
-    titulo = models.CharField(max_length=80, null=False, unique=False, verbose_name='Titulo')
-    descripcion = models.TextField(max_length=2000, null=False,unique=False,verbose_name='Descripcion')
-    hora = models.TimeField(auto_now_add=True, verbose_name='Hora del Reporte')
-    fecha = models.DateField(auto_now_add=True, verbose_name='Fecha del Reporte')
-    seguimiento = models.TextField(max_length=2000, null=True, blank=True,unique=False,verbose_name='Seguimiento')
-    #llave foranea 1 encargado tiene muchos reportes
-    encargado = models.ForeignKey(Encargado, on_delete=models.CASCADE, null=False, blank=False, verbose_name='Encargado')
-    #AGREGUE ESTE POR SI LAS DUDDAS
-    computadora = models.ForeignKey(Computadora, verbose_name=("Computadora"), on_delete=models.CASCADE, null=True, blank=True)
-    
-    def __str__(self):
-        return f"Reporte: {self.id}, Titulo: {self.titulo}"
-    
+        managed = False
+        db_table = 'encargado'
+
+
+class Estudiante(models.Model):
+    nombre = models.CharField(max_length=50)
+    apellido_p = models.CharField(max_length=40)
+    apellido_m = models.CharField(max_length=40)
+    boleta = models.IntegerField(unique=True)
+    grupo = models.CharField(max_length=10, blank=True, null=True)
+    qr = models.CharField(unique=True, max_length=200, blank=True, null=True)
+    carrera = models.ForeignKey(Carrera, models.DO_NOTHING)
+
     class Meta:
-        db_table = 'report'
-        verbose_name = 'Reporte'
-        verbose_name_plural = 'Reportes'
-        ordering = ['fecha', 'id']
-    
-class Profesor (models.Model):
-    #llave primaria por defecto
-    nombre = models.CharField(max_length=100, null=False, verbose_name='Nombre')
-    apellido_p = models.CharField(max_length=100, null=False,verbose_name='Apellido Paterno')
-    apellido_m = models.CharField(max_length=100,null=False, verbose_name='Apellido Materno')
-    boleta = models.IntegerField(null=False, unique=True, verbose_name='Boleta')
-    #AGREGUE QR
-    qr = models.CharField(max_length=200, null=True, blank=True, unique=True, verbose_name='QR')
-    
-    def __str__(self):
-        return f"Profesor: {self.nombre} {self.apellido_p} {self.apellido_m}"
-    
+        managed = False
+        db_table = 'estudiante'
+
+
+class Profesor(models.Model):
+    nombre = models.CharField(max_length=50)
+    apellido_p = models.CharField(max_length=40)
+    apellido_m = models.CharField(max_length=40)
+    boleta = models.IntegerField(unique=True)
+    qr = models.CharField(unique=True, max_length=200, blank=True, null=True)
+
     class Meta:
-        db_table = 'teacher'
-        verbose_name = 'Profesor'
-        verbose_name_plural = 'Profesores'
-        ordering = ['id', 'nombre']
-    
-class Alumno(models.Model):
-    #llave primaria por defecto
-    nombre = models.CharField(max_length=100, null=False,verbose_name='Nombre')
-    apellido_p = models.CharField(max_length=100, null=False,verbose_name='Apellido Paterno')
-    apellido_m = models.CharField(max_length=100, null=False,verbose_name='Apellido Materno')
-    boleta = models.IntegerField(null=False, unique=True, verbose_name='Boleta')
-    semestre = models.IntegerField(null=False, verbose_name='Semestre')
-    #AGRGUE QR
-    qr = models.CharField(max_length=200, null=True, blank=True, unique=True, verbose_name='QR')
-    #llave foranea, 1 carrera tiene muchos alumnos
-    carrera = models.ForeignKey(Carrera, on_delete=models.CASCADE, null=False, blank=False, verbose_name='Carrera')
-    
-    def __str__(self):
-        return f"Alumno: {self.nombre} {self.apellido_p} {self.apellido_m}, Semestre: {self.semestre}"
-    
+        managed = False
+        db_table = 'profesor'
+
+
+class Reporte(models.Model):
+    titulo = models.CharField(max_length=80)
+    descripcion = models.CharField(max_length=200)
+    hora = models.DateTimeField()
+    fecha = models.DateField()
+    seguimiento = models.CharField(max_length=200, blank=True, null=True)
+    encargado = models.ForeignKey(Encargado, models.DO_NOTHING)
+    computadora = models.ForeignKey(Computadora, models.DO_NOTHING, blank=True, null=True)
+
     class Meta:
-        db_table = 'student'
-        verbose_name = 'Alumno'
-        verbose_name_plural = 'Alumnos'
-        ordering = ['semestre','nombre']
+        managed = False
+        db_table = 'reporte'
+
 
 class Sesion(models.Model):
-    # Llave primaria por defecto
-    fecha = models.DateField(auto_now_add=True, verbose_name='Fecha de Sesión')
-    hora_inicio = models.TimeField(verbose_name='Hora de inicio')
-    hora_final = models.TimeField(verbose_name='Hora final')
-    #Llave foranea, 1 encagado tiene muchas sesiones
-    encargado = models.ForeignKey(Encargado, verbose_name=("Encargado"), on_delete=models.CASCADE)
-    #Llave foranea, 1 alumno tiene muchas sesiones
-    alumno = models.ForeignKey(Alumno, verbose_name=("Alumno"), on_delete=models.CASCADE)
-    #Llave forane, 1 profesor tiene muchas sesiones
-    profesor = models.ForeignKey(Profesor, verbose_name=("Profesor"), on_delete=models.CASCADE, null=True, blank=True)
-    #Llave forane, 1 computadora tiene muchas sesiones
-    computadora = models.ForeignKey(Computadora, verbose_name=("Computadora"), on_delete=models.CASCADE, null=True, blank=True)
-    
-    def __str__(self):
-        return f"Sesion No: {self.id}, Fecha: {self.fecha}"
-    
+    fecha = models.DateField()
+    hora_inicio = models.DateTimeField()
+    hora_final = models.DateTimeField(blank=True, null=True)
+    encargado = models.ForeignKey(Encargado, models.DO_NOTHING)
+    estudiante = models.ForeignKey(Estudiante, models.DO_NOTHING)
+    profesor = models.ForeignKey(Profesor, models.DO_NOTHING, blank=True, null=True)
+    computadora = models.ForeignKey(Computadora, models.DO_NOTHING, blank=True, null=True)
+
     class Meta:
-        db_table = 'session'
-        verbose_name = 'Sesion'
-        verbose_name_plural = 'Sesiones'
-        ordering = ['id','fecha']
-    
+        managed = False
+        db_table = 'sesion'

@@ -4,7 +4,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>AdminLTE 3 | Dashboard</title>
+  <title>Laboratorio Computación</title>
 
   <!-- Google Font: Source Sans Pro -->
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback">
@@ -127,7 +127,7 @@
           <img src="{% static 'img/usuario.png' %}" class="img-circle elevation-2" alt="User Image">
         </div>
         <div class="info">
-          <a href="#" class="d-block">Bienvenido, USUARIO</a>
+          <a href="#" class="d-block">Bienvenido, {{ encargado.nombre }} {{ encargado.apellido_p }}</a>
         </div>
       </div>
 
@@ -149,33 +149,6 @@
           <!-- Add icons to the links using the .nav-icon class
                with font-awesome or any other icon font library -->
           <li class="nav-header">SESIONES</li>
-          <li class="nav-item">
-            <a href="#" class="nav-link">
-              <i class="nav-icon fas fa-laptop-house"></i><!-- fas fa-plus(+) fas fa-laptop-medical -->
-              <p>
-                Crear Sesión
-                <i class="fas fa-angle-left right"></i>
-              </p>
-            </a>
-            <ul class="nav nav-treeview">
-              <li class="nav-item">
-                <a href="{% url 'crearsesion_grupal' %}" class="nav-link">
-                  <i class="nav-icon fas fa-users"></i>
-                    <p>
-                      Sesión de Grupo
-                    </p>
-                  </a>
-              </li>
-              <li class="nav-item">
-                <a href="{% url 'crearsesion_indiv' %}" class="nav-link">
-                  <i class="nav-icon fas fa-user"></i>
-                  <p>
-                    Sesión Individual
-                  </p>
-                </a>
-              </li> 
-            </ul>
-          </li> 
           <li class="nav-item">
             <a href="#" class="nav-link">
               <i class="nav-icon fas fa-eye"></i>
@@ -231,6 +204,15 @@
               </li> 
             </ul>
           </li> 
+          <li class="nav-header">REPORTES</li>
+          <li class="nav-item">
+            <a href="#" class="nav-link">
+              <i class="nav-icon fas fa-user"></i>
+              <p>
+                Ver reportes
+              </p>
+            </a>
+          </li>
           <li class="nav-header">CONFIGURACIÓN</li>
           <li class="nav-item">
             <a href="#" class="nav-link">
@@ -295,13 +277,13 @@
       <div class="col-12 mb-2">
         <div class="small-box bg-info">
           <div class="inner d-flex align-items-center">
-            <h3 class="mr-1">5</h3>
+            <h3 class="mr-1">{{ encargados }}</h3>
             <p class="m-0">|  Encargados Registrados</p>
           </div>
           <div class="icon">
             <i class="ion ion-bag"></i>
           </div>
-          <a href="#" class="small-box-footer">Más Información <i class="fas fa-arrow-circle-right"></i></a>
+          <a href="{% url 'encargados' %}" class="small-box-footer">Más Información <i class="fas fa-arrow-circle-right"></i></a>
         </div>
       </div>
   
@@ -309,7 +291,7 @@
       <div class="col-12 mb-2">
         <div class="small-box bg-success">
           <div class="inner d-flex align-items-center">
-            <h3 class="mr-1">50</h3>
+            <h3 class="mr-1">{{ profesores }}</h3>
             <p class="m-0">|  Profesores Registrados</p>
           </div>
           <div class="icon">
@@ -323,7 +305,7 @@
       <div class="col-12 mb-2">
         <div class="small-box bg-warning">
           <div class="inner d-flex align-items-center">
-            <h3 class="mr-1">44</h3>
+            <h3 class="mr-1">{{ estudiantes }}</h3>
             <p class="m-0">|  Alumnos Registrados</p>
           </div>
           <div class="icon">
@@ -337,7 +319,7 @@
       <div class="col-12 mb-2">
         <div class="small-box bg-danger">
           <div class="inner d-flex align-items-center">
-            <h3 class="mr-1">65</h3>
+            <h3 class="mr-1">{{ computadoras }}</h3>
             <p class="m-0">|  Computadoras Registradas</p>
           </div>
           <div class="icon">
