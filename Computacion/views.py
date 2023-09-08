@@ -51,11 +51,11 @@ def acceso(request):
 
     # Crear un contexto con todos los datos
     context = {
-        'computadoras': num_computadoras,
-        'profesores': num_profesores,
-        'encargados': num_encargados,
-        'estudiantes': num_estudiantes,
-        'encargado': encargado,  # Incluye también el encargado autenticado en el contexto
+        'computadoras_lista': num_computadoras,
+        'profesores_lista': num_profesores,
+        'encargados_lista': num_encargados,
+        'estudiantes_lista': num_estudiantes,
+        'encargado_principal': encargado,  # Incluye también el encargado autenticado en el contexto
     }
 
     return render(request, 'adminlte/index.html', context)
@@ -102,13 +102,107 @@ def registro(request):
     # sin datos ingresados, para que el usuario pueda comenzar a registrarse.
     return render(request, 'login/login.html', {'es_registro': True})
 
+# ----------------------------- VISTA DE ENCARGADOS ----------------------------------------- #
 def encargados(request):
+    # Obtener el número de registros de tablas
+    num_computadoras = Computadora.objects.count()
+    num_profesores = Profesor.objects.count()
+    num_encargados = Encargado.objects.count()
+    num_estudiantes = Estudiante.objects.count()
+
+    encargado_id = request.session.get('encargado_id')
+    encargado = None
+
+    if encargado_id:
+        # Consultar la base de datos para obtener la información del encargado
+        encargado = Encargado.objects.get(id=encargado_id)
+
+    # Consultar la lista de todos los encargados
     encargados = Encargado.objects.all()
-    return render(request, 'encargado/encargado.html', {'encargados': encargados})
+
+    # Crear un contexto con todos los datos
+    context = {
+        'computadoras_lista': num_computadoras,
+        'profesores_lista': num_profesores,
+        'encargados_lista': num_encargados,
+        'estudiantes_lista': num_estudiantes,
+        'encargado_principal': encargado,  # Incluye también el encargado autenticado en el contexto
+        'encargados': encargados,  # Incluye la lista de todos los encargados
+    }
+
+    return render(request, 'v_encargados/encargado.html', context)
 
 def agregar_encargado(request):
     pass
 def editar_encargado(request):
     pass
 def eliminar_encargado(request):
+    pass
+
+# ----------------------------- VISTA DE PROFESORES ----------------------------------------- #
+def profesores(request):
+    pass
+def agregar_profesor(request):
+    pass
+def editar_profesor(request):
+    pass
+def eliminar_profesor(request):
+    pass
+
+# ----------------------------- VISTA DE ALUMNOS ----------------------------------------- #
+def alumnos(request):
+    pass
+def agregar_alumno(request):
+    pass
+def editar_alumno(request):
+    pass
+def eliminar_alumno(request):
+    pass
+
+# ----------------------------- VISTA DE COMPUTADORAS ----------------------------------------- #
+def computadoras(request):
+    pass
+def agregar_computadora(request):
+    pass
+def editar_computadora(request):
+    pass
+def eliminar_computadora(request):
+    pass
+
+# ----------------------------- VISTA DE SESIONES DE GRUPO ----------------------------------------- #
+def sesiones_grupo(request):
+    pass
+
+# ----------------------------- VISTA DE SESIONES INDIVIDUALES ----------------------------------------- #
+def sesiones_individual(request):
+    pass
+
+# ----------------------------- VISTA DE LABORATORIO 1 ----------------------------------------- #
+def laboratorio_uno(request):
+    pass
+
+# ----------------------------- VISTA DE LABORATORIO 2 ----------------------------------------- #
+def laboratorio_dos(request):
+    pass
+
+# ----------------------------- VISTA DE REPORTES ----------------------------------------- #
+def reportes(request):
+    pass
+def agregar_reporte(request):
+    pass
+def editar_reporte(request):
+    pass
+def eliminar_reporte(request):
+    pass
+
+# ----------------------------- VISTA DE PERFIL ----------------------------------------- #
+def perfil(request):
+    pass
+
+# ----------------------------- VISTA DE AYUDA ----------------------------------------- #
+def ayuda(request):
+    pass
+
+# ----------------------------- VISTA DE CERRAR SESION ----------------------------------------- #
+def cerrar_sesion(request):
     pass

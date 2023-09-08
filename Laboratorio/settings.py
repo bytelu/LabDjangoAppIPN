@@ -83,7 +83,10 @@ DATABASES = {
         'USER': 'Encargado',
         'PASSWORD': 'ENCARGADO',
         'HOST': 'localhost',
-        'DATABASE_PORT': '3306'
+        'PORT': '3306',  # El puerto predeterminado de MySQL es 3306
+        'OPTIONS': {
+            'init_command': "SET sql_mode='STRICT_TRANS_TABLES'",
+        },
     }
 }
 

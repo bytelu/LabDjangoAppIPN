@@ -11,7 +11,7 @@
   <!-- Font Awesome -->
   <link rel="stylesheet" href="{% static 'plugins/fontawesome-free/css/all.min.css' %}">
   <!-- Ionicons -->
-  <link rel="stylesheet" href="{% static 'https://code.ionicframework.com/ionicons/2.0.1/css/ionicons.min.css' %}">
+  <!-- <link rel="stylesheet" href="{% static 'https://code.ionicframework.com/ionicons/2.0.1/css/ionicons.min.css' %}"> -->
   <!-- Tempusdominus Bootstrap 4 -->
   <link rel="stylesheet" href="{% static 'plugins/tempusdominus-bootstrap-4/css/tempusdominus-bootstrap-4.min.css' %}">
   <!-- iCheck -->
@@ -127,7 +127,7 @@
           <img src="{% static 'img/usuario.png' %}" class="img-circle elevation-2" alt="User Image">
         </div>
         <div class="info">
-          <a href="#" class="d-block">Bienvenido, {{ encargado.nombre }} {{ encargado.apellido_p }}</a>
+          <a href="#" class="d-block">Bienvenido, {{ encargado_principal.nombre }} {{ encargado_principal.apellido_p }}</a>
         </div>
       </div>
 
@@ -277,7 +277,7 @@
       <div class="col-12 mb-2">
         <div class="small-box bg-info">
           <div class="inner d-flex align-items-center">
-            <h3 class="mr-1">{{ encargados }}</h3>
+            <h3 class="mr-1">{{ encargados_lista }}</h3>
             <p class="m-0">|  Encargados Registrados</p>
           </div>
           <div class="icon">
@@ -291,7 +291,7 @@
       <div class="col-12 mb-2">
         <div class="small-box bg-success">
           <div class="inner d-flex align-items-center">
-            <h3 class="mr-1">{{ profesores }}</h3>
+            <h3 class="mr-1">{{ profesores_lista }}</h3>
             <p class="m-0">|  Profesores Registrados</p>
           </div>
           <div class="icon">
@@ -305,7 +305,7 @@
       <div class="col-12 mb-2">
         <div class="small-box bg-warning">
           <div class="inner d-flex align-items-center">
-            <h3 class="mr-1">{{ estudiantes }}</h3>
+            <h3 class="mr-1">{{ estudiantes_lista }}</h3>
             <p class="m-0">|  Alumnos Registrados</p>
           </div>
           <div class="icon">
@@ -319,7 +319,7 @@
       <div class="col-12 mb-2">
         <div class="small-box bg-danger">
           <div class="inner d-flex align-items-center">
-            <h3 class="mr-1">{{ computadoras }}</h3>
+            <h3 class="mr-1">{{ computadoras_lista }}</h3>
             <p class="m-0">|  Computadoras Registradas</p>
           </div>
           <div class="icon">
@@ -368,7 +368,7 @@
 <!-- AdminLTE App -->
 <script src="{% static 'dist/js/adminlte.js' %}"></script>
 <!-- AdminLTE for demo purposes -->
-<script src="{% static 'dist/js/demo.js}"></script>
+<!-- <script src="{% static 'dist/js/demo.js}"></script> -->
 <!-- AdminLTE dashboard demo (This is only for demo purposes) -->
 <script src="{% static 'dist/js/pages/dashboard.js' %}"></script>
 </body>

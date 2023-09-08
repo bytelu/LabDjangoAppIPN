@@ -33,7 +33,7 @@ class Encargado(models.Model):
     nombre = models.CharField(max_length=50)
     apellido_p = models.CharField(max_length=40)
     apellido_m = models.CharField(max_length=40)
-    hora_entrada = models.DateTimeField(blank=True, null=True)
+    hora_entrada = models.DateTimeField()
     hora_salida = models.DateTimeField(blank=True, null=True)
     usuario = models.CharField(unique=True, max_length=25)
     contrasenia = models.CharField(max_length=25)
