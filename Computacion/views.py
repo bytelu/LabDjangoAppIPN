@@ -151,7 +151,34 @@ def eliminar_profesor(request):
 
 # ----------------------------- VISTA DE ALUMNOS ----------------------------------------- #
 def alumnos(request):
-    pass
+    # Obtener el número de registros de tablas
+    #num_computadoras = Computadora.objects.count()
+    #num_profesores = Profesor.objects.count()
+    #num_encargados = Encargado.objects.count()
+    #num_estudiantes = Estudiante.objects.count()
+
+    #encargado_id = request.session.get('encargado_id')
+    #encargado = None
+
+    #if encargado_id:
+        # Consultar la base de datos para obtener la información del encargado
+     #   encargado = Encargado.objects.get(id=encargado_id)
+
+    # Consultar la lista de todos los encargados
+    alumnos = Estudiante.objects.all()
+
+    # Crear un contexto con todos los datos
+    context = {
+      #  'computadoras_lista': num_computadoras,
+       # 'profesores_lista': num_profesores,
+        #'encargados_lista': num_encargados,
+      #  'estudiantes_lista': num_estudiantes,
+       # 'encargado_principal': encargado,  # Incluye también el encargado autenticado en el contexto
+        'alumnos': alumnos,  # Incluye la lista de todos los encargados
+    }
+
+    return render(request, 'v_alumnos/alumno.html', context)
+
 def agregar_alumno(request):
     pass
 def editar_alumno(request):

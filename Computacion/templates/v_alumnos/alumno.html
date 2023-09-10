@@ -1,4 +1,43 @@
-{% extends "adminlte/acceso.html" %} {% load static %} {% block body %}
-<!-- Aqui comienzas a escribir el html, guiarse de encargado.html -->
-
+{% extends "adminlte/acceso.html" %}{% block body %}
+<!-- Agregando un margen superior para mover el diseño hacia abajo -->
+<br>
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">Lista de Alumnos</h3>
+                </div>
+                <div class="card-body">
+                    <table class="table table-bordered table-hover">
+                        <thead>
+                            <tr>
+                                <th>Nombre</th>
+                                <th>Apellido Paterno</th>
+                                <th>Apellido Materno</th>
+                                <th>Boleta</th>
+                                <th>Carrera</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for alumno in alumnos %}
+                            <tr>
+                                <td>{{ alumno.nombre }}</td>
+                                <td>{{ alumno.apellido_p }}</td>
+                                <td>{{ alumno.apellido_m }}</td>
+                                <td>{{ alumno.boleta }}</td>
+                                <td>{{ alumno.carrera.carrera }}</td>
+                                <td>
+                                    <a href="{% url 'editar_alumno' alumno.id %}" class="btn btn-primary btn-sm">Editar</a>
+                                    <a href="{% url 'eliminar_alumno' alumno.id %}" class="btn btn-danger btn-sm" onclick="return confirm('¿Deseas eliminar este Alumno?')">Eliminar</a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                    <a href="{% url 'agregar_alumno' %}" class="btn btn-success">Agregar Alumno</a>
+                </div>
+            </div>
+        </div>
+    </div>
 {% endblock %}
