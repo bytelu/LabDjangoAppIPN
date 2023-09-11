@@ -1,4 +1,43 @@
-{% extends "adminlte/acceso.html" %} {% load static %} {% block body %}
-<!-- Aqui comienzas a escribir el html, guiarse de encargado.html -->
-
+{% extends "adminlte/acceso.html" %}{% block body %}
+<!-- Agregando un margen superior para mover el diseño hacia abajo -->
+<br>
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">Lista de Alumnos</h3>
+                </div>
+                <div class="card-body">
+                    <table class="table table-bordered table-hover">
+                        <thead>
+                            <tr>
+                                <th>Número</th>
+                                <th>Estado</th>
+                                <th>Laboratorio</th>
+                                <th>Código Monitor</th>
+                                <th>Código Cpu</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for computadora in computadoras %}
+                            <tr>
+                                <td>{{ computadora.numero }}</td>
+                                <td>{{ computadora.estado }}</td>
+                                <td>{{ computadora.laboratorio }}</td>
+                                <td>{{ computadora.cod_monitor }}</td>
+                                <td>{{ computadora.cod_cpu }}</td>
+                                <td>
+                                    <a href="{% url 'editar_computadora' computadora.id %}" class="btn btn-primary btn-sm">Editar</a>
+                                    <a href="{% url 'eliminar_computadora' computadora.id %}" class="btn btn-danger btn-sm" onclick="return confirm('¿Deseas eliminar esta computadora?')">Eliminar</a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                    <a href="{% url 'agregar_computadora' %}" class="btn btn-success">Agregar Alumno</a>
+                </div>
+            </div>
+        </div>
+    </div>
 {% endblock %}

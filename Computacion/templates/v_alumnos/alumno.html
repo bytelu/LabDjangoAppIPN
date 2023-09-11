@@ -4,29 +4,29 @@
     <div class="row">
         <div class="col-md-12">
             <div class="card">
-                <div class="card-header">
+                <div class="card-header" style="text-align: center; background-color: #74b3c9; font-size: 30px; color: white;">
                     <h3 class="card-title">Lista de Alumnos</h3>
                 </div>
                 <div class="card-body">
                     <table class="table table-bordered table-hover">
                         <thead>
                             <tr>
-                                <th>Nombre</th>
-                                <th>Apellido Paterno</th>
-                                <th>Apellido Materno</th>
-                                <th>Boleta</th>
-                                <th>Carrera</th>
-                                <th>Acciones</th>
+                                <th style="text-align: center; font-size: 18px; background-color: #344498; color: rgb(217, 228, 248);">Nombre</th>
+                                <th style="text-align: center; font-size: 18px; background-color: #4155be; color: white;">Apellido Paterno</th>
+                                <th style="text-align: center; font-size: 18px; background-color: #344498; color: rgb(217, 228, 248);">Apellido Materno</th>
+                                <th style="text-align: center; font-size: 18px; background-color: #4155be; color: white;">Boleta</th>
+                                <th style="text-align: center; font-size: 18px; background-color: #344498; color: rgb(217, 228, 248);">Carrera</th>
+                                <th style="text-align: center; font-size: 18px; background-color: #4155be; color: white;">Acciones</th>
                             </tr>
                         </thead>
                         <tbody>
                             {% for alumno in alumnos %}
                             <tr>
-                                <td>{{ alumno.nombre }}</td>
-                                <td>{{ alumno.apellido_p }}</td>
-                                <td>{{ alumno.apellido_m }}</td>
-                                <td>{{ alumno.boleta }}</td>
-                                <td>{{ alumno.carrera.carrera }}</td>
+                                <td style="text-align: center; font-size: 16px; background-color: #cbcced; color: black;">{{ alumno.nombre }}</td>
+                                <td style="text-align: center; font-size: 16px; background-color: #cacff0; color: black;">{{ alumno.apellido_p }}</td>
+                                <td style="text-align: center; font-size: 16px; background-color: #cbcced; color: black;">{{ alumno.apellido_m }}</td>
+                                <td style="text-align: center; font-size: 16px; background-color: #cacff0; color: black;">{{ alumno.boleta }}</td>
+                                <td style="text-align: center; font-size: 16px; background-color: #cbcced; color: black;">{{ alumno.carrera.carrera }}</td>
                                 <td>
                                     <a href="{% url 'editar_alumno' alumno.id %}" class="btn btn-primary btn-sm">Editar</a>
                                     <a href="{% url 'eliminar_alumno' alumno.id %}" class="btn btn-danger btn-sm" onclick="return confirm('¿Deseas eliminar este Alumno?')">Eliminar</a>
