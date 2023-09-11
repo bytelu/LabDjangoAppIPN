@@ -33,10 +33,10 @@ class Encargado(models.Model):
     nombre = models.CharField(max_length=50)
     apellido_p = models.CharField(max_length=40)
     apellido_m = models.CharField(max_length=40)
-    hora_entrada = models.DateTimeField()
-    hora_salida = models.DateTimeField(blank=True, null=True)
+    hora_entrada = models.TimeField(blank=True, null=True)
+    hora_salida = models.TimeField(blank=True, null=True)
     usuario = models.CharField(unique=True, max_length=25)
-    contrasenia = models.CharField(max_length=25)
+    contrasenia = models.CharField(max_length=50)
     estado = models.IntegerField()
 
     class Meta:
@@ -48,7 +48,7 @@ class Estudiante(models.Model):
     nombre = models.CharField(max_length=50)
     apellido_p = models.CharField(max_length=40)
     apellido_m = models.CharField(max_length=40)
-    boleta = models.IntegerField(unique=True)
+    boleta = models.CharField(unique=True, max_length=15)
     grupo = models.CharField(max_length=10, blank=True, null=True)
     qr = models.CharField(unique=True, max_length=200, blank=True, null=True)
     carrera = models.ForeignKey(Carrera, models.DO_NOTHING)
@@ -62,7 +62,7 @@ class Profesor(models.Model):
     nombre = models.CharField(max_length=50)
     apellido_p = models.CharField(max_length=40)
     apellido_m = models.CharField(max_length=40)
-    boleta = models.IntegerField(unique=True)
+    boleta = models.CharField(unique=True, max_length=15)
     qr = models.CharField(unique=True, max_length=200, blank=True, null=True)
 
     class Meta:
@@ -73,7 +73,7 @@ class Profesor(models.Model):
 class Reporte(models.Model):
     titulo = models.CharField(max_length=80)
     descripcion = models.CharField(max_length=200)
-    hora = models.DateTimeField()
+    hora = models.TimeField()
     fecha = models.DateField()
     seguimiento = models.CharField(max_length=200, blank=True, null=True)
     encargado = models.ForeignKey(Encargado, models.DO_NOTHING)
@@ -86,8 +86,8 @@ class Reporte(models.Model):
 
 class Sesion(models.Model):
     fecha = models.DateField()
-    hora_inicio = models.DateTimeField()
-    hora_final = models.DateTimeField(blank=True, null=True)
+    hora_inicio = models.TimeField()
+    hora_final = models.TimeField(blank=True, null=True)
     encargado = models.ForeignKey(Encargado, models.DO_NOTHING)
     estudiante = models.ForeignKey(Estudiante, models.DO_NOTHING)
     profesor = models.ForeignKey(Profesor, models.DO_NOTHING, blank=True, null=True)

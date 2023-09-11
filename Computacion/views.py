@@ -1,9 +1,10 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.contrib.auth.hashers import make_password
 from django.contrib.auth.hashers import check_password
 from django.db import transaction
 from .models import Encargado, Computadora, Profesor, Estudiante
+from datetime import datetime
 
 
 # Create your views here.
@@ -133,37 +134,160 @@ def encargados(request):
     return render(request, 'v_encargados/encargado.html', context)
 
 def agregar_encargado(request):
-    pass
-def editar_encargado(request):
-    pass
+    num_computadoras = Computadora.objects.count()
+    num_profesores = Profesor.objects.count()
+    num_encargados = Encargado.objects.count()
+    num_estudiantes = Estudiante.objects.count()
+
+    encargado_id = request.session.get('encargado_id')
+    encargado = None
+
+    if encargado_id:
+     # Consultar la base de datos para obtener la información del encargado
+       encargado = Encargado.objects.get(id=encargado_id)
+
+    # Crear un contexto con todos los datos
+    context = {
+        'computadoras_lista': num_computadoras,
+        'profesores_lista': num_profesores,
+        'encargados_lista': num_encargados,
+        'estudiantes_lista': num_estudiantes,
+        'encargado_principal': encargado,  # Incluye también el encargado autenticado en el contexto
+    }
+
+    return render(request, 'v_encargados/agregar_encargado.html', context)
+def validacionA_encargado(request):
+    nombre = request.POST.get("nombre")
+    apellido_p = request.POST.get("apellido_p")
+    apellido_m = request.POST.get("apellido_m")
+    hora_entrada = request.POST.get("hora_entrada")
+    hora_salida = request.POST.get("hora_salida")
+    usuario = request.POST.get("usuario")
+    contrasenia = request.POST.get("contrasenia")
+    repcontrasenia = request.POST.get("repcontrasenia")
+
+    # Verificar si el usuario ya existe en la base de datos
+    if Encargado.objects.filter(usuario=usuario).exists():
+        messages.error(request, "El usuario ya existe.")
+        return render(request, 'v_encargados/agregar_encargado.html', {
+            'nombre': nombre,
+            'apellido_p': apellido_p,
+            'apellido_m': apellido_m,
+            'hora_entrada': hora_entrada,
+            'hora_salida': hora_salida,
+            'usuario': usuario,
+            'contrasenia': contrasenia,
+            'repcontrasenia': repcontrasenia,
+        })
+
+    if contrasenia == repcontrasenia:
+        # Crear el encargado con la contraseña segura
+        with transaction.atomic():
+            encargado = Encargado(
+                usuario=usuario,
+                contrasenia=contrasenia,
+                nombre=nombre,
+                apellido_m=apellido_m,
+                apellido_p=apellido_p,
+                estado=1,
+                hora_entrada=hora_entrada,
+                hora_salida=hora_salida,
+            )
+            encargado.save()
+
+        # Redireccionar al usuario a la página de inicio de sesión con mensaje de éxito
+        messages.success(request, "Usuario registrado correctamente.")
+        return redirect('encargados')  # Cambia 'pagina_de_inicio' al nombre de la URL adecuada
+    else:
+        messages.error(request, "Las contraseñas no coinciden.")
+        return render(request, 'v_encargados/agregar_encargado.html', {
+            'nombre': nombre,
+            'apellido_p': apellido_p,
+            'apellido_m': apellido_m,
+            'hora_entrada': hora_entrada,
+            'hora_salida': hora_salida,
+            'usuario': usuario,
+        })
+    
+def editar_encargado(request, id):
+    num_computadoras = Computadora.objects.count()
+    num_profesores = Profesor.objects.count()
+    num_encargados = Encargado.objects.count()
+    num_estudiantes = Estudiante.objects.count()
+    
+    # Consulta el objeto Encargado utilizando el id pasado como parámetro
+    encargado = get_object_or_404(Encargado, pk=id)
+
+    encargado_id = request.session.get('encargado_id')
+    encargado_principal = None
+
+    if encargado_id:
+        # Consultar la base de datos para obtener la información del encargado autenticado
+        encargado_principal = Encargado.objects.get(id=encargado_id)
+
+    # Crear un contexto con todos los datos
+    context = {
+        'computadoras_lista': num_computadoras,
+        'profesores_lista': num_profesores,
+        'encargados_lista': num_encargados,
+        'estudiantes_lista': num_estudiantes,
+        'encargado_principal': encargado_principal,
+        'modificando': encargado,  # Utiliza el objeto encargado consultado
+    }
+    return render(request, 'v_encargados/editar_encargado.html', context)
+
+def validacionE_encargado(request):
+    id = request.POST.get("id")
+    nombre = request.POST.get("nombre")
+    apellido_p = request.POST.get("apellido_p")
+    apellido_m = request.POST.get("apellido_m")
+    hora_entrada = request.POST.get("hora_entrada")
+    hora_salida = request.POST.get("hora_salida")
+    usuario = request.POST.get("usuario")
+    contrasenia = request.POST.get("contrasenia")
+    repcontrasenia = request.POST.get("repcontrasenia")
+    if contrasenia == repcontrasenia:
+        Encargado.objects.filter(pk=id).update(nombre=nombre, apellido_m=apellido_m, apellido_p=apellido_p, hora_entrada=hora_entrada, hora_salida=hora_salida,usuario=usuario,contrasenia=contrasenia)
+        messages.success(request, 'Encargado actualizado')
+        return redirect('encargados')
+    else:
+        messages.error(request, "Las contraseñas no coinciden.")
+        return render(request, 'v_encargados/editar_encargado.html', {
+            'nombre': nombre,
+            'apellido_p': apellido_p,
+            'apellido_m': apellido_m,
+            'hora_entrada': hora_entrada,
+            'hora_salida': hora_salida,
+            'usuario': usuario,
+        })
 def eliminar_encargado(request):
     pass
 
 # ----------------------------- VISTA DE PROFESORES ----------------------------------------- #
 def profesores(request):
      #Obtener el número de registros de tablas
-    #num_computadoras = Computadora.objects.count()
-   # num_profesores = Profesor.objects.count()
-  # num_encargados = Encargado.objects.count()
-   # num_estudiantes = Estudiante.objects.count()
+    num_computadoras = Computadora.objects.count()
+    num_profesores = Profesor.objects.count()
+    num_encargados = Encargado.objects.count()
+    num_estudiantes = Estudiante.objects.count()
 
-    #encargado_id = request.session.get('encargado_id')
-    #encargado = None
+    encargado_id = request.session.get('encargado_id')
+    encargado = None
 
-    #if encargado_id:
+    if encargado_id:
      # Consultar la base de datos para obtener la información del encargado
-      # encargado = Encargado.objects.get(id=encargado_id)
+        encargado = Encargado.objects.get(id=encargado_id)
 
      #Consultar la lista de todos los encargados
     profesores = Profesor.objects.all()
 
      # Crear un contexto con todos los datos
     context = {
-    #   'computadoras_lista': num_computadoras,
-     #   'profesores_lista': num_profesores,
-      #  'encargados_lista': num_encargados,
-       # 'estudiantes_lista': num_estudiantes,
-        #'encargado_principal': encargado,  # Incluye también el encargado autenticado en el contexto
+        'computadoras_lista': num_computadoras,
+        'profesores_lista': num_profesores,
+        'encargados_lista': num_encargados,
+        'estudiantes_lista': num_estudiantes,
+        'encargado_principal': encargado,  # Incluye también el encargado autenticado en el contexto
         'profesores': profesores,  # Incluye la lista de todos los profesores
     }
 
@@ -179,28 +303,28 @@ def eliminar_profesor(request):
 # ----------------------------- VISTA DE ALUMNOS ----------------------------------------- #
 def alumnos(request):
    #  Obtener el número de registros de tablas
-    #num_computadoras = Computadora.objects.count()
-   # num_profesores = Profesor.objects.count()
-  # num_encargados = Encargado.objects.count()
-   # num_estudiantes = Estudiante.objects.count()
+    num_computadoras = Computadora.objects.count()
+    num_profesores = Profesor.objects.count()
+    num_encargados = Encargado.objects.count()
+    num_estudiantes = Estudiante.objects.count()
 
-    #encargado_id = request.session.get('encargado_id')
-    #encargado = None
+    encargado_id = request.session.get('encargado_id')
+    encargado = None
 
-    #if encargado_id:
+    if encargado_id:
      # Consultar la base de datos para obtener la información del encargado
-      # encargado = Encargado.objects.get(id=encargado_id)
+       encargado = Encargado.objects.get(id=encargado_id)
 
      #Consultar la lista de todos los encargados
     alumnos = Estudiante.objects.all()
 
     # Crear un contexto con todos los datos
     context = {
-    #   'computadoras_lista': num_computadoras,
-     #   'profesores_lista': num_profesores,
-      #  'encargados_lista': num_encargados,
-       # 'estudiantes_lista': num_estudiantes,
-        #'encargado_principal': encargado,  # Incluye también el encargado autenticado en el contexto
+        'computadoras_lista': num_computadoras,
+        'profesores_lista': num_profesores,
+        'encargados_lista': num_encargados,
+        'estudiantes_lista': num_estudiantes,
+        'encargado_principal': encargado,  # Incluye también el encargado autenticado en el contexto
         'alumnos': alumnos,  # Incluye la lista de todos los encargados
     }
 
@@ -216,28 +340,28 @@ def eliminar_alumno(request):
 # ----------------------------- VISTA DE COMPUTADORAS ----------------------------------------- #
 def computadoras(request):
       # Obtener el número de registros de tablas
-    #num_computadoras = Computadora.objects.count()
-    #num_profesores = Profesor.objects.count()
-    #num_encargados = Encargado.objects.count()
-    #num_estudiantes = Estudiante.objects.count()
+    num_computadoras = Computadora.objects.count()
+    num_profesores = Profesor.objects.count()
+    num_encargados = Encargado.objects.count()
+    num_estudiantes = Estudiante.objects.count()
 
-    #encargado_id = request.session.get('encargado_id')
-    #encargado = None
+    encargado_id = request.session.get('encargado_id')
+    encargado = None
 
-    #if encargado_id:
+    if encargado_id:
         # Consultar la base de datos para obtener la información del encargado
-     #   encargado = Encargado.objects.get(id=encargado_id)
+        encargado = Encargado.objects.get(id=encargado_id)
 
     # Consultar la lista de todos los encargados
     computadoras = Computadora.objects.all()
 
     # Crear un contexto con todos los datos
     context = {
-      #  'computadoras_lista': num_computadoras,
-       # 'profesores_lista': num_profesores,
-        #'encargados_lista': num_encargados,
-      #  'estudiantes_lista': num_estudiantes,
-       # 'encargado_principal': encargado,  # Incluye también el encargado autenticado en el contexto
+        'computadoras_lista': num_computadoras,
+        'profesores_lista': num_profesores,
+        'encargados_lista': num_encargados,
+        'estudiantes_lista': num_estudiantes,
+        'encargado_principal': encargado,  # Incluye también el encargado autenticado en el contexto
         'computadoras': computadoras,  # Incluye la lista de todos los encargados
     }
 
