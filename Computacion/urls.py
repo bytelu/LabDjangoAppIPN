@@ -6,7 +6,6 @@ urlpatterns = [
     path('', acceso, name='acceso'),
     #------------------------------VISTA DE ENCARGADOS--------------------#
     path('encargados/', encargados, name='encargados'),
-    path('encargados/agregar/', views.agregar_encargado, name='agregar_encargado'),
     path('encargados/validandoA/', views.validacionA_encargado, name='validacionA_encargado'),
     path('encargados/validandoE', views.validacionE_encargado, name='validacionE_encargado'),
     path('encargados/eliminar/<int:id>/', views.eliminar_encargado, name='eliminar_encargado'),
@@ -19,7 +18,6 @@ urlpatterns = [
     path('alumnos/', alumnos, name='alumnos'),
     path('alumnos/agregar/', views.agregar_alumno, name='agregar_alumno'),
     path('alumnos/validandoA/', views.validacionA_alumno, name='validacionA_alumno'),
-    path('alumnos/editar/<int:id>/', views.editar_alumno, name='editar_alumno'),
     path('alumnos/validandoE', views.validacionE_alumno, name='validacionE_alumno'),
     path('alumnos/eliminar/<int:id>/', views.eliminar_alumno, name='eliminar_alumno'),
     #------------------------------VISTA DE COMPUTADORAS--------------------#

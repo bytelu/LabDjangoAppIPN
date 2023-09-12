@@ -1,6 +1,7 @@
 {% extends "adminlte/acceso.html" %}
 {% block body %}
 <br>
+<!-- Ventana principal MOSTRAR encargados -->
 <div class="row">
     <div class="col-md-12">
         <div class="card">
@@ -52,49 +53,92 @@
                         {% endfor %}
                     </tbody>
                 </table>
-                <a href="{% url 'agregar_encargado' %}" class="btn btn-success">Agregar Encargado</a>
+                <button type="button" class="btn btn-success" data-toggle="modal" data-target="#agregarModal">
+                    Agregar Encargado
+                </button>
             </div>
         </div>
     </div>
 </div>
+<!-- Ventana modal para EDITAR encargado -->
 <div class="modal fade" id="editarModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
-            <!-- Contenido de la ventana modal aquí -->
-            <br>
-            <form class="formAgregar" id="editarForm" method="post" action="{% url 'validacionE_encargado' %}">
-                <h2 class="text-center">Modificando Encargado:</h2>
-                {% csrf_token %}
-                <input type="hidden" name="id" id="id_encargado">
-                Nombre: <input type="text" name="nombre" id="id_nombre" class="form-control my-2">
-                Apellido Paterno: <input type="text" name="apellido_p" id="id_apellido_p" class="form-control my-2" required>
-                Apellido Materno: <input type="text" name="apellido_m" id="id_apellido_m" class="form-control my-2" required>
-                Usuario: <input type="text" name="usuario" id="id_usuario" class="form-control my-2" required>
-                Contraseña: <input type="password" name="contrasenia" id= "id_contrasenia" class="form-control my-2" required>
-                Repetir Contraseña: <input type="password" name="repcontrasenia" id="id_repcontrasenia" class="form-control my-2" required>
-                Hora Entrada: <input type="time" name="hora_entrada" id="id_hora_entrada" class="form-control my-2" required placeholder="HH:mm">
-                Hora Salida: <input type="time" name="hora_salida" id="id_hora_salida" class="form-control my-2" required placeholder="HH:mm">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Modificando Encargado</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <!-- Contenido de la ventana modal aquí -->
+                <form class="formAgregar" id="editarForm" method="post" action="{% url 'validacionE_encargado' %}">
+                    {% csrf_token %}
+                    <input type="hidden" name="id" id="id_encargado">
+                    Nombre: <input type="text" name="nombre" id="id_nombre" class="form-control my-2">
+                    Apellido Paterno: <input type="text" name="apellido_p" id="id_apellido_p" class="form-control my-2" required>
+                    Apellido Materno: <input type="text" name="apellido_m" id="id_apellido_m" class="form-control my-2" required>
+                    Usuario: <input type="text" name="usuario" id="id_usuario" class="form-control my-2" required>
+                    Contraseña: <input type="password" name="contrasenia" id= "id_contrasenia" class="form-control my-2" required>
+                    Repetir Contraseña: <input type="password" name="repcontrasenia" id="id_repcontrasenia" class="form-control my-2" required>
+                    Hora Entrada: <input type="time" name="hora_entrada" id="id_hora_entrada" class="form-control my-2" required placeholder="HH:mm">
+                    Hora Salida: <input type="time" name="hora_salida" id="id_hora_salida" class="form-control my-2" required placeholder="HH:mm">
 
-                <label for="activo">Activo:</label>
-                <input type="checkbox" name="activo" id="activo" value="1">
-                <input type="hidden" name="activo" value="0">
-
-                <div class="d-flex justify-content-between">
-                    <input type="submit" value="Editar" class="btn btn-warning">
-                    <button type="button" class="btn btn-danger" data-dismiss="modal">Cancelar</button>
-                </div>
-            </form>
+                    <label for="activo">Activo:</label>
+                    <input type="checkbox" name="activo" id="activo" value="1">
+                    <input type="hidden" name="activo" value="0">
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" id="btn-editar-encargado">Editar Encargado</button>
+            </div>
         </div>
     </div>
 </div>
+<!-- Ventana modal para AGREGAR encargado -->
+<div class="modal fade" id="agregarModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Agregar Encargado</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form class="formAgregar" id="agregarForm" method="post" action="{% url 'validacionA_encargado'%}">
+                    {% csrf_token %}
+                    Nombre: <input type="text" name="nombre" id="id_nombre" class="form-control my-2">
+                    Apellido Paterno: <input type="text" name="apellido_p" id="id_apellido_p" class="form-control my-2" required>
+                    Apellido Materno: <input type="text" name="apellido_m" id="id_apellido_m" class="form-control my-2" required>
+                    Usuario: <input type="text" name="usuario" id="id_usuario" class="form-control my-2" required>
+                    Contraseña: <input type="password" name="contrasenia" id= "id_contrasenia" class="form-control my-2" required>
+                    Repetir Contraseña: <input type="password" name="repcontrasenia" id="id_repcontrasenia" class="form-control my-2" required>
+                    Hora Entrada: <input type="time" name="hora_entrada" id="id_hora_entrada" class="form-control my-2" required placeholder="HH:mm">
+                    Hora Salida: <input type="time" name="hora_salida" id="id_hora_salida" class="form-control my-2" required placeholder="HH:mm">
+
+                    <label for="activo">Activo:</label>
+                    <input type="checkbox" name="activo" id="activo" value="1">
+                    <input type="hidden" name="activo" value="0">
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="submit" class="btn btn-primary" id="btn-guardar-encargado">Guardar Encargado</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
+    //Funcion para la tabla y obtener datos
     $(document).ready(function () {
         $('#tabla-encargados').DataTable({
             ...idioma
         });
 
-        $(".btn-editar").click(function () {
+        // Usamos un evento delegado para manejar los clics en los botones de "Editar"
+        $('#tabla-encargados').on('click', '.btn-editar', function () {
             // Obtener los datos del encargado de la fila
             var nombre = $(this).data("nombre");
             var apellido_p = $(this).data("apellido_p");
@@ -118,10 +162,23 @@
             $("#editarForm #id_contrasenia").val(contrasenia);
             $("#editarForm #id_repcontrasenia").val(repcontrasenia);
             $("#editarForm #id_encargado").val(id);
-            $("#editarForm #id_encargado").val(id);
 
             $("#activo").prop("checked", activo === 1);
 
+        });
+    });
+   //Funcion para abrir Ventana de EDITAR
+    $(document).ready(function () {
+        // Captura el evento de clic en el botón "Editar Encargado" y envía el formulario
+        $('#btn-editar-encargado').click(function () {
+            $('#editarForm').submit();
+        });
+    });
+    //Funcion para abrir Ventana de AGREGAR
+    $(document).ready(function () {
+        // Captura el evento de clic en el botón "Guardar Encargado" y envía el formulario
+        $('#btn-guardar-encargado').click(function () {
+            $('#agregarForm').submit();
         });
     });
 </script>

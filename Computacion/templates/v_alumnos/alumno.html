@@ -1,51 +1,215 @@
-{% extends "adminlte/acceso.html" %}{% block body %}
-<!-- Agregando un margen superior para mover el diseño hacia abajo -->
+{% extends "adminlte/acceso.html" %}
+{% block body %}
 <br>
-    <div class="row">
-        <div class="col-md-12">
-            <div class="card">
-                <div class="card-header" style="text-align: center; background-color: #74b3c9; font-size: 30px; color: white;">
-                    <h3 class="card-title">Lista de Alumnos</h3>
-                </div>
-                <div class="card-body">
-                    <table id = "tabla-alumnos" class="table table-bordered table-hover">
-                        <thead>
-                            <tr>
-                                <th style="text-align: center; font-size: 18px; background-color: #344498; color: rgb(217, 228, 248);">Nombre</th>
-                                <th style="text-align: center; font-size: 18px; background-color: #4155be; color: white;">Apellido Paterno</th>
-                                <th style="text-align: center; font-size: 18px; background-color: #344498; color: rgb(217, 228, 248);">Apellido Materno</th>
-                                <th style="text-align: center; font-size: 18px; background-color: #4155be; color: white;">Boleta</th>
-                                <th style="text-align: center; font-size: 18px; background-color: #344498; color: rgb(217, 228, 248);">Carrera</th>
-                                <th style="text-align: center; font-size: 18px; background-color: #4155be; color: white;">Acciones</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for alumno in alumnos %}
-                            <tr>
-                                <td style="text-align: center; font-size: 16px; background-color: #cbcced; color: black;">{{ alumno.nombre }}</td>
-                                <td style="text-align: center; font-size: 16px; background-color: #cacff0; color: black;">{{ alumno.apellido_p }}</td>
-                                <td style="text-align: center; font-size: 16px; background-color: #cbcced; color: black;">{{ alumno.apellido_m }}</td>
-                                <td style="text-align: center; font-size: 16px; background-color: #cacff0; color: black;">{{ alumno.boleta }}</td>
-                                <td style="text-align: center; font-size: 16px; background-color: #cbcced; color: black;">{{ alumno.carrera.carrera }}</td>
-                                <td>
-                                    <a href="{% url 'editar_alumno' alumno.id %}" class="btn btn-primary btn-sm">Editar</a>
-                                    <a href="{% url 'eliminar_alumno' alumno.id %}" class="btn btn-danger btn-sm" onclick="return confirm('¿Deseas eliminar este Alumno?')">Eliminar</a>
-                                </td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                    <a href="{% url 'agregar_alumno' %}" class="btn btn-success">Agregar Alumno</a>
-                </div>
+<!-- Ventana principal MOSTRAR alumnos -->
+<div class="row">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header" style="text-align: center; background-color: #74b3c9; font-size: 30px; color: white;">
+                <h3 class="card-title">Lista de Alumnos</h3>
+            </div>
+            <div class="card-body">
+                <table id="tabla-alumnos" class="table table-bordered table-hover">
+                    <thead>
+                        <tr>
+                            <th>Nombre</th>
+                            <th>Apellido Paterno</th>
+                            <th>Apellido Materno</th>
+                            <th>Boleta</th>
+                            <th>Carrera</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for alumno in alumnos %}
+                        <tr>
+                            <td>{{ alumno.nombre }}</td>
+                            <td>{{ alumno.apellido_p }}</td>
+                            <td>{{ alumno.apellido_m }}</td>
+                            <td>{{ alumno.boleta }}</td>
+                            <td>{{ alumno.carrera.carrera }}</td>
+                            <td>
+                                <button class="btn btn-primary btn-sm btn-editar-alumno"
+                                    data-toggle="modal"
+                                    data-target="#editarModalAlumno"
+                                    data-id="{{ alumno.id }}"
+                                    data-nombre="{{ alumno.nombre }}"
+                                    data-apellido_p="{{ alumno.apellido_p }}"
+                                    data-apellido_m="{{ alumno.apellido_m }}"
+                                    data-boleta="{{ alumno.boleta }}"
+                                    data-carrera="{{ alumno.carrera.id }}">Editar</button>
+                                <a href="{% url 'eliminar_alumno' alumno.id %}" class="btn btn-danger btn-sm" onclick="return confirm('¿Deseas eliminar este Alumno?')">Eliminar</a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                <a href="{% url 'agregar_alumno' %}" class="btn btn-success">Agregar Alumno</a>
             </div>
         </div>
     </div>
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script>
-        $(document).ready( function () {
-            $('#tabla-alumnos').DataTable({
+</div>
+<!-- Ventana modal para EDITAR alumno -->
+<div class="modal fade" id="editarModalAlumno" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Modificando Alumno</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <!-- Contenido de la ventana modal aquí -->
+                <form class="formAgregar" id="editarForm" method="post" action="{% url 'validacionE_alumno' %}">
+                    {% csrf_token %}
+                    <input type="hidden" name="id" id="id_alumno" value="">
+                    <div class="form-group">
+                        <label for="id_nombre_alumno">Nombre</label>
+                        <input type="text" name="nombre" id="id_nombre_alumno" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="id_apellido_p_alumno">Apellido Paterno</label>
+                        <input type="text" name="apellido_p" id="id_apellido_p_alumno" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="id_apellido_m_alumno">Apellido Materno</label>
+                        <input type="text" name="apellido_m" id="id_apellido_m_alumno" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="id_boleta_alumno">Boleta</label>
+                        <input type="text" name="boleta" id="id_boleta_alumno" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="id_carrera_alumno">Carrera</label>
+                        <select name="carrera" id="id_carrera_alumno" class="form-control" required>
+                            <option value="" disabled selected>Seleccione Carrera</option>
+                            {% for carreraa in carrera %}
+                            <option value="{{ carreraa.id }}">{{ carreraa.carrera }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" id="btn-editar-alumno">Editar Alumno</button>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Ventana modal para AGREGAR alumno -->
+<div class="modal fade" id="agregarModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Agregar Alumno</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form class="form" method="POST" action="{% url 'validacionA_alumno'%}">
+                    {% csrf_token %}
+                    <div class="row">
+                      <div class="col-md-4">
+                        <!-- Tabla de Año de Produccion -->
+                        <div class="contenedorTablaForms">
+                          <table class="table">
+                              <tr>
+                                <td>
+                                  <label>Nombre</label>
+                                  <input type="text" name="nombre" class="form-control" required
+                                      placeholder="Inserta Nombre del Alumno">
+                                </td>
+                              </tr>
+                              <tr>
+                                  <td>
+                                    <label>Apellido Paterno</label>
+                                    <input type="text" name="apellido_p" class="form-control" required
+                                        placeholder="Inserta el Apellido Paterno del Alumno">
+                                  </td>
+                              </tr>
+                              <tr>
+                                  <td>
+                                    <label>Apellido Materno</label>
+                                    <input type="text" name="apellido_m" class="form-control" required
+                                        placeholder="Inserta el Apellido Materno del Alumno">
+                                  </td>
+                              </tr>
+                              <tr>
+                                  <td>
+                                    <label>Boleta</label>
+                                    <input type="text" name="boleta" class="form-control" required
+                                        placeholder="Inserta la Boleta del Alumno">
+                                  </td>
+                              </tr>
+                              <tr>
+                                  <td>
+                                      <p>Carrera:
+                                          <div class="d-flex justify-content-between">
+                                              <select name="carrera" id="carrera" class="form-control my-2" style="border-radius: 10px;" required>
+                                                  <option value="" disabled selected>Seleccione Carrera</option>
+                                                  {% for carreraa in carrera %}
+                                                      <option value="{{ carreraa.id }}">{{ carreraa.carrera }}</option>
+                                                  {% endfor %}
+                                              </select>                    
+                                          </div>                
+                                      </p>        
+                                     
+                                  </td>
+                              </tr>
+                          </table>
+                        </div>
+                      </div>
+                    </div>
+                  </form>
+            </div>
+            <div class="modal-footer">
+                <button type="submit" class="btn btn-primary" id="btn-guardar-alumno">Guardar Alumno</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    $(document).ready(function () {
+        var tablaAlumnos = $('#tabla-alumnos').DataTable({
             ...idioma
-            });
         });
-    </script>    
+
+        $('#tabla-alumnos tbody').on('click', '.btn-editar-alumno', function () {
+            var data = tablaAlumnos.row($(this).closest('tr')).data();
+            // Obtener los datos del alumno de la fila
+            var nombre = data[0];
+            var apellido_p = data[1];
+            var apellido_m = data[2];
+            var boleta = data[3];
+            var carreraId = $(this).data("carrera");
+            var id = $(this).data("id");
+
+            // Rellenar el formulario de la ventana modal con los datos del alumno
+            $("#editarForm #id_nombre_alumno").val(nombre);
+            $("#editarForm #id_apellido_p_alumno").val(apellido_p);
+            $("#editarForm #id_apellido_m_alumno").val(apellido_m);
+            $("#editarForm #id_boleta_alumno").val(boleta);
+            $("#editarForm #id_carrera_alumno").val(carreraId);
+            $("#editarForm #id_alumno").val(id);
+        });
+    });
+    //Funcion para abrir Ventana de EDITAR
+    $(document).ready(function () {
+        // Captura el evento de clic en el botón "Editar alumno" y envía el formulario
+        $('#btn-editar-alumno').click(function () {
+            $('#editarForm').submit();
+        });
+    });
+    //Funcion para abrir Ventana de AGREGAR
+    $(document).ready(function () {
+        // Captura el evento de clic en el botón "Guardar alumno" y envía el formulario
+        $('#btn-guardar-alumno').click(function () {
+            $('#agregarForm').submit();
+        });
+    });
+</script>
 {% endblock %}

@@ -128,29 +128,6 @@ def encargados(request):
     }
 
     return render(request, 'v_encargados/encargado.html', context)
-def agregar_encargado(request):
-    num_computadoras = Computadora.objects.count()
-    num_profesores = Profesor.objects.count()
-    num_encargados = Encargado.objects.count()
-    num_estudiantes = Estudiante.objects.count()
-
-    encargado_id = request.session.get('encargado_id')
-    encargado = None
-
-    if encargado_id:
-     # Consultar la base de datos para obtener la información del encargado
-       encargado = Encargado.objects.get(id=encargado_id)
-
-    # Crear un contexto con todos los datos
-    context = {
-        'computadoras_lista': num_computadoras,
-        'profesores_lista': num_profesores,
-        'encargados_lista': num_encargados,
-        'estudiantes_lista': num_estudiantes,
-        'encargado_principal': encargado,  # Incluye también el encargado autenticado en el contexto
-    }
-
-    return render(request, 'v_encargados/agregar_encargado.html', context)
 def validacionA_encargado(request):
     nombre = request.POST.get("nombre")
     apellido_p = request.POST.get("apellido_p")
@@ -274,6 +251,7 @@ def alumnos(request):
     num_profesores = Profesor.objects.count()
     num_encargados = Encargado.objects.count()
     num_estudiantes = Estudiante.objects.count()
+    carrera = Carrera.objects.all()
 
     encargado_id = request.session.get('encargado_id')
     encargado = None
@@ -293,6 +271,7 @@ def alumnos(request):
         'estudiantes_lista': num_estudiantes,
         'encargado_principal': encargado,  # Incluye también el encargado autenticado en el contexto
         'alumnos': alumnos,  # Incluye la lista de todos los encargados
+        'carrera' : carrera, 
     }
 
     return render(request, 'v_alumnos/alumno.html', context)
@@ -352,34 +331,6 @@ def validacionA_alumno(request):
         # Redireccionar al usuario a la página de inicio de sesión con mensaje de éxito
         messages.success(request, "Alumno registrado correctamente.")
         return redirect('alumnos')  # Cambia 'pagina_de_inicio' al nombre de la URL adecuada    
-def editar_alumno(request,id):
-    num_computadoras = Computadora.objects.count()
-    num_profesores = Profesor.objects.count()
-    num_encargados = Encargado.objects.count()
-    num_estudiantes = Estudiante.objects.count()
-    carrera = Carrera.objects.all()
-    
-    # Consulta el objeto Encargado utilizando el id pasado como parámetro
-    alumno = get_object_or_404(Estudiante, pk=id)
-
-    encargado_id = request.session.get('encargado_id')
-    encargado_principal = None
-
-    if encargado_id:
-        # Consultar la base de datos para obtener la información del encargado autenticado
-        encargado_principal = Encargado.objects.get(id=encargado_id)
-
-    # Crear un contexto con todos los datos
-    context = {
-        'computadoras_lista': num_computadoras,
-        'profesores_lista': num_profesores,
-        'encargados_lista': num_encargados,
-        'estudiantes_lista': num_estudiantes,
-        'encargado_principal': encargado_principal,
-        'modificando': alumno,  # Utiliza el objeto encargado consultado
-        'carrera' : carrera, 
-    }
-    return render(request, 'v_alumnos/editar_alumno.html', context)
 def validacionE_alumno(request):
     id = request.POST.get("id")
     nombre = request.POST.get("nombre")
