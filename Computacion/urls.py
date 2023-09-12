@@ -19,7 +19,9 @@ urlpatterns = [
     #------------------------------VISTA DE ALUMNOS--------------------#
     path('alumnos/', alumnos, name='alumnos'),
     path('alumnos/agregar/', views.agregar_alumno, name='agregar_alumno'),
+    path('alumnos/validandoA/', views.validacionA_alumno, name='validacionA_alumno'),
     path('alumnos/editar/<int:id>/', views.editar_alumno, name='editar_alumno'),
+    path('alumnos/validandoE', views.validacionE_alumno, name='validacionE_alumno'),
     path('alumnos/eliminar/<int:id>/', views.eliminar_alumno, name='eliminar_alumno'),
     #------------------------------VISTA DE COMPUTADORAS--------------------#
     path('computadoras/', computadoras, name='computadoras'),

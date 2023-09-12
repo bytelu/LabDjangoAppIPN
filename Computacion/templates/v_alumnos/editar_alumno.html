@@ -1,0 +1,28 @@
+{% extends "adminlte/acceso.html" %}{% block body %}
+<div class="right_col" role="main">
+    <br>
+    <form class="formAgregar" method="post" action="{% url 'validacionE_alumno' %}">
+        <h2 class="text-center">Modificando Alumno:  {{ modificando.nombre }} {{ modificando.apellido_p }} {{ modificando.apellido_m }}</h2>
+        {% csrf_token %}
+        <input type="hidden" name="id" value="{{ modificando.id }}">
+        Nombre: <input type="text" name="nombre" class="form-control my-2" value="{{ modificando.nombre }}" readonly>
+        Apellido Paterno: <input type="text" name="apellido_p" class="form-control my-2" required value="{{ modificando.apellido_p }}">
+        Apellido Materno: <input type="text" name="apellido_m" class="form-control my-2" required value="{{ modificando.apellido_m }}">
+        Boleta: <input type="text" name="boleta" class="form-control my-2" required value="{{ modificando.boleta }}">
+        <p>Carrera:
+            <div class="d-flex justify-content-between">
+                <select name="carrera" id="carrera" class="form-control my-2" style="border-radius: 10px;" required>
+                    <option value="" disabled selected>Seleccione Carrera</option>
+                    {% for carreraa in carrera %}
+                        <option value="{{ carreraa.id }}">{{ carreraa.carrera }}</option>
+                    {% endfor %}
+                </select>                    
+            </div>                
+        </p>        
+        <div class="d-flex justify-content-between">
+            <input type="submit" value="Editar" class="btn btn-warning">
+            <a href="{% url 'alumnos' %}"><button type="button" class="btn btn-danger">Cancelar</button></a>
+        </div>
+    </form>        
+</div>
+{% endblock %}
