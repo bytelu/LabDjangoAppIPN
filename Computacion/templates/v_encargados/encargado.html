@@ -1,5 +1,4 @@
 {% extends "adminlte/acceso.html" %}{% block body %}
-<!-- Agregando un margen superior para mover el diseño hacia abajo -->
 <br>
     <div class="row">
         <div class="col-md-12">
@@ -8,7 +7,7 @@
                     <h3 class="card-title">Lista de Encargados</h3>
                 </div>
                 <div class="card-body">
-                    <table class="table table-bordered table-hover">
+                    <table class="table table-bordered table-hover" id="tabla-encargados">
                         <thead>
                             <tr>
                                 <th>Nombre</th>
@@ -44,4 +43,10 @@
             </div>
         </div>
     </div>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    $(document).ready( function () {
+        $('#tabla-encargados').DataTable();
+    });
+</script>
 {% endblock %}
