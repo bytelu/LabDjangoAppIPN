@@ -16,7 +16,6 @@ urlpatterns = [
     path('profesores/eliminar/<int:id>/', views.eliminar_profesor, name='eliminar_profesor'),
     #------------------------------VISTA DE ALUMNOS--------------------#
     path('alumnos/', alumnos, name='alumnos'),
-    path('alumnos/agregar/', views.agregar_alumno, name='agregar_alumno'),
     path('alumnos/validandoA/', views.validacionA_alumno, name='validacionA_alumno'),
     path('alumnos/validandoE', views.validacionE_alumno, name='validacionE_alumno'),
     path('alumnos/eliminar/<int:id>/', views.eliminar_alumno, name='eliminar_alumno'),

@@ -275,31 +275,6 @@ def alumnos(request):
     }
 
     return render(request, 'v_alumnos/alumno.html', context)
-def agregar_alumno(request):
-    num_computadoras = Computadora.objects.count()
-    num_profesores = Profesor.objects.count()
-    num_encargados = Encargado.objects.count()
-    num_estudiantes = Estudiante.objects.count()
-    carrera = Carrera.objects.all()
-
-    encargado_id = request.session.get('encargado_id')
-    encargado = None
-
-    if encargado_id:
-     # Consultar la base de datos para obtener la información del encargado
-       encargado = Encargado.objects.get(id=encargado_id)
-
-    # Crear un contexto con todos los datos
-    context = {
-        'computadoras_lista': num_computadoras,
-        'profesores_lista': num_profesores,
-        'encargados_lista': num_encargados,
-        'estudiantes_lista': num_estudiantes,
-        'encargado_principal': encargado,  # Incluye también el encargado autenticado en el contexto
-        'carrera': carrera,
-    }
-
-    return render(request, 'v_alumnos/agregar_alumno.html', context)
 def validacionA_alumno(request):
     nombre = request.POST.get("nombre")
     apellido_p = request.POST.get("apellido_p")
