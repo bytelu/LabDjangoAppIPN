@@ -260,8 +260,11 @@ def validacionE_encargado(request):
             'hora_salida': hora_salida,
             'usuario': usuario,
         })
-def eliminar_encargado(request):
-    pass
+def eliminar_encargado(request, id):
+    encargado = Encargado.objects.filter(pk=id)
+    encargado.delete()
+    messages.success(request, 'Encargado eliminado')
+    return redirect('encargados')
 
 # ----------------------------- VISTA DE PROFESORES ----------------------------------------- #
 def profesores(request):
