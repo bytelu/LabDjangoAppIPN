@@ -114,9 +114,9 @@
   <!-- /.navbar -->
 
   <!-- Main Sidebar Container MENU LATERAL IZQUIERDO -->
-  <aside class="main-sidebar sidebar-dark-primary elevation-4">
+  <aside class="main-sidebar sidebar-dark-primary elevation-4" style="background-color: #152d28;">
     <!-- Logo ESIME -->
-    <a href="https://www.esimecu.ipn.mx/" class="brand-link">
+    <a href="https://www.esimecu.ipn.mx/" class="brand-link" style="border-bottom: 1px solid #ffffff;">
       <img src="{% static 'img/logoesime.jpg' %}" alt="ESIME Logo" class="brand-image img-circle elevation-3" style="opacity: .8">
       <span class="brand-text font-weight-light">ESIME Culhuacán</span>
     </a>
@@ -124,7 +124,7 @@
     <!-- Sidebar -->
     <div class="sidebar">
       <!-- Sidebar USUARIO -->
-      <div class="user-panel mt-3 pb-3 mb-3 d-flex">
+      <div class="user-panel mt-3 pb-3 mb-3 d-flex" style="border-bottom: 1px solid #ffffff;">
         <div class="image">
           <img src="{% static 'img/usuario.png' %}" class="img-circle elevation-2" alt="User Image">
         </div>
@@ -150,7 +150,7 @@
         <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
           <!-- Add icons to the links using the .nav-icon class
                with font-awesome or any other icon font library -->
-          <li class="nav-header">SESIONES</li>
+          <li class="nav-header" style="color:white;">SESIONES</li>
           <li class="nav-item">
             <a href="#" class="nav-link">
               <i class="nav-icon fas fa-eye"></i>
@@ -178,7 +178,7 @@
               </li> 
             </ul>
           </li>     
-          <li class="nav-header">LABORATORIOS</li>
+          <li class="nav-header" style="color:white;">LABORATORIOS</li>
           <li class="nav-item">
             <a href="#" class="nav-link">
               <i class="nav-icon fas fa-solar-panel"></i>
@@ -206,7 +206,7 @@
               </li> 
             </ul>
           </li> 
-          <li class="nav-header">REPORTES</li>
+          <li class="nav-header" style="color:white;">REPORTES</li>
           <li class="nav-item">
             <a href="#" class="nav-link">
               <i class="nav-icon fas fa-user"></i>
@@ -215,7 +215,7 @@
               </p>
             </a>
           </li>
-          <li class="nav-header">CONFIGURACIÓN</li>
+          <li class="nav-header" style="color:white;">CONFIGURACIÓN</li>
           <li class="nav-item">
             <a href="#" class="nav-link">
               <i class="nav-icon fas fa-user"></i>
@@ -272,62 +272,62 @@
   </footer>
 
   <!-- Control Sidebar -->
-  <aside class="control-sidebar control-sidebar-dark p-3">
+  <aside class="control-sidebar control-sidebar-dark p-3" style="background-color: #152d28;">
     <!-- Control sidebar content goes here -->
     <div class="row">
       <!-- Primer elemento -->
       <div class="col-12 mb-2">
-        <div class="small-box bg-info">
+        <div class="small-box bg" style="background-color: #8C1858">
           <div class="inner d-flex align-items-center">
             <h3 class="mr-1">{{ encargados_lista }}</h3>
-            <p class="m-0">|  Encargados Registrados</p>
+            <p class="m-0" style="color: white;">|  Encargados Registrados</p>
           </div>
           <div class="icon">
             <i class="ion ion-bag"></i>
           </div>
-          <a href="{% url 'encargados' %}" class="small-box-footer">Más Información <i class="fas fa-arrow-circle-right"></i></a>
+          <a href="{% url 'encargados' %}" class="small-box-footer" style="background-color: #6D1A42;">Más Información <i class="fas fa-arrow-circle-right"></i></a>
         </div>
       </div>
   
       <!-- Segundo elemento -->
       <div class="col-12 mb-2">
-        <div class="small-box bg-success">
+        <div class="small-box bg" style="background-color: #8C657B;">
           <div class="inner d-flex align-items-center">
             <h3 class="mr-1">{{ profesores_lista }}</h3>
-            <p class="m-0">|  Profesores Registrados</p>
+            <p class="m-0" style="color: white;">|  Profesores Registrados</p>
           </div>
           <div class="icon">
             <i class="ion ion-stats-bars"></i>
           </div>
-          <a href="{% url 'profesores' %}" class="small-box-footer">Más Información <i class="fas fa-arrow-circle-right"></i></a>
+          <a href="{% url 'profesores' %}" class="small-box-footer" style="background-color: #8C1858;">Más Información <i class="fas fa-arrow-circle-right"></i></a>
         </div>
       </div>
   
       <!-- Tercer elemento -->
       <div class="col-12 mb-2">
-        <div class="small-box bg-warning">
+        <div class="small-box bg" style="background-color: #6D1A42;">
           <div class="inner d-flex align-items-center">
             <h3 class="mr-1">{{ estudiantes_lista }}</h3>
-            <p class="m-0">|  Alumnos Registrados</p>
+            <p class="m-0" style="color: white;">|  Alumnos Registrados</p>
           </div>
           <div class="icon">
             <i class="ion ion-person-add"></i>
           </div>
-          <a href="{% url 'alumnos' %}" class="small-box-footer">Más Información <i class="fas fa-arrow-circle-right"></i></a>
+          <a href="{% url 'alumnos' %}" class="small-box-footer" style="background-color: #b38e5d;">Más Información <i class="fas fa-arrow-circle-right"></i></a>
         </div>
       </div>
   
       <!-- Cuarto elemento -->
       <div class="col-12 mb-2">
-        <div class="small-box bg-danger">
+        <div class="small-box bg" style="background-color: #5a1236">
           <div class="inner d-flex align-items-center">
             <h3 class="mr-1">{{ computadoras_lista }}</h3>
-            <p class="m-0">|  Computadoras Registradas</p>
+            <p class="m-0" style="color: white;">|  Computadoras Registradas</p>
           </div>
           <div class="icon">
             <i class="ion ion-pie-graph"></i>
           </div>
-          <a href="{% url 'computadoras' %}" class="small-box-footer">Más Información<i class="fas fa-arrow-circle-right"></i></a>
+          <a href="{% url 'computadoras' %}" class="small-box-footer" style="background-color: #8C1858;">Más Información<i class="fas fa-arrow-circle-right"></i></a>
         </div>
       </div>
     </div>
