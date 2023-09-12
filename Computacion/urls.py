@@ -8,7 +8,6 @@ urlpatterns = [
     path('encargados/', encargados, name='encargados'),
     path('encargados/agregar/', views.agregar_encargado, name='agregar_encargado'),
     path('encargados/validandoA/', views.validacionA_encargado, name='validacionA_encargado'),
-    path('encargados/editar/<int:id>/', views.editar_encargado, name='editar_encargado'),
     path('encargados/validandoE', views.validacionE_encargado, name='validacionE_encargado'),
     path('encargados/eliminar/<int:id>/', views.eliminar_encargado, name='eliminar_encargado'),
     #------------------------------VISTA DE PROFESORES--------------------#

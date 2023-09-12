@@ -1,52 +1,128 @@
-{% extends "adminlte/acceso.html" %}{% block body %}
+{% extends "adminlte/acceso.html" %}
+{% block body %}
 <br>
-    <div class="row">
-        <div class="col-md-12">
-            <div class="card">
-                <div class="card-header">
-                    <h3 class="card-title">Lista de Encargados</h3>
-                </div>
-                <div class="card-body">
-                    <table class="table table-bordered table-hover" id="tabla-encargados">
-                        <thead>
-                            <tr>
-                                <th>Nombre</th>
-                                <th>Apellido Paterno</th>
-                                <th>Apellido Materno</th>
-                                <th>Hora de entrada</th>
-                                <th>Hora de salida</th>
-                                <th>Usuario</th>
-                                <th>Activo</th>
-                                <th>Acciones</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for encargado in encargados %}
-                            <tr>
-                                <td>{{ encargado.nombre }}</td>
-                                <td>{{ encargado.apellido_p }}</td>
-                                <td>{{ encargado.apellido_m }}</td>
-                                <td>{{ encargado.hora_entrada }}</td>
-                                <td>{{ encargado.hora_salida }}</td>
-                                <td>{{ encargado.usuario }}</td>
-                                <td>{{ encargado.estado }}</td>
-                                <td>
-                                    <a href="{% url 'editar_encargado' encargado.id %}" class="btn btn-primary btn-sm">Editar</a>
-                                    <a href="{% url 'eliminar_encargado' encargado.id %}" class="btn btn-danger btn-sm" onclick="return confirm('¿Deseas eliminar este Encargado?')">Eliminar</a>
-                                </td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                    <a href="{% url 'agregar_encargado' %}" class="btn btn-success">Agregar Encargado</a>
-                </div>
+<div class="row">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">Lista de Encargados</h3>
+            </div>
+            <div class="card-body">
+                <table class="table table-bordered table-hover" id="tabla-encargados">
+                    <thead>
+                        <tr>
+                            <th>Nombre</th>
+                            <th>Apellido Paterno</th>
+                            <th>Apellido Materno</th>
+                            <th>Hora de entrada</th>
+                            <th>Hora de salida</th>
+                            <th>Usuario</th>
+                            <th>Activo</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for encargado in encargados %}
+                        <tr>
+                            <td>{{ encargado.nombre }}</td>
+                            <td>{{ encargado.apellido_p }}</td>
+                            <td>{{ encargado.apellido_m }}</td>
+                            <td>{{ encargado.hora_entrada }}</td>
+                            <td>{{ encargado.hora_salida }}</td>
+                            <td>{{ encargado.usuario }}</td>
+                            <td>{{ encargado.estado }}</td>
+                            <td>
+                                <button class="btn btn-primary btn-sm btn-editar"
+                                    data-toggle="modal"
+                                    data-target="#editarModal"
+                                    data-id="{{ encargado.id }}"
+                                    data-nombre="{{ encargado.nombre }}"
+                                    data-apellido_p="{{ encargado.apellido_p }}"
+                                    data-apellido_m="{{ encargado.apellido_m }}"
+                                    data-hora_entrada="{{ encargado.hora_entrada }}"
+                                    data-hora_salida="{{ encargado.hora_salida }}"
+                                    data-usuario="{{ encargado.usuario }}"
+                                    data-contrasenia="{{ encargado.contrasenia }}"
+                                    data-estado="{{ encargado.estado }}"
+                                    data-activo="{{ encargado.activo }}">Editar</button>
+                                <a href="{% url 'eliminar_encargado' encargado.id %}" class="btn btn-danger btn-sm"
+                                    onclick="return confirm('¿Deseas eliminar este Encargado?')">Eliminar</a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                <a href="{% url 'agregar_encargado' %}" class="btn btn-success">Agregar Encargado</a>
             </div>
         </div>
     </div>
+</div>
+<div class="modal fade" id="editarModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <!-- Contenido de la ventana modal aquí -->
+            <br>
+            <form class="formAgregar" id="editarForm" method="post" action="{% url 'validacionE_encargado' %}">
+                <h2 class="text-center">Modificando Encargado:</h2>
+                {% csrf_token %}
+                <input type="hidden" name="id" id="id_encargado">
+                Nombre: <input type="text" name="nombre" id="id_nombre" class="form-control my-2">
+                Apellido Paterno: <input type="text" name="apellido_p" id="id_apellido_p" class="form-control my-2" required>
+                Apellido Materno: <input type="text" name="apellido_m" id="id_apellido_m" class="form-control my-2" required>
+                Usuario: <input type="text" name="usuario" id="id_usuario" class="form-control my-2" required>
+                Contraseña: <input type="password" name="contrasenia" id= "id_contrasenia" class="form-control my-2" required>
+                Repetir Contraseña: <input type="password" name="repcontrasenia" id="id_repcontrasenia" class="form-control my-2" required>
+                Hora Entrada: <input type="time" name="hora_entrada" id="id_hora_entrada" class="form-control my-2" required placeholder="HH:mm">
+                Hora Salida: <input type="time" name="hora_salida" id="id_hora_salida" class="form-control my-2" required placeholder="HH:mm">
+
+                <label for="activo">Activo:</label>
+                <input type="checkbox" name="activo" id="activo" value="1">
+                <input type="hidden" name="activo" value="0">
+
+                <div class="d-flex justify-content-between">
+                    <input type="submit" value="Editar" class="btn btn-warning">
+                    <button type="button" class="btn btn-danger" data-dismiss="modal">Cancelar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
-    $(document).ready( function () {
-        $('#tabla-encargados').DataTable();
+    $(document).ready(function () {
+        $('#tabla-encargados').DataTable({
+            ...idioma
+        });
+
+        $(".btn-editar").click(function () {
+            // Obtener los datos del encargado de la fila
+            var nombre = $(this).data("nombre");
+            var apellido_p = $(this).data("apellido_p");
+            var apellido_m = $(this).data("apellido_m");
+            var hora_entrada = $(this).data("hora_entrada");
+            var hora_salida = $(this).data("hora_salida");
+            var usuario = $(this).data("usuario");
+            var contrasenia = $(this).data("contrasenia");
+            var repcontrasenia = $(this).data("contrasenia");
+            var estado = $(this).data("estado");
+            var activo = $(this).data("activo");
+            var id = $(this).data("id");
+
+            // Rellenar el formulario de la ventana modal con los datos del encargado
+            $("#editarForm #id_nombre").val(nombre);
+            $("#editarForm #id_apellido_p").val(apellido_p);
+            $("#editarForm #id_apellido_m").val(apellido_m);
+            $("#editarForm #id_hora_entrada").val(hora_entrada);
+            $("#editarForm #id_hora_salida").val(hora_salida);
+            $("#editarForm #id_usuario").val(usuario);
+            $("#editarForm #id_contrasenia").val(contrasenia);
+            $("#editarForm #id_repcontrasenia").val(repcontrasenia);
+            $("#editarForm #id_encargado").val(id);
+            $("#editarForm #id_encargado").val(id);
+
+            $("#activo").prop("checked", activo === 1);
+
+        });
     });
 </script>
 {% endblock %}
