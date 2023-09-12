@@ -31,7 +31,7 @@
                             <td>
                                 <button class="btn btn-primary btn-sm btn-editar-alumno"
                                     data-toggle="modal"
-                                    data-target="#editarModalAlumno"
+                                    data-target="#editarModal"
                                     data-id="{{ alumno.id }}"
                                     data-nombre="{{ alumno.nombre }}"
                                     data-apellido_p="{{ alumno.apellido_p }}"
@@ -44,13 +44,15 @@
                         {% endfor %}
                     </tbody>
                 </table>
-                <a href="{% url 'agregar_alumno' %}" class="btn btn-success">Agregar Alumno</a>
+                <button type="button" class="btn btn-success" data-toggle="modal" data-target="#agregarModal">
+                    Agregar Alumno
+                </button>
             </div>
         </div>
     </div>
 </div>
 <!-- Ventana modal para EDITAR alumno -->
-<div class="modal fade" id="editarModalAlumno" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+<div class="modal fade" id="editarModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-header">
@@ -102,70 +104,44 @@
     <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="exampleModalLabel">Agregar Alumno</h5>
+                <h5 class="modal-title" id="exampleModalLabel">Agregando Alumno</h5>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
             <div class="modal-body">
-                <form class="form" method="POST" action="{% url 'validacionA_alumno'%}">
+                <!-- Contenido de la ventana modal aquí -->
+                <form class="formAgregar" id="agregarForm" method="post" action="{% url 'validacionA_alumno' %}">
                     {% csrf_token %}
-                    <div class="row">
-                      <div class="col-md-4">
-                        <!-- Tabla de Año de Produccion -->
-                        <div class="contenedorTablaForms">
-                          <table class="table">
-                              <tr>
-                                <td>
-                                  <label>Nombre</label>
-                                  <input type="text" name="nombre" class="form-control" required
-                                      placeholder="Inserta Nombre del Alumno">
-                                </td>
-                              </tr>
-                              <tr>
-                                  <td>
-                                    <label>Apellido Paterno</label>
-                                    <input type="text" name="apellido_p" class="form-control" required
-                                        placeholder="Inserta el Apellido Paterno del Alumno">
-                                  </td>
-                              </tr>
-                              <tr>
-                                  <td>
-                                    <label>Apellido Materno</label>
-                                    <input type="text" name="apellido_m" class="form-control" required
-                                        placeholder="Inserta el Apellido Materno del Alumno">
-                                  </td>
-                              </tr>
-                              <tr>
-                                  <td>
-                                    <label>Boleta</label>
-                                    <input type="text" name="boleta" class="form-control" required
-                                        placeholder="Inserta la Boleta del Alumno">
-                                  </td>
-                              </tr>
-                              <tr>
-                                  <td>
-                                      <p>Carrera:
-                                          <div class="d-flex justify-content-between">
-                                              <select name="carrera" id="carrera" class="form-control my-2" style="border-radius: 10px;" required>
-                                                  <option value="" disabled selected>Seleccione Carrera</option>
-                                                  {% for carreraa in carrera %}
-                                                      <option value="{{ carreraa.id }}">{{ carreraa.carrera }}</option>
-                                                  {% endfor %}
-                                              </select>                    
-                                          </div>                
-                                      </p>        
-                                     
-                                  </td>
-                              </tr>
-                          </table>
-                        </div>
-                      </div>
+                    <div class="form-group">
+                        <label for="id_nombre_alumno">Nombre</label>
+                        <input type="text" name="nombre" id="id_nombre_alumno" class="form-control" required>
                     </div>
-                  </form>
+                    <div class="form-group">
+                        <label for="id_apellido_p_alumno">Apellido Paterno</label>
+                        <input type="text" name="apellido_p" id="id_apellido_p_alumno" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="id_apellido_m_alumno">Apellido Materno</label>
+                        <input type="text" name="apellido_m" id="id_apellido_m_alumno" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="id_boleta_alumno">Boleta</label>
+                        <input type="text" name="boleta" id="id_boleta_alumno" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="id_carrera_alumno">Carrera</label>
+                        <select name="carrera" id="id_carrera_alumno" class="form-control" required>
+                            <option value="" disabled selected>Seleccione Carrera</option>
+                            {% for carreraa in carrera %}
+                            <option value="{{ carreraa.id }}">{{ carreraa.carrera }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </form>
             </div>
             <div class="modal-footer">
-                <button type="submit" class="btn btn-primary" id="btn-guardar-alumno">Guardar Alumno</button>
+                <button type="button" class="btn btn-primary" id="btn-guardar-alumno">Agregar Alumno</button>
             </div>
         </div>
     </div>

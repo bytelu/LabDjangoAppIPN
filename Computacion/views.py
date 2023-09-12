@@ -311,7 +311,7 @@ def validacionA_alumno(request):
     # Verificar si el alumno ya existe en la base de datos
     if Estudiante.objects.filter(nombre=nombre).exists():
         messages.error(request, "El alumno ya existe.")
-        return render(request, 'v_alumnos/agregar_alumno.html', {
+        return render(request, 'v_alumnos/alumnos.html', {
             'nombre': nombre,
             'apellido_p': apellido_p,
             'apellido_m': apellido_m,
