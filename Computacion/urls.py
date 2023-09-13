@@ -21,8 +21,8 @@ urlpatterns = [
     path('alumnos/eliminar/<int:id>/', views.eliminar_alumno, name='eliminar_alumno'),
     #------------------------------VISTA DE COMPUTADORAS--------------------#
     path('computadoras/', computadoras, name='computadoras'),
-    path('computadoras/agregar/', views.agregar_computadora, name='agregar_computadora'),
-    path('computadoras/editar/<int:id>/', views.editar_computadora, name='editar_computadora'),
+    path('computadoras/validandoA/', views.validacionA_computadora, name='validacionA_computadora'),
+    path('computadoras/validandoE/', views.validacionE_computadora, name='validacionE_computadora'),
     path('computadoras/eliminar/<int:id>/', views.eliminar_computadora, name='eliminar_computadora'),
     #------------------------------VISTA DE SESIONES DE GRUPO--------------------#
     path('sesionesgrupo/', sesiones_grupo, name='sesiones_grupo'),

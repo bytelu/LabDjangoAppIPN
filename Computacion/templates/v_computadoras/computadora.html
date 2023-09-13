@@ -1,43 +1,194 @@
-{% extends "adminlte/acceso.html" %}{% block body %}
-<!-- Agregando un margen superior para mover el diseño hacia abajo -->
+{% extends "adminlte/acceso.html" %}
+{% block body %}
 <br>
-    <div class="row">
-        <div class="col-md-12">
-            <div class="card">
-                <div class="card-header">
-                    <h3 class="card-title">Lista de Computadoras</h3>
-                </div>
-                <div class="card-body">
-                    <table class="table table-bordered table-hover">
-                        <thead>
-                            <tr>
-                                <th>Número</th>
-                                <th>Estado</th>
-                                <th>Laboratorio</th>
-                                <th>Código Monitor</th>
-                                <th>Código Cpu</th>
-                                <th>Acciones</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for computadora in computadoras %}
-                            <tr>
-                                <td>{{ computadora.numero }}</td>
-                                <td>{{ computadora.estado }}</td>
-                                <td>{{ computadora.laboratorio }}</td>
-                                <td>{{ computadora.cod_monitor }}</td>
-                                <td>{{ computadora.cod_cpu }}</td>
-                                <td>
-                                    <a href="{% url 'editar_computadora' computadora.id %}" class="btn btn-primary btn-sm">Editar</a>
-                                    <a href="{% url 'eliminar_computadora' computadora.id %}" class="btn btn-danger btn-sm" onclick="return confirm('¿Deseas eliminar esta computadora?')">Eliminar</a>
-                                </td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                    <a href="{% url 'agregar_computadora' %}" class="btn btn-success">Agregar Computadora</a>
-                </div>
+<!-- Ventana principal MOSTRAR computadora -->
+<div class="row">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header" style="text-align: center; background-color: #74b3c9; font-size: 30px; color: white;">
+                <h3 class="card-title">Lista de Computadoras</h3>
+            </div>
+            <div class="card-body">
+                <table id="tablita" class="table table-bordered table-hover">
+                    <thead>
+                        <tr>
+                            <th>Numero</th>
+                            <th>Estado</th>
+                            <th>Laboratorio</th>
+                            <th>Codigo Monitor</th>
+                            <th>Codigo CPU</th>
+                            <th>Ocupada</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for computadora in computadoras %}
+                        <tr>
+                            <td>{{ computadora.numero }}</td>
+                            <td>{{ computadora.estado }}</td>
+                            <td>{{ computadora.laboratorio }}</td>
+                            <td>{{ computadora.cod_monitor }}</td>
+                            <td>{{ computadora.cod_cpu }}</td>
+                            <td>{{ computadora.ocupada }}</td>
+                            <td>
+                                <button class="btn btn-primary btn-sm btn-editar-computadora"
+                                    data-toggle="modal"
+                                    data-target="#editarModal"
+                                    data-id="{{ computadora.id }}"
+                                    data-numero="{{ computadora.numero }}"
+                                    data-estado="{{ computadora.estado }}"
+                                    data-laboratorio="{{ computadora.laboratorio }}"
+                                    data-cod_monitor="{{ computadora.cod_monitor }}"
+                                    data-cod_cpu="{{ computadora.cod_cpu }}"
+                                    data-ocupada="{{ computadora.ocupada }}">Editar</button>
+                                <a href="{% url 'eliminar_computadora' computadora.id %}" class="btn btn-danger btn-sm" onclick="return confirm('¿Deseas eliminar este computadora?')">Eliminar</a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                <button type="button" class="btn btn-success" data-toggle="modal" data-target="#agregarModal">
+                    Agregar computadora
+                </button>
             </div>
         </div>
     </div>
+</div>
+<!-- Ventana modal para EDITAR computadora -->
+<div class="modal fade" id="editarModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Modificando Computadora</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <!-- Contenido de la ventana modal aquí -->
+                <form class="formAgregar" id="editarForm" method="post" action="{% url 'validacionE_computadora' %}">
+                    {% csrf_token %}
+                    <input type="hidden" name="id" id="id_computadora" value="">
+                    <div class="form-group">
+                        <label>Numero</label>
+                        <input type="text" name="numero" id="id_numero" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Estado</label>
+                        <input type="text" name="estado" id="id_estado" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Laboratorio</label>
+                        <input type="text" name="laboratorio" id="id_laboratorio" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Codigo del Monitor</label>
+                        <input type="text" name="cod_monitor" id="id_cod_monitor" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Codigo del CPU</label>
+                        <input type="text" name="cod_cpu" id="id_cod_cpu" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Ocupada</label>
+                        <input type="text" name="ocupada" id="id_ocupada" class="form-control" required>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" id="btn-editar-computadora">Editar Computadora</button>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Ventana modal para AGREGAR computadora -->
+<div class="modal fade" id="agregarModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Agregando Computadora</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <!-- Contenido de la ventana modal aquí -->
+                <form class="formAgregar" id="agregarForm" method="post" action="{% url 'validacionA_computadora' %}">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <label>Numero</label>
+                        <input type="text" name="numero" id="id_numero" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Estado</label>
+                        <input type="text" name="estado" id="id_estado" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Laboratorio</label>
+                        <input type="text" name="laboratorio" id="id_laboratorio" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Codigo del Monitor</label>
+                        <input type="text" name="cod_monitor" id="id_cod_monitor" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Codigo del CPU</label>
+                        <input type="text" name="cod_cpu" id="id_cod_cpu" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Ocupada</label>
+                        <input type="text" name="ocupada" id="id_ocupada" class="form-control" required>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" id="btn-guardar-computadora">Agregar Computadora</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    $(document).ready(function () {
+        var tablaComputadoras = $('#tablita').DataTable({
+            ...idioma
+        });
+
+        $('#tablita tbody').on('click', '.btn-editar-computadora', function () {
+            var data = tablaComputadoras.row($(this).closest('tr')).data();
+            // Obtener los datos del computadora de la fila
+            var numero = data[0];
+            var estado = data[1];
+            var laboratorio = data[2];
+            var cod_monitor = data[3];
+            var cod_cpu = data[4];
+            var ocupada = data[5];
+            var id = $(this).data("id");
+
+            // Rellenar el formulario de la ventana modal con los datos de la computadora
+            $("#editarForm #id_numero").val(numero);
+            $("#editarForm #id_estado").val(estado);
+            $("#editarForm #id_laboratorio").val(laboratorio);
+            $("#editarForm #id_cod_monitor").val(cod_monitor);
+            $("#editarForm #id_cod_cpu").val(cod_cpu);
+            $("#editarForm #id_ocupada").val(ocupada);
+            $("#editarForm #id_computadora").val(id);
+        });
+    });
+    //Funcion para abrir Ventana de EDITAR
+    $(document).ready(function () {
+        // Captura el evento de clic en el botón "Editar computadora" y envía el formulario
+        $('#btn-editar-computadora').click(function () {
+            $('#editarForm').submit();
+        });
+    });
+    //Funcion para abrir Ventana de AGREGAR
+    $(document).ready(function () {
+        // Captura el evento de clic en el botón "Guardar computadora" y envía el formulario
+        $('#btn-guardar-computadora').click(function () {
+            $('#agregarForm').submit();
+        });
+    });
+</script>
 {% endblock %}

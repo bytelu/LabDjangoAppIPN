@@ -348,14 +348,57 @@ def computadoras(request):
         'encargados_lista': num_encargados,
         'estudiantes_lista': num_estudiantes,
         'encargado_principal': encargado,  # Incluye también el encargado autenticado en el contexto
-        'computadoras': computadoras,  # Incluye la lista de todos los encargados
+        'computadoras': computadoras,  # Incluye la lista de todas las computadoras
     }
 
     return render(request, 'v_computadoras/computadora.html', context)
-def agregar_computadora(request):
-    pass
-def editar_computadora(request):
-    pass
+def validacionA_computadora(request):
+    numero = request.POST.get("numero")
+    estado = request.POST.get("estado")
+    laboratorio = request.POST.get("laboratorio")
+    cod_monitor = request.POST.get("cod_monitor")
+    cod_cpu = request.POST.get("cod_cpu")
+    ocupada = request.POST.get("ocupada")
+
+    # Verificar si el la computadora ya existe en la base de datos
+    if Computadora.objects.filter(cod_monitor=cod_monitor).exists():
+        messages.error(request, "La computadora ya existe.")
+        return render(request, 'v_computadoras/computadora.html', {
+            'numero': numero,
+            'estado': estado,
+            'laboratorio': laboratorio,
+            'cod_monitor': cod_monitor,
+            'cod_cpu': cod_cpu,
+            'ocupada': ocupada,
+        })
+    
+    else:
+        # Crear el computadora si no existe
+        computadora = Computadora(
+            numero=numero,
+            estado=estado,
+            laboratorio=laboratorio,
+            cod_monitor=cod_monitor,
+            cod_cpu=cod_cpu,
+            ocupada=ocupada,
+        )
+        computadora.save()
+        # Redireccionar al usuario a la página de inicio de sesión con mensaje de éxito
+        messages.success(request, "Computadora registrada correctamente.")
+        return redirect('computadoras')  # Cambia 'pagina_de_inicio' al nombre de la URL adecuada 
+
+def validacionE_computadora(request):
+    id = request.POST.get("id")
+    numero = request.POST.get("numero")
+    estado = request.POST.get("estado")
+    laboratorio = request.POST.get("laboratorio")
+    cod_monitor = request.POST.get("cod_monitor")
+    cod_cpu = request.POST.get("cod_cpu")
+    ocupada = request.POST.get("ocupada")
+    
+    Computadora.objects.filter(pk=id).update(numero=numero, estado=estado, laboratorio=laboratorio, cod_monitor=cod_monitor, cod_cpu=cod_cpu, ocupada=ocupada)
+    messages.success(request, 'Computadora actualizada')
+    return redirect('computadoras') 
 def eliminar_computadora(request):
     pass
 # ----------------------------- VISTA DE SESIONES DE GRUPO ----------------------------------------- #
