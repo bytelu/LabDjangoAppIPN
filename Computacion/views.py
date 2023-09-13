@@ -399,8 +399,11 @@ def validacionE_computadora(request):
     Computadora.objects.filter(pk=id).update(numero=numero, estado=estado, laboratorio=laboratorio, cod_monitor=cod_monitor, cod_cpu=cod_cpu, ocupada=ocupada)
     messages.success(request, 'Computadora actualizada')
     return redirect('computadoras') 
-def eliminar_computadora(request):
-    pass
+def eliminar_computadora(request, id):
+    computadora = Computadora.objects.filter(pk=id)
+    computadora.delete()
+    messages.success(request, 'Computadora eliminada')
+    return redirect('computadoras')
 # ----------------------------- VISTA DE SESIONES DE GRUPO ----------------------------------------- #
 def sesiones_grupo(request):
     pass
