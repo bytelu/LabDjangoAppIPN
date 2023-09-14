@@ -5,6 +5,7 @@ from django.contrib.auth.hashers import check_password
 from django.db import transaction
 from .models import Encargado, Computadora, Profesor, Estudiante, Carrera
 from datetime import datetime
+from django.db.models import Q
 
 
 # Create your views here.
@@ -138,10 +139,24 @@ def validacionA_encargado(request):
     contrasenia = request.POST.get("contrasenia")
     repcontrasenia = request.POST.get("repcontrasenia")
 
-    # Verificar si el usuario ya existe en la base de datos
+     # Verificar si el usuario ya existe en la base de datos por nombre completo
+    if Encargado.objects.filter(Q(nombre=nombre) & Q(apellido_p=apellido_p) & Q(apellido_m=apellido_m)).exists():
+        messages.error(request, "El encargado ya esta registrado.")
+        return render(request, 'v_encargados/encargado.html', {
+            'nombre': nombre,
+            'apellido_p': apellido_p,
+            'apellido_m': apellido_m,
+            'hora_entrada': hora_entrada,
+            'hora_salida': hora_salida,
+            'usuario': usuario,
+            'contrasenia': contrasenia,
+            'repcontrasenia': repcontrasenia,
+        })
+
+    # Si no existe por nombre completo, verifica por el nombre de usuario
     if Encargado.objects.filter(usuario=usuario).exists():
-        messages.error(request, "El usuario ya existe.")
-        return render(request, 'v_encargados/agregar_encargado.html', {
+        messages.error(request, "El nombre de usuario ya existe.")
+        return render(request, 'v_encargados/encargados.html', {
             'nombre': nombre,
             'apellido_p': apellido_p,
             'apellido_m': apellido_m,
@@ -238,12 +253,49 @@ def profesores(request):
     }
 
     return render(request, 'v_profesores/profesor.html', context)
-def agregar_profesor(request):
-    pass
-def editar_profesor(request):
-    pass
-def eliminar_profesor(request):
-    pass
+def validacionA_profesor(request):
+    nombre = request.POST.get("nombre")
+    apellido_p = request.POST.get("apellido_p")
+    apellido_m = request.POST.get("apellido_m")
+    boleta = request.POST.get("boleta")
+
+    # Verificar si el profesor ya existe en la base de datos
+    if Profesor.objects.filter(Q(nombre=nombre) & Q(apellido_p=apellido_p) & Q(apellido_m=apellido_m)).exists():
+        messages.error(request, "El profesor ya existe.")
+        return render(request, 'v_profesores/profesor.html', {
+            'nombre': nombre,
+            'apellido_p': apellido_p,
+            'apellido_m': apellido_m,
+            'boleta': boleta,
+        })
+    
+    else:
+        # Crear el computadora si no existe
+        profesor = Profesor(
+            nombre=nombre,
+            apellido_p=apellido_p,
+            apellido_m=apellido_m,
+            boleta=boleta,
+        )
+        profesor.save()
+        # Redireccionar al usuario a la página de inicio de sesión con mensaje de éxito
+        messages.success(request, "Profesor registrado correctamente.")
+        return redirect('profesores')  # Cambia 'pagina_de_inicio' al nombre de la URL adecuada 
+def validacionE_profesor(request):
+    id = request.POST.get("id")
+    nombre = request.POST.get("nombre")
+    apellido_p = request.POST.get("apellido_p")
+    apellido_m = request.POST.get("apellido_m")
+    boleta = request.POST.get("boleta")
+    
+    Profesor.objects.filter(pk=id).update(nombre=nombre, apellido_p=apellido_p, apellido_m=apellido_m, boleta=boleta)
+    messages.success(request, 'Profesor actualizado')
+    return redirect('profesores') 
+def eliminar_profesor(request, id):
+    profesor = Profesor.objects.filter(pk=id)
+    profesor.delete()
+    messages.success(request, 'Profesor eliminado')
+    return redirect('profesores')
 # ----------------------------- VISTA DE ALUMNOS ----------------------------------------- #
 def alumnos(request):
    #  Obtener el número de registros de tablas
@@ -284,9 +336,19 @@ def validacionA_alumno(request):
     carrera = get_object_or_404(Carrera, id=id_carrera_id)
     
     # Verificar si el alumno ya existe en la base de datos
-    if Estudiante.objects.filter(nombre=nombre).exists():
-        messages.error(request, "El alumno ya existe.")
-        return render(request, 'v_alumnos/alumnos.html', {
+    if Estudiante.objects.filter(Q(nombre=nombre) & Q(apellido_p=apellido_p) & Q(apellido_m=apellido_m)).exists():
+        messages.error(request, "El alumno ya esta registrado.")
+        return render(request, 'v_alumnos/alumno.html', {
+            'nombre': nombre,
+            'apellido_p': apellido_p,
+            'apellido_m': apellido_m,
+            'boleta': boleta,
+        })
+        
+    # Verificar si el alumno ya existe en la base de datos
+    if Estudiante.objects.filter(Q(boleta=boleta)).exists():
+        messages.error(request, "El numero de boleta ya esta asignado.")
+        return render(request, 'v_alumnos/alumno.html', {
             'nombre': nombre,
             'apellido_p': apellido_p,
             'apellido_m': apellido_m,
@@ -361,7 +423,7 @@ def validacionA_computadora(request):
     ocupada = request.POST.get("ocupada")
 
     # Verificar si el la computadora ya existe en la base de datos
-    if Computadora.objects.filter(cod_monitor=cod_monitor).exists():
+    if Computadora.objects.filter(Q(numero=numero) & Q(laboratorio=laboratorio)).exists():
         messages.error(request, "La computadora ya existe.")
         return render(request, 'v_computadoras/computadora.html', {
             'numero': numero,
@@ -386,7 +448,6 @@ def validacionA_computadora(request):
         # Redireccionar al usuario a la página de inicio de sesión con mensaje de éxito
         messages.success(request, "Computadora registrada correctamente.")
         return redirect('computadoras')  # Cambia 'pagina_de_inicio' al nombre de la URL adecuada 
-
 def validacionE_computadora(request):
     id = request.POST.get("id")
     numero = request.POST.get("numero")

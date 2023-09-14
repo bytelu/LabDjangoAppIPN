@@ -1,0 +1,62 @@
+/* formularios.css */
+
+/* Estilo general para los formularios */
+.formAgregar {
+    font-family: Arial, sans-serif;
+    max-width: 400px; /* Ancho máximo del formulario */
+    margin: 0 auto; /* Centrar el formulario horizontalmente */
+    padding: 20px;
+    border: 1px solid #dddddd;
+    border-radius: 10px;
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1); /* Sombra ligera */
+}
+
+/* Estilo para las etiquetas de los campos de entrada */
+.form-group label {
+    font-weight: bold;
+    color: #003366; /* Color de texto para etiquetas */
+    display: block; /* Mostrar etiquetas en bloques separados */
+    margin-bottom: 5px;
+}
+
+/* Estilo para los campos de entrada de texto */
+.form-control {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 15px;
+    border: 1px solid #dddddd;
+    border-radius: 5px;
+    font-size: 14px;
+}
+
+/* Estilo para los botones en el formulario */
+.formAgregar button[type="submit"] {
+    background-color: #003366; /* Color de fondo para el botón de enviar */
+    color: #ffffff; /* Color de texto para el botón de enviar */
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease; /* Transición suave al pasar el mouse */
+}
+
+/* Cambiar color al pasar el mouse sobre el botón */
+.formAgregar button[type="submit"]:hover {
+    background-color: #ff6600; /* Color de fondo al pasar el mouse sobre el botón de enviar */
+}
+
+/* Estilo para el mensaje de éxito */
+.success-message {
+    color: #008000; /* Color de texto para mensajes de éxito */
+    font-size: 14px;
+    margin-top: 10px;
+    text-align: center; /* Alineación centrada para el mensaje de éxito */
+}
+
+/* Estilo para el mensaje de error */
+.error-message {
+    color: #ff0000; /* Color de texto para mensajes de error */
+    font-size: 14px;
+    margin-top: 10px;
+    text-align: center; /* Alineación centrada para el mensaje de error */
+}

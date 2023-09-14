@@ -4,12 +4,12 @@
 <!-- Ventana principal MOSTRAR encargados -->
 <div class="row">
     <div class="col-md-12">
-        <div class="card">
-            <div class="card-header">
-                <h3 class="card-title">Lista de Encargados</h3>
+        <div class="card" style="border: none; border-radius: 10px; box-shadow: 0px 0px 20px rgba(0, 0, 0, 0.2);">
+            <div class="card-header" style="text-align: center; background-color: #6D1A42; color: #ffffff; border-top-left-radius: 10px; border-top-right-radius: 10px; padding: 15px;">
+                <h3 class="card-title" style="font-size: 30px;">Lista de Encargados</h3>
             </div>
-            <div class="card-body">
-                <table class="table table-bordered table-hover" id="tabla-encargados">
+            <div class="card-body" style="background-color: #ffffff; padding: 20px;">
+                <table class="table table-bordered table-hover" id="tablita">
                     <thead>
                         <tr>
                             <th>Nombre</th>
@@ -45,9 +45,9 @@
                                     data-usuario="{{ encargado.usuario }}"
                                     data-contrasenia="{{ encargado.contrasenia }}"
                                     data-estado="{{ encargado.estado }}"
-                                    data-activo="{{ encargado.activo }}">Editar</button>
+                                    data-activo="{{ encargado.activo }}"><i class="fas fa-edit"></i></button>
                                 <a href="{% url 'eliminar_encargado' encargado.id %}" class="btn btn-danger btn-sm"
-                                    onclick="return confirm('¿Deseas eliminar este Encargado?')">Eliminar</a>
+                                    onclick="return confirm('¿Deseas eliminar este Encargado?')"><i class="fas fa-trash"></i></a>
                             </td>
                         </tr>
                         {% endfor %}
@@ -90,7 +90,7 @@
                 </form>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-primary" id="btn-editar-encargado">Editar Encargado</button>
+                <button type="button" class="btn btn-primary" id="btn-editar">Editar Encargado</button>
             </div>
         </div>
     </div>
@@ -123,7 +123,7 @@
                 </form>
             </div>
             <div class="modal-footer">
-                <button type="submit" class="btn btn-primary" id="btn-guardar-encargado">Guardar Encargado</button>
+                <button type="submit" class="btn btn-primary" id="btn-guardar">Guardar Encargado</button>
             </div>
         </div>
     </div>
@@ -133,12 +133,12 @@
 <script>
     //Funcion para la tabla y obtener datos
     $(document).ready(function () {
-        $('#tabla-encargados').DataTable({
+        $('#tablita').DataTable({
             ...idioma
         });
 
         // Usamos un evento delegado para manejar los clics en los botones de "Editar"
-        $('#tabla-encargados').on('click', '.btn-editar', function () {
+        $('#tablita').on('click', '.btn-editar', function () {
             // Obtener los datos del encargado de la fila
             var nombre = $(this).data("nombre");
             var apellido_p = $(this).data("apellido_p");
@@ -170,14 +170,14 @@
    //Funcion para abrir Ventana de EDITAR
     $(document).ready(function () {
         // Captura el evento de clic en el botón "Editar Encargado" y envía el formulario
-        $('#btn-editar-encargado').click(function () {
+        $('#btn-editar').click(function () {
             $('#editarForm').submit();
         });
     });
     //Funcion para abrir Ventana de AGREGAR
     $(document).ready(function () {
         // Captura el evento de clic en el botón "Guardar Encargado" y envía el formulario
-        $('#btn-guardar-encargado').click(function () {
+        $('#btn-guardar').click(function () {
             $('#agregarForm').submit();
         });
     });

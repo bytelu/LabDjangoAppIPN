@@ -4,12 +4,12 @@
 <!-- Ventana principal MOSTRAR alumnos -->
 <div class="row">
     <div class="col-md-12">
-        <div class="card">
-            <div class="card-header" style="text-align: center; background-color: #74b3c9; font-size: 30px; color: white;">
-                <h3 class="card-title">Lista de Alumnos</h3>
+        <div class="card" style="border: none; border-radius: 10px; box-shadow: 0px 0px 20px rgba(0, 0, 0, 0.2);">
+            <div class="card-header" style="text-align: center; background-color: #6D1A42; color: #ffffff; border-top-left-radius: 10px; border-top-right-radius: 10px; padding: 15px;">
+                <h3 class="card-title" style="font-size: 30px;">Lista de Alumnos</h3>
             </div>
-            <div class="card-body">
-                <table id="tabla-alumnos" class="table table-bordered table-hover">
+            <div class="card-body" style="background-color: #ffffff; padding: 20px;">
+                <table id="tablita" class="table table-bordered table-hover">
                     <thead>
                         <tr>
                             <th>Nombre</th>
@@ -29,7 +29,7 @@
                             <td>{{ alumno.boleta }}</td>
                             <td>{{ alumno.carrera.carrera }}</td>
                             <td>
-                                <button class="btn btn-primary btn-sm btn-editar-alumno"
+                                <button class="btn btn-primary btn-sm btn-editar"
                                     data-toggle="modal"
                                     data-target="#editarModal"
                                     data-id="{{ alumno.id }}"
@@ -37,8 +37,8 @@
                                     data-apellido_p="{{ alumno.apellido_p }}"
                                     data-apellido_m="{{ alumno.apellido_m }}"
                                     data-boleta="{{ alumno.boleta }}"
-                                    data-carrera="{{ alumno.carrera.id }}">Editar</button>
-                                <a href="{% url 'eliminar_alumno' alumno.id %}" class="btn btn-danger btn-sm" onclick="return confirm('¿Deseas eliminar este Alumno?')">Eliminar</a>
+                                    data-carrera="{{ alumno.carrera.id }}"><i class="fas fa-edit"></i></button>
+                                <a href="{% url 'eliminar_alumno' alumno.id %}" class="btn btn-danger btn-sm" onclick="return confirm('¿Deseas eliminar este Alumno?')"><i class="fas fa-trash"></i></a>
                             </td>
                         </tr>
                         {% endfor %}
@@ -94,7 +94,7 @@
                 </form>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-primary" id="btn-editar-alumno">Editar Alumno</button>
+                <button type="button" class="btn btn-primary" id="btn-editar">Editar Alumno</button>
             </div>
         </div>
     </div>
@@ -141,7 +141,7 @@
                 </form>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-primary" id="btn-guardar-alumno">Agregar Alumno</button>
+                <button type="button" class="btn btn-primary" id="btn-guardar">Agregar Alumno</button>
             </div>
         </div>
     </div>
@@ -150,11 +150,11 @@
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
     $(document).ready(function () {
-        var tablaAlumnos = $('#tabla-alumnos').DataTable({
+        var tablaAlumnos = $('#tablita').DataTable({
             ...idioma
         });
 
-        $('#tabla-alumnos tbody').on('click', '.btn-editar-alumno', function () {
+        $('#tablita tbody').on('click', '.btn-editar', function () {
             var data = tablaAlumnos.row($(this).closest('tr')).data();
             // Obtener los datos del alumno de la fila
             var nombre = data[0];
@@ -176,14 +176,14 @@
     //Funcion para abrir Ventana de EDITAR
     $(document).ready(function () {
         // Captura el evento de clic en el botón "Editar alumno" y envía el formulario
-        $('#btn-editar-alumno').click(function () {
+        $('#btn-editar').click(function () {
             $('#editarForm').submit();
         });
     });
     //Funcion para abrir Ventana de AGREGAR
     $(document).ready(function () {
         // Captura el evento de clic en el botón "Guardar alumno" y envía el formulario
-        $('#btn-guardar-alumno').click(function () {
+        $('#btn-guardar').click(function () {
             $('#agregarForm').submit();
         });
     });

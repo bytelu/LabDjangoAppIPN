@@ -1,41 +1,171 @@
-{% extends "adminlte/acceso.html" %}{% block body %}
-<!-- Agregando un margen superior para mover el diseño hacia abajo -->
+{% extends "adminlte/acceso.html" %}
+{% block body %}
 <br>
-    <div class="row">
-        <div class="col-md-12">
-            <div class="card">
-                <div class="card-header">
-                    <h3 class="card-title">Lista de Profesores</h3>
-                </div>
-                <div class="card-body">
-                    <table class="table table-bordered table-hover">
-                        <thead>
-                            <tr>
-                                <th>Nombre</th>
-                                <th>Apellido Paterno</th>
-                                <th>Apellido Materno</th>
-                                <th>Boleta</th>
-                                <th>Acciones</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for profesor in profesores %}
-                            <tr>
-                                <td>{{ profesor.nombre }}</td>
-                                <td>{{ profesor.apellido_p }}</td>
-                                <td>{{ profesor.apellido_m }}</td>
-                                <td>{{ profesor.boleta }}</td>
-                                <td>
-                                    <a href="{% url 'editar_profesor' profesor.id %}" class="btn btn-primary btn-sm">Editar</a>
-                                    <a href="{% url 'eliminar_profesor' profesor.id %}" class="btn btn-danger btn-sm" onclick="return confirm('¿Deseas eliminar este Profesor?')">Eliminar</a>
-                                </td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                    <a href="{% url 'agregar_profesor' %}" class="btn btn-success">Agregar Profesor</a>
-                </div>
+<!-- Ventana principal MOSTRAR profesor -->
+<div class="row">
+    <div class="col-md-12">
+        <div class="card" style="border: none; border-radius: 10px; box-shadow: 0px 0px 20px rgba(0, 0, 0, 0.2);">
+            <div class="card-header" style="text-align: center; background-color: #6D1A42; color: #ffffff; border-top-left-radius: 10px; border-top-right-radius: 10px; padding: 15px;">
+                <h3 class="card-title" style="font-size: 30px;">Lista de Profesores</h3>
+            </div>
+            <div class="card-body" style="background-color: #ffffff; padding: 20px;">
+                <table id="tablita" class="table table-bordered table-hover">
+                    <thead>
+                        <tr>
+                            <th>Nombre</th>
+                            <th>Apellido Paterno</th>
+                            <th>Apellido Materno</th>
+                            <th>Boleta</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for profesor in profesores %}
+                        <tr>
+                            <td>{{ profesor.nombre }}</td>
+                            <td>{{ profesor.apellido_p }}</td>
+                            <td>{{ profesor.apellido_m }}</td>
+                            <td>{{ profesor.boleta }}</td>
+                            <td>
+                                <button class="btn btn-primary btn-sm btn-editar"
+                                    data-toggle="modal"
+                                    data-target="#editarModal"
+                                    data-id="{{ profesor.id }}"
+                                    data-nombre="{{ profesor.nombre }}"
+                                    data-apellido_p="{{ profesor.apellido_p }}"
+                                    data-apellido_m="{{ profesor.apellido_m }}"
+                                    data-boleta="{{ profesor.boleta }}">
+                                    <i class="fas fa-edit"></i> <!-- Agrega el icono de editar -->
+                                </button>
+                                <a href="{% url 'eliminar_profesor' profesor.id %}" class="btn btn-danger btn-sm" onclick="return confirm('¿Deseas eliminar este profesor?')"><i class="fas fa-trash"></i>
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                <button type="button" class="btn btn-success" data-toggle="modal" data-target="#agregarModal">
+                    Agregar profesor
+                </button>
             </div>
         </div>
     </div>
+</div>
+<!-- Ventana modal para EDITAR profesor -->
+<div class="modal fade" id="editarModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Modificando Profesor</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <!-- Contenido de la ventana modal aquí -->
+                <form class="formAgregar" id="editarForm" method="post" action="{% url 'validacionE_profesor' %}">
+                    {% csrf_token %}
+                    <input type="hidden" name="id" id="id_profesor" value="">
+                    <div class="form-group">
+                        <label>Nombre</label>
+                        <input type="text" name="nombre" id="id_nombre" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Apellido Paterno</label>
+                        <input type="text" name="apellido_p" id="id_apellido_p" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Apellido Materno</label>
+                        <input type="text" name="apellido_m" id="id_apellido_m" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Boleta</label>
+                        <input type="text" name="boleta" id="id_boleta" class="form-control" required>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" id="btn-editar">Editar Profesor</button>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Ventana modal para AGREGAR profesor -->
+<div class="modal fade" id="agregarModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Agregando Profesor</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <!-- Contenido de la ventana modal aquí -->
+                <form class="formAgregar" id="agregarForm" method="post" action="{% url 'validacionA_profesor' %}">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <label>Nombre</label>
+                        <input type="text" name="nombre" id="id_nombre" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Apellido Paterno</label>
+                        <input type="text" name="apellido_p" id="id_apellido_p" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Apellido Materno</label>
+                        <input type="text" name="apellido_m" id="id_apellido_m" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Boleta</label>
+                        <input type="text" name="boleta" id="id_boleta" class="form-control" required>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" id="btn-guardar">Agregar Profesor</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    $(document).ready(function () {
+        var tablaProfesores = $('#tablita').DataTable({
+            ...idioma
+        });
+
+        $('#tablita tbody').on('click', '.btn-editar', function () {
+            var data = tablaProfesores.row($(this).closest('tr')).data();
+            // Obtener los datos del profesor de la fila
+            var nombre = data[0];
+            var apellido_p = data[1];
+            var apellido_m = data[2];
+            var boleta = data[3];
+            var id = $(this).data("id");
+
+            // Rellenar el formulario de la ventana modal con los datos de la profesor
+            $("#editarForm #id_nombre").val(nombre);
+            $("#editarForm #id_apellido_p").val(apellido_p);
+            $("#editarForm #id_apellido_m").val(apellido_m);
+            $("#editarForm #id_boleta").val(boleta);
+            $("#editarForm #id_profesor").val(id);
+        });
+    });
+    //Funcion para abrir Ventana de EDITAR
+    $(document).ready(function () {
+        // Captura el evento de clic en el botón "Editar profesor" y envía el formulario
+        $('#btn-editar').click(function () {
+            $('#editarForm').submit();
+        });
+    });
+    //Funcion para abrir Ventana de AGREGAR
+    $(document).ready(function () {
+        // Captura el evento de clic en el botón "Guardar profesor" y envía el formulario
+        $('#btn-guardar').click(function () {
+            $('#agregarForm').submit();
+        });
+    });
+</script>
 {% endblock %}

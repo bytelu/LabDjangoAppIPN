@@ -11,8 +11,8 @@ urlpatterns = [
     path('encargados/eliminar/<int:id>/', views.eliminar_encargado, name='eliminar_encargado'),
     #------------------------------VISTA DE PROFESORES--------------------#
     path('profesores/', profesores, name='profesores'),
-    path('profesores/agregar/', views.agregar_profesor, name='agregar_profesor'),
-    path('profesores/editar/<int:id>/', views.editar_profesor, name='editar_profesor'),
+    path('profesores/validandoA/', views.validacionA_profesor, name='validacionA_profesor'),
+    path('profesores/validandoE/', views.validacionE_profesor, name='validacionE_profesor'),
     path('profesores/eliminar/<int:id>/', views.eliminar_profesor, name='eliminar_profesor'),
     #------------------------------VISTA DE ALUMNOS--------------------#
     path('alumnos/', alumnos, name='alumnos'),

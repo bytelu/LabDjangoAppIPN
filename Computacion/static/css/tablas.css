@@ -1,0 +1,122 @@
+/* tablas.css */
+
+/* Estilo general de la tabla */
+#tablita {
+    font-family: Arial, sans-serif;
+    border-collapse: collapse;
+    width: 100%;
+    box-shadow: 0px 3px 6px rgba(0, 0, 0, 0.6); /* Sombra ligera */
+}
+
+#tablita tbody tr:hover {
+    background-color: #e0e0e0; /* Color de fondo al pasar el mouse */
+}
+
+#tablita th {
+    border: 1px solid #dddddd;
+    text-align: center;
+    font-weight: bold; /* Texto en negrita en las celdas de encabezado */
+    padding: 1px 6px 1px 6px; /*arriba derecha abajo izquierda;*/
+}
+#tablita td {
+    border: 1px solid #dddddd;
+    text-align: left;
+    /* Texto en negrita en las celdas de encabezado */
+    padding: 8px;
+}
+
+#tablita tr:nth-child(even) {
+    background-color: #f2f2f2;
+}
+
+#tablita tbody tr:last-child td {
+    border-bottom: 1px solid #dddddd; /* Borde inferior en la última fila */
+}
+
+/* Estilo de la cabecera de la tabla */
+#tablita th {
+    background-color: #6D1A42; /* Color de fondo */
+    color: #ffffff; /* Color del texto */
+}
+
+/* Estilo de los botones de acción */
+.btn-editar,
+.btn-danger,
+.btn-success{
+    padding: 5px 10px;
+    margin-right: 5px;
+    border: none; /* Quitamos el borde para dar un estilo más limpio */
+    cursor: pointer;
+    transition: background-color 0.3s ease; /* Transición suave para el cambio de color */
+    background-color: #b38e5d;/* Color de fondo normal */
+    color: #ffffff; /* Color de texto normal */
+}
+
+/* Estilo de los botones de acción al pasar el ratón sobre ellos */
+.btn-editar:hover,
+.btn-danger:hover,
+.btn-success:hover {
+    background-color: #857b6bbe; /* Color de fondo al pasar el mouse */
+    color: #ffffff; /* Color de texto al pasar el mouse */
+}
+
+/* Al hacer clic */
+.btn-editar:active,
+.btn-danger:active,
+.btn-success:active {
+    background-color: #866207; /* Color de fondo al hacer clic */
+    color: #ffffff; /* Color de texto al hacer clic */
+}
+
+/* Estilo de la ventana modal */
+.modal {
+    font-family: Arial, sans-serif;
+    border: none;
+    border-radius: 10px;
+    box-shadow: 0px 0px 20px rgba(0, 0, 0, 0.2); /* Sombra más pronunciada */
+}
+
+/* Estilo del encabezado de la ventana modal */
+.modal-header {
+    background-color: #8C1858; /* Color de fondo del encabezado */
+    color: #ffffff; /* Color del texto del encabezado */
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
+    padding: 15px;
+    text-align: center;
+    border-bottom: none;
+}
+
+/* Estilo del contenido de la ventana modal */
+.modal-body {
+    padding: 20px;
+    background-color: #ffffff; /* Color de fondo del contenido */
+}
+
+/* Estilo del pie de la ventana modal */
+.modal-footer {
+    background-color: #8C1858; /* Color de fondo del pie */
+    border-bottom-left-radius: 10px;
+    border-bottom-right-radius: 10px;
+    padding: 15px;
+    text-align: center;
+    border-top: none;
+}
+
+/* Estilo del botón de cierre de la ventana modal */
+.close {
+    color: bisque; /* Color del botón de cierre */
+    font-size: 30px;
+    font-weight: bold;
+    position: absolute;
+    top: 10px;
+    right: 10px;
+}
+
+.close:hover,
+.close:focus {
+    color: #f44336; /* Color del botón de cierre al pasar el ratón sobre él */
+    text-decoration: none;
+    cursor: pointer;
+}
+
