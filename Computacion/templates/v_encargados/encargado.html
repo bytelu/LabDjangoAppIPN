@@ -28,8 +28,8 @@
                             <td>{{ encargado.nombre }}</td>
                             <td>{{ encargado.apellido_p }}</td>
                             <td>{{ encargado.apellido_m }}</td>
-                            <td>{{ encargado.hora_entrada }}</td>
-                            <td>{{ encargado.hora_salida }}</td>
+                            <td>{{ encargado.hora_entrada|default:"N/A" }}</td>
+                            <td>{{ encargado.hora_salida|default:"N/A" }}</td>
                             <td>{{ encargado.usuario }}</td>
                             <td>{{ encargado.estado }}</td>
                             <td>

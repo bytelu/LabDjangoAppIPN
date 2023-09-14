@@ -1,9 +1,10 @@
+import re
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.contrib.auth.hashers import make_password
 from django.contrib.auth.hashers import check_password
 from django.db import transaction
-from .models import Encargado, Computadora, Profesor, Estudiante, Carrera
+from .models import Encargado, Computadora, Profesor, Estudiante, Carrera, Reporte
 from datetime import datetime
 from django.db.models import Q
 
@@ -138,6 +139,19 @@ def validacionA_encargado(request):
     usuario = request.POST.get("usuario")
     contrasenia = request.POST.get("contrasenia")
     repcontrasenia = request.POST.get("repcontrasenia")
+    
+    # Verificar y formatear hora de entrada
+    if not hora_entrada or not re.match(r'^\d{2}:\d{2}$', hora_entrada):
+        hora_entrada = '00:00'
+    # Verificar y formatear hora de salida
+    if not hora_salida or not re.match(r'^\d{2}:\d{2}$', hora_salida):
+        hora_salida = '00:00'
+
+    # Reemplaza 'midnight' con '00:00' si es necesario
+    if hora_entrada == 'midnight':
+        hora_entrada = '00:00'
+    if hora_salida == 'midnight':
+        hora_salida = '00:00'
 
      # Verificar si el usuario ya existe en la base de datos por nombre completo
     if Encargado.objects.filter(Q(nombre=nombre) & Q(apellido_p=apellido_p) & Q(apellido_m=apellido_m)).exists():
@@ -205,6 +219,20 @@ def validacionE_encargado(request):
     usuario = request.POST.get("usuario")
     contrasenia = request.POST.get("contrasenia")
     repcontrasenia = request.POST.get("repcontrasenia")
+    
+    # Verificar y formatear hora de entrada
+    if not hora_entrada or not re.match(r'^\d{2}:\d{2}$', hora_entrada):
+        hora_entrada = '00:00'
+    # Verificar y formatear hora de salida
+    if not hora_salida or not re.match(r'^\d{2}:\d{2}$', hora_salida):
+        hora_salida = '00:00'
+
+    # Reemplaza 'midnight' con '00:00' si es necesario
+    if hora_entrada == 'midnight':
+        hora_entrada = '00:00'
+    if hora_salida == 'midnight':
+        hora_salida = '00:00'
+    
     if contrasenia == repcontrasenia:
         Encargado.objects.filter(pk=id).update(nombre=nombre, apellido_m=apellido_m, apellido_p=apellido_p, hora_entrada=hora_entrada, hora_salida=hora_salida,usuario=usuario,contrasenia=contrasenia)
         messages.success(request, 'Encargado actualizado')
@@ -479,13 +507,89 @@ def laboratorio_dos(request):
     pass
 # ----------------------------- VISTA DE REPORTES ----------------------------------------- #
 def reportes(request):
-    pass
+    #  Obtener el número de registros de tablas
+    num_computadoras = Computadora.objects.count()
+    num_profesores = Profesor.objects.count()
+    num_encargados = Encargado.objects.count()
+    num_estudiantes = Estudiante.objects.count()
+    encargadoo = Encargado.objects.all()
+    computadora = Computadora.objects.all()
+
+    encargado_id = request.session.get('encargado_id')
+    encargado = None
+
+    if encargado_id:
+     # Consultar la base de datos para obtener la información del encargado
+       encargado = Encargado.objects.get(id=encargado_id)
+
+     #Consultar la lista de todos los encargados
+    reportes = Reporte.objects.all()
+
+    # Crear un contexto con todos los datos
+    context = {
+        'computadoras_lista': num_computadoras,
+        'profesores_lista': num_profesores,
+        'encargados_lista': num_encargados,
+        'estudiantes_lista': num_estudiantes,
+        'encargado_principal': encargado,  # Incluye también el encargado autenticado en el contexto
+        'encargado': encargadoo,
+        'computadora' : computadora,
+        'reportes':reportes,
+    }
+
+    return render(request, 'v_reportes/reporte.html', context)
 def validacionA_reportes(request):
-    pass
+    titulo = request.POST.get("titulo")
+    descripcion = request.POST.get("descripcion")
+    fecha = request.POST.get("fecha")
+    hora = request.POST.get("hora")
+    seguimiento = request.POST.get("seguimiento")
+    id_encargado_id = request.POST.get("encargado")
+    encargado = get_object_or_404(Encargado, id=id_encargado_id)
+    id_computadora_id = request.POST.get("computadora")
+
+    # Verifica si se proporcionó una computadora
+    if id_computadora_id:
+        computadora = get_object_or_404(Computadora, id=id_computadora_id)
+    else:
+        computadora = None  # Establece el campo en None si no se proporcionó
+
+    reporte = Reporte(
+        titulo=titulo,
+        descripcion=descripcion,
+        fecha=fecha,
+        hora=hora,
+        seguimiento=seguimiento,
+        encargado=encargado,
+        computadora=computadora,
+    )
+    reporte.save()
+    # Redireccionar al usuario a la página de inicio de sesión con mensaje de éxito
+    messages.success(request, "Reporte registrado correctamente.")
+    return redirect('reportes')  # Cambia 'pagina_de_inicio' al nombre de la URL adecuada
 def validacionE_reportes(request):
-    pass
-def eliminar_reporte(request):
-    pass
+    id = request.POST.get("id")
+    titulo = request.POST.get("titulo")
+    descripcion = request.POST.get("descripcion")
+    seguimiento = request.POST.get("seguimiento")
+    id_encargado_id = request.POST.get("encargado")
+    encargado = get_object_or_404(Encargado, id=id_encargado_id)
+    id_computadora_id = request.POST.get("computadora")
+
+    # Verifica si se proporcionó una computadora
+    if id_computadora_id:
+        computadora = get_object_or_404(Computadora, id=id_computadora_id)
+    else:
+        computadora = None  # Establece el campo en None si no se proporcionó
+
+    Reporte.objects.filter(pk=id).update(titulo=titulo, descripcion=descripcion, seguimiento=seguimiento, encargado_id=encargado, computadora_id=computadora)
+    messages.success(request, 'Reporte actualizado')
+    return redirect('reportes')
+def eliminar_reporte(request, id):
+    reporte = Reporte.objects.filter(pk=id)
+    reporte.delete()
+    messages.success(request, 'Reporte eliminado')
+    return redirect('reportes')
 # ----------------------------- VISTA DE PERFIL ----------------------------------------- #
 def perfil(request):
     pass

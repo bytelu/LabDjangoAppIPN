@@ -27,8 +27,8 @@
                             <td>{{ computadora.numero }}</td>
                             <td>{{ computadora.estado }}</td>
                             <td>{{ computadora.laboratorio }}</td>
-                            <td>{{ computadora.cod_monitor }}</td>
-                            <td>{{ computadora.cod_cpu }}</td>
+                            <td>{% if computadora.cod_monitor %}{{ computadora.cod_monitor }}{% else %}N/A{% endif %}</td>
+                           <td>{% if computadora.cod_cpu %}{{ computadora.cod_cpu }}{% else %}N/A{% endif %}</td>
                             <td>{{ computadora.ocupada }}</td>
                             <td>
                                 <button class="btn btn-primary btn-sm btn-editar"

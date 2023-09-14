@@ -1,4 +1,233 @@
-{% extends "adminlte/acceso.html" %} {% block body %}
-<!-- Aqui comienzas a escribir el html, guiarse de computadora.html -->
+{% extends "adminlte/acceso.html" %}
+{% block body %}
+<br>
+<!-- Ventana principal MOSTRAR alumnos -->
+<div class="row">
+    <div class="col-md-12">
+        <div class="card" style="border: none; border-radius: 10px; box-shadow: 0px 0px 20px rgba(0, 0, 0, 0.2);">
+            <div class="card-header" style="text-align: center; background-color: #6D1A42; color: #ffffff; border-top-left-radius: 10px; border-top-right-radius: 10px; padding: 15px;">
+                <h3 class="card-title" style="font-size: 30px;">Lista de Reportes</h3>
+            </div>
+            <div class="card-body" style="background-color: #ffffff; padding: 20px;">
+                <table id="tablita" class="table table-bordered table-hover">
+                    <thead>
+                        <tr>
+                            <th>Titulo</th>
+                            <th>Descripción</th>
+                            <th>Fecha</th>
+                            <th>Hora</th>
+                            <th>Seguimiento</th>
+                            <th>Encargado</th>
+                            <th>Computadora</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for reporte in reportes %}
+                        <tr>
+                            <td>{{ reporte.titulo }}</td>
+                            <td>{{ reporte.descripcion }}</td>
+                            <td>{{ reporte.fecha }}</td>
+                            <td>{{ reporte.hora }}</td>
+                            <td>
+                                {% if reporte.seguimiento %}
+                                    {{ reporte.seguimiento }}
+                                {% else %}
+                                    Sin Seguimiento
+                                {% endif %}
+                            </td>                            
+                            <td>{{ reporte.encargado.nombre }} {{ reporte.encargado.apellido_p }} {{ reporte.encargado.apellido_m }}</td>
+                            <td>
+                                {% if reporte.computadora %}
+                                    No: {{ reporte.computadora.numero }}, Lab: {{ reporte.computadora.laboratorio }}
+                                {% else %}
+                                    No Asignada
+                                {% endif %}
+                            </td>                            
+                            <td>
+                                <button class="btn btn-primary btn-sm btn-editar"
+                                    data-toggle="modal"
+                                    data-target="#editarModal"
+                                    data-id="{{ reporte.id }}"
+                                    data-nombre="{{ reporte.titulo }}"
+                                    data-nombre="{{ reporte.descripcion }}"
+                                    data-apellido_p="{{ reporte.fecha }}"
+                                    data-apellido_m="{{ reporte.hora }}"
+                                    data-boleta="{{ reporte.seguimiento }}"
+                                    data-carrera="{{ reporte.encargado.id }}"
+                                    data-carrera="{{ reporte.computadora.id }}"><i class="fas fa-edit"></i></button>
+                                <a href="{% url 'eliminar_reporte' reporte.id %}" class="btn btn-danger btn-sm" onclick="return confirm('¿Deseas eliminar este reporte?')"><i class="fas fa-trash"></i></a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                <button type="button" class="btn btn-success" data-toggle="modal" data-target="#agregarModal">
+                    Agregar Reporte
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Ventana modal para EDITAR reporte -->
+<div class="modal fade" id="editarModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Modificando Reporte</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <!-- Contenido de la ventana modal aquí  readonly-->
+                <form class="formAgregar" id="editarForm" method="post" action="{% url 'validacionE_reporte' %}">
+                    {% csrf_token %}
+                    <input type="hidden" name="id" id="id_reporte" value="">
+                    <div class="form-group">
+                        <label>Titulo</label>
+                        <input type="text" name="titulo" id="id_titulo" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Descripción</label>
+                        <textarea name="descripcion" id="id_descripcion" class="form-control" rows="4" style="resize: none;" required></textarea>
+                    </div>                    
+                    <input type="hidden" name="fecha" id="id_fecha" value="">
+                    <input type="hidden" name="hora" id="id_hora" value="">
+                    <div class="form-group">
+                        <label>Seguimiento</label>
+                        <input type="text" name="seguimiento" id="id_seguimiento" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Encargado</label>
+                        <select name="encargado" id="id_encargado" class="form-control" required>
+                            <option value="" disabled selected>Seleccione Encargado</option>
+                            {% for encargadoo in encargado %}
+                            <option value="{{ encargadoo.id }}">{{ encargadoo.nombre }} {{ encargadoo.apellido_p }} {{ encargadoo.apellido_m }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Computadora</label>
+                        <select name="computadora" id="id_computadora" class="form-control" required>
+                            <option value="" disabled selected>Seleccione No. de Computadora</option>
+                            {% for computadoraa in computadora %}
+                            <option value="{{ computadoraa.id }}">No.: {{ computadoraa.numero }}, Laboratorio:{{ computadoraa.laboratorio }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" id="btn-editar">Editar Reporte</button>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Ventana modal para AGREGAR reporte -->
+<div class="modal fade" id="agregarModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Agregando Reporte</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <!-- Contenido de la ventana modal aquí -->
+                <form class="formAgregar" id="agregarForm" method="post" action="{% url 'validacionA_reporte' %}">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <label>Titulo</label>
+                        <input type="text" name="titulo" id="id_titulo" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Descripción</label>
+                        <textarea name="descripcion" id="id_descripcion" class="form-control" rows="4" style="resize: none;" required></textarea>
+                    </div> 
+                    <div class="form-group">
+                        <label>fecha</label>
+                        <input type="date" name="fecha" id="id_fecha" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Hora</label>
+                        <input type="time" name="hora" id="id_hora" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Seguimiento</label>
+                        <input type="text" name="seguimiento" id="id_seguimiento" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Encargado</label>
+                        <select name="encargado" id="id_encargado" class="form-control" required>
+                            <option value="" disabled selected>Seleccione Encargado</option>
+                            {% for encargadoo in encargado %}
+                            <option value="{{ encargadoo.id }}">{{ encargadoo.nombre }} {{ encargadoo.apellido_p }} {{ encargadoo.apellido_m }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Computadora</label>
+                        <select name="computadora" id="id_computadora" class="form-control" required>
+                            <option value="" disabled selected>Seleccione No. de Computadora</option>
+                            {% for computadoraa in computadora %}
+                            <option value="{{ computadoraa.id }}">No.: {{ computadoraa.numero }}, Laboratorio:{{ computadoraa.laboratorio }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" id="btn-guardar">Agregar Reporte</button>
+            </div>
+        </div>
+    </div>
+</div>
 
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    $(document).ready(function () {
+        var tablaAlumnos = $('#tablita').DataTable({
+            ...idioma
+        });
+
+        $('#tablita tbody').on('click', '.btn-editar', function () {
+            var data = tablaAlumnos.row($(this).closest('tr')).data();
+            // Obtener los datos del alumno de la fila
+            var titulo = data[0];
+            var descripcion = data[1];
+            var fecha = data[2];
+            var hora = data[3];
+            var seguimiento = data[4];
+            var encargadoId = $(this).data("encargado");
+            var computadoraId = $(this).data("computadora");
+            var id = $(this).data("id");
+
+            // Rellenar el formulario de la ventana modal con los datos del alumno
+            $("#editarForm #id_titulo").val(titulo);
+            $("#editarForm #id_descripcion").val(descripcion);
+            $("#editarForm #id_fecha").val(fecha);
+            $("#editarForm #id_hora").val(hora);
+            $("#editarForm #id_seguimiento").val(seguimiento);
+            $("#editarForm #id_encargado").val(encargadoId);
+            $("#editarForm #id_computadora").val(computadoraId);
+            $("#editarForm #id_reporte").val(id);
+        });
+    });
+    //Funcion para abrir Ventana de EDITAR
+    $(document).ready(function () {
+        // Captura el evento de clic en el botón "Editar alumno" y envía el formulario
+        $('#btn-editar').click(function () {
+            $('#editarForm').submit();
+        });
+    });
+    //Funcion para abrir Ventana de AGREGAR
+    $(document).ready(function () {
+        // Captura el evento de clic en el botón "Guardar alumno" y envía el formulario
+        $('#btn-guardar').click(function () {
+            $('#agregarForm').submit();
+        });
+    });
+</script>
 {% endblock %}
