@@ -480,9 +480,9 @@ def laboratorio_dos(request):
 # ----------------------------- VISTA DE REPORTES ----------------------------------------- #
 def reportes(request):
     pass
-def agregar_reporte(request):
+def validacionA_reportes(request):
     pass
-def editar_reporte(request):
+def validacionE_reportes(request):
     pass
 def eliminar_reporte(request):
     pass
