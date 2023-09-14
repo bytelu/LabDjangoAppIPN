@@ -1,4 +1,40 @@
-{% extends "adminlte/acceso.html" %} {% load static %} {% block body %}
-<!-- Aqui comienzas a escribir el html, guiarse de encargado.html -->
+{% extends "adminlte/acceso.html" %}
+{% block body %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+<br>
+<!-- Ventana principal MOSTRAR computadoras LABORATORIO 1 -->
+<div class="row">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header" style="background-color: #6D1A42; color: #ffffff;">
+                <h3 class="card-title" style="font-size: 30px;">Computadoras del Laboratorio 1</h3>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    {% for computadora in computadoras %}
+                        {% if computadora.laboratorio == 1 %}
+                            <div class="col-md-2 mb-1">
+                                <div class="card computadora-card" style="border: none; border-radius: 10px; box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);">
+                                    <div class="card-body">
+                                        {% if computadora.estado == 1 %}
+                                            <i class="fas fa-desktop activa"></i>
+                                        {% else %}
+                                            <i class="fas fa-desktop inactiva"></i>
+                                        {% endif %}
+                                        <h5 class="card-title">Computadora {{ computadora.numero }}</h5>
+                                        {% if computadora.ocupada == 1 %}
+                                            <i class="fas fa-address-card estudiante"></i>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 
 {% endblock %}

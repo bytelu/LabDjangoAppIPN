@@ -30,6 +30,7 @@
   <!-- MIS ESTILOS -->
   <link rel="stylesheet" href="{% static 'css/tablas.css' %}">
   <link rel="stylesheet" href="{% static 'css/formularios.css' %}">
+  <link rel="stylesheet" href="{% static 'css/computadoras.css' %}">
 
 </head>
 <body class="hold-transition sidebar-mini layout-fixed">
@@ -65,7 +66,7 @@
         <div class="navbar-search-block">
           <form class="form-inline">
             <div class="input-group input-group-sm">
-              <input class="form-control form-control-navbar" type="search" placeholder="Search" aria-label="Search">
+              <input class="form-control form-control-navbar" type="search" placeholder="Buscar" aria-label="Search">
               <div class="input-group-append">
                 <button class="btn btn-navbar" type="submit">
                   <i class="fas fa-search"></i>
@@ -86,11 +87,11 @@
         <div class="dropdown-menu dropdown-menu-lg dropdown-menu-right">
           <span class="dropdown-item dropdown-header">Configuración</span>
           <div class="dropdown-divider"></div>
-          <a href="{% url 'perfil' %}" class="dropdown-item">
+          <a data-toggle="modal" data-target="#perfil" class="dropdown-item">
             <i class="fas fa-user mr-2"></i> Perfil
           </a>
           <div class="dropdown-divider"></div>
-          <a href="#" class="dropdown-item">
+          <a href="{% url 'ayuda' %}" class="dropdown-item">
             <i class="fas fa-question-circle mr-2"></i> Ayuda
           </a>
       </li>
@@ -101,8 +102,8 @@
         </a>
       </li>
       <!-- Boton de Cerrar sesion -->
-      <li class="nav-item dropdown">
-        <a class="nav-link" data-toggle="dropdown" href="">
+      <li class="nav-item">
+        <a class="nav-link" href="{% url 'cerrar_sesion' %}">
           <i class="fas fa-sign-out-alt"></i>
         </a>
       </li>
@@ -132,7 +133,7 @@
           <img src="{% static 'img/usuario.png' %}" class="img-circle elevation-2" alt="User Image">
         </div>
         <div class="info">
-          <a href="#" class="d-block">Bienvenido, {{ encargado_principal.nombre }} {{ encargado_principal.apellido_p }}</a>
+          <a data-toggle="modal" data-target="#perfil" class="d-block">Bienvenido, {{ encargado_principal.nombre }}</a>
         </div>
       </div>
 
@@ -192,7 +193,7 @@
             </a>
             <ul class="nav nav-treeview">
               <li class="nav-item">
-                <a href="#" class="nav-link">
+                <a href="{% url 'laboratorio_uno' %}" class="nav-link">
                   <i class="nav-icon fas fa-laptop"></i>
                     <p>
                       Laboratorio 1
@@ -201,7 +202,7 @@
               </li>
               <li class="nav-item">
                 <a href="#" class="nav-link">
-                  <i class="nav-icon fas fa-desktop"></i>
+                  <i class="nav-icon fas fa-laptop"></i>
                   <p>
                     Laboratorio 2
                   </p>
@@ -212,7 +213,7 @@
           <li class="nav-header" style="color:white;">REPORTES</li>
           <li class="nav-item">
             <a href="{% url 'reportes' %}" class="nav-link">
-              <i class="nav-icon fas fa-user"></i>
+              <i class="nav-icon fas fa-calendar-alt"></i>
               <p>
                 Ver reportes
               </p>
@@ -220,7 +221,7 @@
           </li>
           <li class="nav-header" style="color:white;">CONFIGURACIÓN</li>
           <li class="nav-item">
-            <a href="#" class="nav-link">
+            <a data-toggle="modal" data-target="#perfil" class="nav-link">
               <i class="nav-icon fas fa-user"></i>
               <p>
                 Perfil
@@ -228,7 +229,7 @@
             </a>
           </li>
           <li class="nav-item">
-            <a href="#" class="nav-link">
+            <a href="{% url 'ayuda' %}" class="nav-link">
               <i class="nav-icon fas fa-question-circle"></i>
               <p>
                 Ayuda
@@ -236,13 +237,13 @@
             </a>
           </li>
           <li class="nav-item">
-            <a href="#" class="nav-link">
-              <i class="nav-icon fas fa-sign-out-alt"></i>
-              <p>
-                Cerrar Sesión
-              </p>
+            <a href="{% url 'cerrar_sesion' %}" class="nav-link">
+                <i class="nav-icon fas fa-sign-out-alt"></i>
+                <p>
+                    Cerrar Sesión
+                </p>
             </a>
-          </li>
+        </li>
         </ul>
       </nav>
       <!-- /.sidebar-menu -->
@@ -337,11 +338,40 @@
     <!-- /.row -->
   </aside>
   
-  
   <!-- /.control-sidebar -->
 </div>
 <!-- ./wrapper -->
-
+<!-- Ventana modal para PERFIL-->
+<div class="modal fade" id="perfil" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+      <div class="modal-content">
+          <div class="modal-header">
+              <h5 class="modal-title" id="exampleModalLabel">Perfil</h5>
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                  <span aria-hidden="true">&times;</span>
+              </button>
+          </div>
+          <div class="modal-body">
+              <!-- Contenido de la ventana modal aquí -->
+              <form class="formAgregar" id="perfil-form" method="post" action="{% url 'validacionE_encargado' %}">
+                  {% csrf_token %}
+                    <input type="hidden" name="id" value="{{ encargado_principal.id }}">
+                    Nombre: <input type="text" name="nombre" class="form-control my-2" value="{{ encargado_principal.nombre }}" required>
+                    Apellido Paterno: <input type="text" name="apellido_p" class="form-control my-2" value="{{ encargado_principal.apellido_p }}" required>
+                    Apellido Materno: <input type="text" name="apellido_m" class="form-control my-2" value="{{ encargado_principal.apellido_m }}" required>
+                    Usuario: <input type="text" name="usuario" class="form-control my-2" value="{{ encargado_principal.usuario }}" required>
+                    Contraseña: <input type="password" name="contrasenia" class="form-control my-2" value="{{ encargado_principal.contrasenia }}" required>
+                    Repetir Contraseña: <input type="password" name="repcontrasenia" class="form-control my-2" required>
+                    Hora Entrada: <input type="time" name="hora_entrada" class="form-control my-2" value="{{ encargado_principal.hora_entrada }}" required placeholder="HH:mm">
+                    Hora Salida: <input type="time" name="hora_salida" class="form-control my-2" value="{{ encargado_principal.hora_salida }}" required placeholder="HH:mm">
+              </form>
+          </div>
+          <div class="modal-footer">
+              <button type="button" class="btn btn-success" id="btn-guardar-perfil">Guardar Cambios</button>
+          </div>
+      </div>
+  </div>
+</div>
 <!-- jQuery -->
 <script src="{% static 'plugins/jquery/jquery.min.js' %}"></script>
 <!-- jQuery UI 1.11.4 -->
@@ -375,6 +405,14 @@
 <!-- DataTables -->
 <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
 <script src="{% static 'js/datatableE.js' %}"></script>
-
+<script>
+  //Funcion para abrir Ventana de GUARDAR PERFIL
+  $(document).ready(function () {
+    // Captura el evento de clic en el botón "Guardar perfil" y envía el formulario
+    $('#btn-guardar-perfil').click(function () {
+        $('#perfil-form').submit();
+    });
+});
+</script>
 </body>
 </html>

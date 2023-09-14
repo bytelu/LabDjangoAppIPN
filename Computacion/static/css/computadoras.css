@@ -1,0 +1,40 @@
+/* Estilos para las tarjetas de computadora */
+.computadora-card {
+    display: inline-block;
+    text-align: center;
+    margin: 10px;
+    padding: 10px;
+    border-radius: 10px;
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);
+    transition: transform 0.2s ease-in-out;
+}
+
+.computadora-card:hover {
+    transform: scale(1.05);
+}
+
+/* Estilos para el ícono de computadora */
+.fa-desktop {
+    font-size: 48px;
+    margin-bottom: 10px;
+}
+
+/* Estilos para computadoras activas */
+.activa {
+    color: green; /* Color para computadoras activas */
+}
+
+/* Estilos para computadoras inactivas */
+.inactiva {
+    color: red; /* Color para computadoras inactivas */
+}
+
+/* Estilos para el ícono de estudiante */
+.fa-addres-card {
+    font-size: 48px;
+    margin-bottom: 10px;
+}
+/* Estilos para computadoras ocupadas por estudiantes */
+.estudiante {
+    color: #363554; /* Texto negro para computadoras ocupadas */
+}
