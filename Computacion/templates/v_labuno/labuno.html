@@ -12,19 +12,52 @@
             </div>
             <div class="card-body">
                 <div class="row">
+                    <div class="col-md-4 text-center">
+                        <!-- Ejemplo de colores -->
+                        <div class="d-flex align-items-center justify-content-center">
+                            <div class="mr-2">
+                                <i class="fas fa-desktop fa-2x activa"></i>
+                            </div>
+                            <p class="mb-0">Computadora activa</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4 text-center">
+                        <!-- Ejemplo de colores -->
+                        <div class="d-flex align-items-center justify-content-center">
+                            <div class="mr-2">
+                                <i class="fas fa-desktop fa-2x inactiva"></i>
+                            </div>
+                            <p class="mb-0">Computadora inactiva</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4 text-center">
+                        <!-- Ejemplo de colores -->
+                        <div class="d-flex align-items-center justify-content-center">
+                            <div class="mr-2">
+                                <i class="fas fa-desktop fa-2x ocupada"></i>
+                            </div>
+                            <p class="mb-0">Computadora ocupada</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
                     {% for computadora in computadoras %}
                         {% if computadora.laboratorio == 1 %}
                             <div class="col-md-2 mb-1">
-                                <div class="card computadora-card" style="border: none; border-radius: 10px; box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);">
+                                <div class="card computadora-card">
                                     <div class="card-body">
                                         {% if computadora.estado == 1 %}
-                                            <i class="fas fa-desktop activa"></i>
+                                            {% if computadora.ocupada == 1 %}
+                                                <i class="fas fa-desktop ocupada"></i>
+                                            {% else %}
+                                                <i class="fas fa-desktop activa"></i>
+                                            {% endif %}
                                         {% else %}
                                             <i class="fas fa-desktop inactiva"></i>
                                         {% endif %}
-                                        <h5 class="card-title">Computadora {{ computadora.numero }}</h5>
+                                        <h5 class="card-title custom-card-title">Computadora {{ computadora.numero }}</h5>
                                         {% if computadora.ocupada == 1 %}
-                                            <i class="fas fa-address-card estudiante"></i>
+                                            <i class="fas fa-desktop ocupada estudiante-icon ocupada-icon"></i>
                                         {% endif %}
                                     </div>
                                 </div>
