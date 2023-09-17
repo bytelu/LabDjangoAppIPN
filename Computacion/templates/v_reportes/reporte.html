@@ -49,13 +49,13 @@
                                     data-toggle="modal"
                                     data-target="#editarModal"
                                     data-id="{{ reporte.id }}"
-                                    data-nombre="{{ reporte.titulo }}"
-                                    data-nombre="{{ reporte.descripcion }}"
-                                    data-apellido_p="{{ reporte.fecha }}"
-                                    data-apellido_m="{{ reporte.hora }}"
-                                    data-boleta="{{ reporte.seguimiento }}"
-                                    data-carrera="{{ reporte.encargado.id }}"
-                                    data-carrera="{{ reporte.computadora.id }}"><i class="fas fa-edit"></i></button>
+                                    data-titulo="{{ reporte.titulo }}"
+                                    data-descripcion="{{ reporte.descripcion }}"
+                                    data-fecha="{{ reporte.fecha }}"
+                                    data-hora="{{ reporte.hora }}"
+                                    data-seguimiento="{{ reporte.seguimiento }}"
+                                    data-encargado="{{ reporte.encargado.id }}"
+                                    data-computadora="{{ reporte.computadora.id }}"><i class="fas fa-edit"></i></button>
                                 <a href="{% url 'eliminar_reporte' reporte.id %}" class="btn btn-danger btn-sm" onclick="return confirm('¿Deseas eliminar este reporte?')"><i class="fas fa-trash"></i></a>
                             </td>
                         </tr>
@@ -195,11 +195,11 @@
         $('#tablita tbody').on('click', '.btn-editar', function () {
             var data = tablaAlumnos.row($(this).closest('tr')).data();
             // Obtener los datos del alumno de la fila
-            var titulo = data[0];
-            var descripcion = data[1];
-            var fecha = data[2];
-            var hora = data[3];
-            var seguimiento = data[4];
+            var titulo = $(this).data("titulo");
+            var descripcion = $(this).data("descripcion");
+            var fecha = $(this).data("fecha");
+            var hora = $(this).data("hora");
+            var seguimiento = $(this).data("seguimiento");
             var encargadoId = $(this).data("encargado");
             var computadoraId = $(this).data("computadora");
             var id = $(this).data("id");

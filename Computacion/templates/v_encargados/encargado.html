@@ -18,7 +18,7 @@
                             <th>Hora de entrada</th>
                             <th>Hora de salida</th>
                             <th>Usuario</th>
-                            <th>Activo</th>
+                            <th>Estado</th>
                             <th>Acciones</th>
                         </tr>
                     </thead>
@@ -28,10 +28,28 @@
                             <td>{{ encargado.nombre }}</td>
                             <td>{{ encargado.apellido_p }}</td>
                             <td>{{ encargado.apellido_m }}</td>
-                            <td>{{ encargado.hora_entrada|default:"N/A" }}</td>
-                            <td>{{ encargado.hora_salida|default:"N/A" }}</td>
+                            <td>
+                                {% if encargado.hora_entrada == midnight %}
+                                    N/A
+                                {% else %}
+                                    {{ encargado.hora_entrada }}
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if encargado.hora_salida == midnight %}
+                                    N/A
+                                {% else %}
+                                    {{ encargado.hora_salida }}
+                                {% endif %}
+                            </td>
                             <td>{{ encargado.usuario }}</td>
-                            <td>{{ encargado.estado }}</td>
+                            <td>
+                                {% if encargado.estado == 1 %}
+                                    Activo
+                                {% else %}
+                                    Inactivo
+                                {% endif %}
+                            </td>
                             <td>
                                 <button class="btn btn-primary btn-sm btn-editar"
                                     data-toggle="modal"

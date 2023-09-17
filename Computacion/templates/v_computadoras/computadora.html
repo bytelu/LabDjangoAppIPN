@@ -25,11 +25,27 @@
                         {% for computadora in computadoras %}
                         <tr>
                             <td>{{ computadora.numero }}</td>
-                            <td>{{ computadora.estado }}</td>
+                            <td>
+                                {% if computadora.estado == 1 %}
+                                    Activo
+                                {% else %}
+                                    Inactiva
+                                {% endif %}
+                            </td>
                             <td>{{ computadora.laboratorio }}</td>
-                            <td>{% if computadora.cod_monitor %}{{ computadora.cod_monitor }}{% else %}N/A{% endif %}</td>
+                            <td>{% if computadora.cod_monitor %}
+                                    {{ computadora.cod_monitor }}
+                                {% else %}
+                                    N/A
+                                {% endif %}</td>
                            <td>{% if computadora.cod_cpu %}{{ computadora.cod_cpu }}{% else %}N/A{% endif %}</td>
-                            <td>{{ computadora.ocupada }}</td>
+                           <td>
+                                {% if computadora.ocupada == 1 %}
+                                    Ocupada
+                                {% else %}
+                                    Desocupada
+                                {% endif %}
+                            </td>
                             <td>
                                 <button class="btn btn-primary btn-sm btn-editar"
                                     data-toggle="modal"
@@ -158,12 +174,12 @@
         $('#tablita tbody').on('click', '.btn-editar', function () {
             var data = tablaComputadoras.row($(this).closest('tr')).data();
             // Obtener los datos del computadora de la fila
-            var numero = data[0];
-            var estado = data[1];
-            var laboratorio = data[2];
-            var cod_monitor = data[3];
-            var cod_cpu = data[4];
-            var ocupada = data[5];
+            var numero = $(this).data("numero");
+            var estado = $(this).data("estado");
+            var laboratorio = $(this).data("laboratorio");
+            var cod_monitor = $(this).data("cod_monitor");
+            var cod_cpu = $(this).data("cod_cpu");
+            var ocupada = $(this).data("ocupada");
             var id = $(this).data("id");
 
             // Rellenar el formulario de la ventana modal con los datos de la computadora

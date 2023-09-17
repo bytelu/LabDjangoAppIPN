@@ -4,7 +4,7 @@ from django.contrib import messages
 from django.contrib.auth.hashers import make_password
 from django.contrib.auth.hashers import check_password
 from django.db import transaction
-from .models import Encargado, Computadora, Profesor, Estudiante, Carrera, Reporte
+from .models import Encargado, Computadora, Profesor, Estudiante, Carrera, Reporte, Sesion
 from datetime import datetime
 from django.db.models import Q
 from django.contrib.auth import logout
@@ -508,7 +508,8 @@ def laboratorio_uno(request):
     num_encargados = Encargado.objects.count()
     num_estudiantes = Estudiante.objects.count()
     computadora = Computadora.objects.all()
-
+    sesiones = Sesion.objects.all()
+    
     encargado_id = request.session.get('encargado_id')
     encargado = None
 
@@ -524,12 +525,39 @@ def laboratorio_uno(request):
         'estudiantes_lista': num_estudiantes,
         'encargado_principal': encargado,  # Incluye también el encargado autenticado en el contexto
         'computadoras' : computadora,
+        'sesiones': sesiones
     }
 
     return render(request, 'v_labuno/labuno.html', context)
 # ----------------------------- VISTA DE LABORATORIO 2 ----------------------------------------- #
 def laboratorio_dos(request):
-    pass
+    #  Obtener el número de registros de tablas
+    num_computadoras = Computadora.objects.count()
+    num_profesores = Profesor.objects.count()
+    num_encargados = Encargado.objects.count()
+    num_estudiantes = Estudiante.objects.count()
+    computadora = Computadora.objects.all()
+    sesiones = Sesion.objects.all()
+    
+    encargado_id = request.session.get('encargado_id')
+    encargado = None
+
+    if encargado_id:
+     # Consultar la base de datos para obtener la información del encargado
+       encargado = Encargado.objects.get(id=encargado_id)
+
+    # Crear un contexto con todos los datos
+    context = {
+        'computadoras_lista': num_computadoras,
+        'profesores_lista': num_profesores,
+        'encargados_lista': num_encargados,
+        'estudiantes_lista': num_estudiantes,
+        'encargado_principal': encargado,  # Incluye también el encargado autenticado en el contexto
+        'computadoras' : computadora,
+        'sesiones': sesiones
+    }
+
+    return render(request, 'v_labdos/labdos.html', context)
 # ----------------------------- VISTA DE REPORTES ----------------------------------------- #
 def reportes(request):
     #  Obtener el número de registros de tablas
