@@ -88,6 +88,7 @@ class Sesion(models.Model):
     fecha = models.DateField()
     hora_inicio = models.TimeField()
     hora_final = models.TimeField(blank=True, null=True)
+    activo = models.IntegerField() 
     encargado = models.ForeignKey(Encargado, models.DO_NOTHING)
     estudiante = models.ForeignKey(Estudiante, models.DO_NOTHING)
     profesor = models.ForeignKey(Profesor, models.DO_NOTHING, blank=True, null=True)
