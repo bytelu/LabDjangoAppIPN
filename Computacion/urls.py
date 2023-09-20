@@ -32,6 +32,9 @@ urlpatterns = [
     path('grupos/eliminar/<int:id>/', views.eliminar_grupos, name='eliminar_grupo'),
     #------------------------------VISTA DE SESIONES INDIVIDUALES--------------------#
     path('sesionesindividual/', sesiones_individual, name='sesiones_individual'),
+    path('individual/validandoA/', views.validacionA_individual, name='validacionA_individual'),
+    path('individual/validandoE/', views.validacionE_individual, name='validacionE_individual'),
+    path('individual/eliminar/<int:id>/', views.eliminar_individual, name='eliminar_individual'),
     #------------------------------VISTA DE LABORATORIO 1--------------------#
     path('laboratoriouno/', laboratorio_uno, name='laboratorio_uno'),
     #------------------------------VISTA DE LABORATORIO 2--------------------#

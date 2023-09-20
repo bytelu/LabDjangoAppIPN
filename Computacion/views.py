@@ -550,7 +550,7 @@ def validacionA_grupos(request):
 
     # Verifica si se proporcionó una computadora
     if id_profesor_id:
-        profesor = get_object_or_404(Computadora, id=id_profesor_id)
+        profesor = get_object_or_404(Profesor, id=id_profesor_id)
     else:
         profesor = None  # Establece el campo en None si no se proporcionó
 
@@ -589,7 +589,7 @@ def validacionE_grupos(request):
 
     # Verifica si se proporcionó una computadora
     if id_profesor_id:
-        profesor = get_object_or_404(Computadora, id=id_profesor_id)
+        profesor = get_object_or_404(Profesor, id=id_profesor_id)
     else:
         profesor = None  # Establece el campo en None si no se proporcionó
 
@@ -604,7 +604,95 @@ def eliminar_grupos(request, id):
     return redirect('sesiones_grupo')
 # ----------------------------- VISTA DE SESIONES INDIVIDUALES ----------------------------------------- #
 def sesiones_individual(request):
-    pass
+     #  Obtener el número de registros de tablas
+    num_computadoras = Computadora.objects.count()
+    num_profesores = Profesor.objects.count()
+    num_encargados = Encargado.objects.count()
+    num_estudiantes = Estudiante.objects.count()
+    sesiones = Sesion.objects.all()
+
+    encargado_id = request.session.get('encargado_id')
+    encargado = None
+
+    if encargado_id:
+     # Consultar la base de datos para obtener la información del encargado
+       encargado = Encargado.objects.get(id=encargado_id)
+
+    encargados = Encargado.objects.all()
+    computadoras = Computadora.objects.all()
+    estudiantes = Estudiante.objects.all()
+    
+    # Crear un contexto con todos los datos
+    context = {
+        'computadoras_lista': num_computadoras,
+        'profesores_lista': num_profesores,
+        'encargados_lista': num_encargados,
+        'estudiantes_lista': num_estudiantes,
+        'encargado_principal': encargado,  # Incluye también el encargado autenticado en el contexto
+        'sesiones': sesiones,
+        'encargado':encargados,
+        'computadora':computadoras,
+        'estudiante':estudiantes,
+    }
+
+    return render(request, 'v_sesionesindividual/individual.html', context)
+def validacionA_individual(request):
+    fecha = request.POST.get("fecha")
+    hora_inicio = request.POST.get("hora_inicio")
+    hora_final = request.POST.get("hora_final")
+    activo = request.POST.get("activo")
+    id_encargado_id = request.POST.get("encargado")
+    encargado = get_object_or_404(Encargado, id=id_encargado_id)
+    id_estudiante_id = request.POST.get("estudiante")
+    estudiante = get_object_or_404(Estudiante, id=id_estudiante_id)
+    id_computadora_id = request.POST.get("computadora")
+
+    # Verifica si se proporcionó una computadora
+    if id_computadora_id:
+        computadora = get_object_or_404(Computadora, id=id_computadora_id)
+    else:
+        computadora = None  # Establece el campo en None si no se proporcionó
+
+    sesion = Sesion(
+        fecha=fecha,
+        hora_final=hora_final,
+        hora_inicio=hora_inicio,
+        activo=activo,
+        encargado=encargado,
+        estudiante=estudiante,
+        computadora=computadora,
+        profesor=None,
+    )
+    sesion.save()
+    # Redireccionar al usuario a la página de inicio de sesión con mensaje de éxito
+    messages.success(request, "Sesion registrada correctamente.")
+    return redirect('sesiones_individual')  # Cambia 'pagina_de_inicio' al nombre de la URL adecuada
+def validacionE_individual(request):
+    id = request.POST.get("id")
+    fecha = request.POST.get("fecha")
+    hora_inicio = request.POST.get("hora_inicio")
+    hora_final = request.POST.get("hora_final")
+    activo = request.POST.get("activo")
+    id_encargado_id = request.POST.get("encargado")
+    encargado = get_object_or_404(Encargado, id=id_encargado_id)
+    id_estudiante_id = request.POST.get("estudiante")
+    estudiante = get_object_or_404(Estudiante, id=id_estudiante_id)
+    id_computadora_id = request.POST.get("computadora")
+
+    # Verifica si se proporcionó una computadora
+    if id_computadora_id:
+        computadora = get_object_or_404(Computadora, id=id_computadora_id)
+    else:
+        computadora = None  # Establece el campo en None si no se proporcionó
+
+    Sesion.objects.filter(pk=id).update(fecha=fecha, hora_inicio=hora_inicio, hora_final=hora_final, activo=activo, encargado_id=encargado, estudiante_id=estudiante,computadora_id=computadora, profesor_id=None)
+    messages.success(request, 'Sesión actualizada')
+    return redirect('sesiones_individual')
+def eliminar_individual(request, id):
+    sesion = Sesion.objects.filter(pk=id)
+    sesion.delete()
+    messages.success(request, 'Sesión eliminada')
+    return redirect('sesiones_individual')
 # ----------------------------- VISTA DE LABORATORIO 1 ----------------------------------------- #
 def laboratorio_uno(request):
     #  Obtener el número de registros de tablas

@@ -1,4 +1,239 @@
-{% extends "adminlte/acceso.html" %} {% load static %} {% block body %}
-<!-- Aqui comienzas a escribir el html, guiarse de encargado.html -->
+{% extends "adminlte/acceso.html" %}
+{% block body %}
+<br>
+<!-- Ventana principal MOSTRAR sesiones grupales -->
+<div class="row">
+    <div class="col-md-12">
+        <div class="card" style="border: none; border-radius: 10px; box-shadow: 0px 0px 20px rgba(0, 0, 0, 0.2);">
+            <div class="card-header" style="text-align: center; background-color: #6D1A42; color: #ffffff; border-top-left-radius: 10px; border-top-right-radius: 10px; padding: 15px;">
+                <h3 class="card-title" style="font-size: 30px;">Lista de Sesiones Grupales</h3>
+            </div>
+            <div class="card-body" style="background-color: #ffffff; padding: 20px;">
+                <table id="tablita" class="table table-bordered table-hover">
+                    <thead>
+                        <tr>
+                            <th>Fecha</th>
+                            <th>Encargado</th>
+                            <th>Estudiante</th>
+                            <th>Computadora</th>
+                            <th>Hora Inicio</th>
+                            <th>Hora Final</th>
+                            <th>Estado</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for sesion in sesiones %}
+                        {% if sesion.profesor == NULL %}
+                        <tr>
+                            <td>{{ sesion.fecha }}</td>
+                            <td>{{ sesion.encargado.nombre }} {{ sesion.encargado.apellido_p }} {{ sesion.encargado.apellido_m }}</td>
+                            <td>{{ sesion.estudiante.nombre }} {{ sesion.estudiante.apellido_p }} {{ sesion.estudiante.apellido_m }}</td>
+                            <td>{% if sesion.computadora %}No: {{ sesion.computadora.numero }} Lab: {{ sesion.computadora.laboratorio }}{% else %}Sin computadora{% endif %}</td>
+                            <td>{{ sesion.hora_inicio }}</td>
+                            <td>{% if sesion.hora_final %}{{ sesion.hora_final }}{% else %}Sin finalizar{% endif %}</td>
+                            <td>{% if sesion.activo == 1 %}Sesión Activa{% else %}Sesión Finalizada{% endif %}</td>
+                            <td>
+                                <button class="btn btn-primary btn-sm btn-editar"
+                                    data-toggle="modal"
+                                    data-target="#editarModal"
+                                    data-id="{{ sesion.id }}"
+                                    data-fecha="{{ sesion.fecha }}"
+                                    data-encargado="{{ sesion.encargado.id }}"
+                                    data-estudiante="{{ sesion.estudiante.id }}"
+                                    data-computadora="{{ sesion.computadora.id }}"
+                                    data-hora_inicio="{{ sesion.hora_inicio }}"
+                                    data-hora_final="{{ sesion.hora_final }}"
+                                    data-activo="{{ sesion.activo }}"><i class="fas fa-edit"></i></button>
+                                <a href="{% url 'eliminar_individual' sesion.id %}" class="btn btn-danger btn-sm" onclick="return confirm('¿Deseas eliminar esta sesión?')"><i class="fas fa-trash"></i></a>
+                            </td>
+                        </tr>
+                        {% endif %}
+                        {% endfor %}
+                    </tbody>
+                </table>
+                <button type="button" class="btn btn-success" data-toggle="modal" data-target="#agregarModal">
+                    Agregar Sesion
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Ventana modal para EDITAR sesion -->
+<div class="modal fade" id="editarModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Modificando Sesion</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <!-- Contenido de la ventana modal aquí  readonly-->
+                <form class="formAgregar" id="editarForm" method="post" action="{% url 'validacionE_individual' %}">
+                    {% csrf_token %}
+                    <input type="hidden" name="id" id="id_sesion" value="">
+                    <div class="form-group">
+                        <label>Fecha</label>
+                        <input type="date" name="fecha" id="id_fecha" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Encargado</label>
+                        <select name="encargado" id="id_encargado" class="form-control" required>
+                            <option value="" disabled selected>Seleccione Encargado</option>
+                            {% for encargadoo in encargado %}
+                            <option value="{{ encargadoo.id }}">{{ encargadoo.nombre }} {{ encargadoo.apellido_p }} {{ encargadoo.apellido_m }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Estudiante</label>
+                        <select name="estudiante" id="id_estudiante" class="form-control" required>
+                            <option value="" disabled selected>Seleccione Estudiante</option>
+                            {% for estudiantee in estudiante %}
+                            <option value="{{ estudiantee.id }}">{{ estudiantee.nombre }} {{ estudiantee.apellido_p }} {{ estudiantee.apellido_m }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Computadora</label>
+                        <select name="computadora" id="id_computadora" class="form-control" required>
+                            <option value="" disabled selected>Seleccione No. de Computadora</option>
+                            {% for computadoraa in computadora %}
+                            <option value="{{ computadoraa.id }}">No.: {{ computadoraa.numero }}, Laboratorio:{{ computadoraa.laboratorio }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Hora Inicio</label>
+                        <input type="time" name="hora_inicio" id="id_hora_inicio" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Hora Final</label>
+                        <input type="time" name="hora_final" id="id_hora_final" class="form-control" required>
+                    </div> 
+                    <div class="form-group">
+                        <label>Estado</label>
+                        <input type="text" name="activo" id="id_activo" class="form-control" required>
+                    </div>                  
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" id="btn-editar">Editar Sesión</button>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Ventana modal para AGREGAR sesion -->
+<div class="modal fade" id="agregarModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Agregando sesion</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <!-- Contenido de la ventana modal aquí -->
+                <form class="formAgregar" id="agregarForm" method="post" action="{% url 'validacionA_individual' %}">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <label>Fecha</label>
+                        <input type="date" name="fecha" id="id_fecha" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Encargado</label>
+                        <select name="encargado" id="id_encargado" class="form-control" required>
+                            <option value="" disabled selected>Seleccione Encargado</option>
+                            {% for encargadoo in encargado %}
+                            <option value="{{ encargadoo.id }}">{{ encargadoo.nombre }} {{ encargadoo.apellido_p }} {{ encargadoo.apellido_m }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Estudiante</label>
+                        <select name="estudiante" id="id_estudiante" class="form-control" required>
+                            <option value="" disabled selected>Seleccione Estudiante</option>
+                            {% for estudiantee in estudiante %}
+                            <option value="{{ estudiantee.id }}">{{ estudiantee.nombre }} {{ estudiantee.apellido_p }} {{ estudiantee.apellido_m }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Computadora</label>
+                        <select name="computadora" id="id_computadora" class="form-control" required>
+                            <option value="" disabled selected>Seleccione No. de Computadora</option>
+                            {% for computadoraa in computadora %}
+                            <option value="{{ computadoraa.id }}">No.: {{ computadoraa.numero }}, Laboratorio:{{ computadoraa.laboratorio }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Hora Inicio</label>
+                        <input type="time" name="hora_inicio" id="id_hora_inicio" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Hora Final</label>
+                        <input type="time" name="hora_final" id="id_hora_final" class="form-control" required>
+                    </div> 
+                    <div class="form-group">
+                        <label>Estado</label>
+                        <input type="text" name="activo" id="id_activo" class="form-control" required>
+                    </div>                  
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" id="btn-guardar">Agregar Sesión</button>
+            </div>
+        </div>
+    </div>
+</div>
 
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    $(document).ready(function () {
+        var tablaAlumnos = $('#tablita').DataTable({
+            ...idioma
+        });
+
+        $('#tablita tbody').on('click', '.btn-editar', function () {
+            var data = tablaAlumnos.row($(this).closest('tr')).data();
+            // Obtener los datos del alumno de la fila
+            var fecha = $(this).data("fecha");
+            var encargadoId = $(this).data("encargado");
+            var estudianteId = $(this).data("estudiante");
+            var computadoraId = $(this).data("computadora");
+            var hora_inicio = $(this).data("hora_inicio");
+            var hora_final = $(this).data("hora_final");
+            var activo = $(this).data("activo");
+            var id = $(this).data("id");
+
+            // Rellenar el formulario de la ventana modal con los datos del alumno
+            $("#editarForm #id_fecha").val(fecha);
+            $("#editarForm #id_encargado").val(encargadoId);
+            $("#editarForm #id_estudiante").val(estudianteId);
+            $("#editarForm #id_computadora").val(computadoraId);
+            $("#editarForm #id_hora_inicio").val(hora_inicio);
+            $("#editarForm #id_hora_final").val(hora_final);
+            $("#editarForm #id_activo").val(activo);
+            $("#editarForm #id_sesion").val(id);
+        });
+    });
+    //Funcion para abrir Ventana de EDITAR
+    $(document).ready(function () {
+        // Captura el evento de clic en el botón "Editar alumno" y envía el formulario
+        $('#btn-editar').click(function () {
+            $('#editarForm').submit();
+        });
+    });
+    //Funcion para abrir Ventana de AGREGAR
+    $(document).ready(function () {
+        // Captura el evento de clic en el botón "Guardar alumno" y envía el formulario
+        $('#btn-guardar').click(function () {
+            $('#agregarForm').submit();
+        });
+    });
+</script>
 {% endblock %}

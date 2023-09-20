@@ -20,6 +20,7 @@
                             <th>Hora Inicio</th>
                             <th>Hora Final</th>
                             <th>Estado</th>
+                            <th>Acciones</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -47,7 +48,7 @@
                                     data-hora_inicio="{{ sesion.hora_inicio }}"
                                     data-hora_final="{{ sesion.hora_final }}"
                                     data-activo="{{ sesion.activo }}"><i class="fas fa-edit"></i></button>
-                                <a href="{% url 'eliminar_sesion' sesion.id %}" class="btn btn-danger btn-sm" onclick="return confirm('¿Deseas eliminar esta sesión?')"><i class="fas fa-trash"></i></a>
+                                <a href="{% url 'eliminar_grupo' sesion.id %}" class="btn btn-danger btn-sm" onclick="return confirm('¿Deseas eliminar esta sesión?')"><i class="fas fa-trash"></i></a>
                             </td>
                         </tr>
                         {% endif %}
@@ -118,11 +119,11 @@
                     </div>
                     <div class="form-group">
                         <label>Hora Inicio</label>
-                        <input type="date" name="hora_inicio" id="id_hora_inicio" class="form-control" required>
+                        <input type="time" name="hora_inicio" id="id_hora_inicio" class="form-control" required>
                     </div>
                     <div class="form-group">
                         <label>Hora Final</label>
-                        <input type="date" name="hora_final" id="id_hora_final" class="form-control" required>
+                        <input type="time" name="hora_final" id="id_hora_final" class="form-control" required>
                     </div> 
                     <div class="form-group">
                         <label>Estado</label>
@@ -148,7 +149,7 @@
             </div>
             <div class="modal-body">
                 <!-- Contenido de la ventana modal aquí -->
-                <form class="formAgregar" id="editarForm" method="post" action="{% url 'validacionE_grupos' %}">
+                <form class="formAgregar" id="agregarForm" method="post" action="{% url 'validacionA_grupos' %}">
                     {% csrf_token %}
                     <div class="form-group">
                         <label>Fecha</label>
@@ -192,11 +193,11 @@
                     </div>
                     <div class="form-group">
                         <label>Hora Inicio</label>
-                        <input type="date" name="hora_inicio" id="id_hora_inicio" class="form-control" required>
+                        <input type="time" name="hora_inicio" id="id_hora_inicio" class="form-control" required>
                     </div>
                     <div class="form-group">
                         <label>Hora Final</label>
-                        <input type="date" name="hora_final" id="id_hora_final" class="form-control" required>
+                        <input type="time" name="hora_final" id="id_hora_final" class="form-control" required>
                     </div> 
                     <div class="form-group">
                         <label>Estado</label>
@@ -205,7 +206,7 @@
                 </form>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-primary" id="btn-guardar">Agregar Reporte</button>
+                <button type="button" class="btn btn-primary" id="btn-guardar">Agregar Sesión</button>
             </div>
         </div>
     </div>
@@ -240,7 +241,7 @@
             $("#editarForm #id_hora_inicio").val(hora_inicio);
             $("#editarForm #id_hora_final").val(hora_final);
             $("#editarForm #id_activo").val(activo);
-            $("#editarForm #id_reporte").val(id);
+            $("#editarForm #id_sesion").val(id);
         });
     });
     //Funcion para abrir Ventana de EDITAR
