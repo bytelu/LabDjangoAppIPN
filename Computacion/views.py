@@ -1,4 +1,4 @@
-import os, io, datetime
+import os, io, datetime, locale
 import re
 from django.conf import settings
 from django.shortcuts import render, redirect, get_object_or_404
@@ -17,6 +17,8 @@ from reportlab.lib.units import inch
 from reportlab.platypus import SimpleDocTemplate, Table, TableStyle
 from django.http import HttpResponse
 from reportlab.platypus import Image
+from io import BytesIO
+import requests
 
 # Create your views here.
 def login (request):
@@ -878,52 +880,107 @@ def cerrar_sesion(request):
 ##################################### REPORTE ############################################
 
 def draw_encabezado(pdf, titulo, nombre_encargado):
-    
 
     # Color de fondo más grueso
-    pdf.setFillColorRGB(0.74, 0, 0.56)  # Color fiusha (ajustar según tus preferencias)
-    pdf.rect(0, 742, 612, 50, fill=True)
+    #pdf.setFillColorRGB(0.74, 0, 0.56)  # Color fiusha (ajustar según tus preferencias)
+    #pdf.rect(0, 742, 612, 50, fill=True)
 
-    # Texto "EDUCACION" en la sección superior IZQUIERDA
-    pdf.setFont("Helvetica-Bold", 12)
-    pdf.setFillColorRGB(1, 1, 1)  # Texto en color blanco
-    pdf.drawString(10, 780, "LOGO IPN")
-    
-    # Otros elemento
-    pdf.drawString(10, 750, "Otro elemento")
+    # Ruta de la imagen en tu proyecto Django
+    imagen_url = 'http://localhost:8000/static/img/educacion.jpg'  # Ajusta la URL según tu estructura de carpetas
+
+    # Reducir las dimensiones de la imagen
+    nueva_anchura = 100  # Por ejemplo, la mitad del ancho original
+    nueva_altura = 80  # Por ejemplo, la mitad de la altura original
+
+    # Calcular la posición para colocar la imagen en el encabezado
+    x_imagen = 20
+    y_imagen = 717  
+
+    # Descargar la imagen utilizando requests
+    response = requests.get(imagen_url)
+    image_data = BytesIO(response.content)
+
+    # Cargar la imagen como un objeto Image de ReportLab y ajustar sus dimensiones
+    imagen = Image(image_data, width=nueva_anchura, height=nueva_altura)
+
+    # Agregar la imagen al PDF en la posición específica
+    imagen.drawOn(pdf, x_imagen, y_imagen)
+
+    # Agregar una línea de separación
+    pdf.setLineWidth(1)  # Ancho de la línea
+    pdf.setStrokeColorRGB(0.427, 0.102, 0.259)  # Color IPN
+    pdf.line(15, 735, 595, 737)  # Coordenadas de inicio y fin de la línea
+
+
+    # Agregar una línea de separación
+    pdf.setLineWidth(1)  # Ancho de la línea
+    pdf.setStrokeColorRGB(0.705, 0.556, 0.365)  # Color DORADO
+    pdf.line(122, 770, 122, 750)  # Coordenadas de inicio y fin de la línea
+
+     # Ruta de la imagen en tu proyecto Django
+    imagen_url2 = 'http://localhost:8000/static/img/ipnservicio.png'  # Ajusta la URL según tu estructura de carpetas
+
+    # Reducir las dimensiones de la imagen
+    nueva_anchura2 = 100  # Por ejemplo, la mitad del ancho original
+    nueva_altura2 = 30  # Por ejemplo, la mitad de la altura original
+
+    # Calcular la posición para colocar la imagen en el encabezado
+    x_imagen2 = 130
+    y_imagen2 = 742
+
+    # Descargar la imagen utilizando requests
+    response2 = requests.get(imagen_url2)
+    image_data2 = BytesIO(response2.content)
+
+    # Cargar la imagen como un objeto Image de ReportLab y ajustar sus dimensiones
+    imagen2 = Image(image_data2, width=nueva_anchura2, height=nueva_altura2)
+
+    # Agregar la imagen al PDF en la posición específica
+    imagen2.drawOn(pdf, x_imagen2, y_imagen2)
     
     # Texto "EDUCACION del IPN" en la sección superior DERECHA
-    pdf.setFont("Helvetica-Bold", 12)
-    pdf.setFillColorRGB(1, 1, 1)  # Texto en color blanco
-    pdf.drawString(500, 780, "LOGO IPN")
-
-    # Otros elemento
-    pdf.drawString(500, 750, "Otro elemento")
+    pdf.setFont("Times-Italic", 8)  # Cambiado a un tipo de letra cursiva
+    pdf.setFillColorRGB(0, 0, 0)  # Texto en color negro
+    pdf.drawString(490, 761, "Ingeniería en Computación")
+    pdf.drawString(484, 751, "Laboratorio de Computación")
 
 
     # Título del reporte
     pdf.setFont("Helvetica-Bold", 16)
-    pdf.setFillColorRGB(0.74, 0, 0.56)  # Color fiusha
+    pdf.setFillColorRGB(0.427, 0.102, 0.259)  # Color fiusha
     pdf.drawString(200, 720, titulo)
 
     # Nombre del encargado
-    pdf.setFont("Helvetica", 12)
+    pdf.setFont("Helvetica", 10)
     pdf.setFillColorRGB(0, 0, 0)  # Texto en negro
     pdf.drawString(50, 700, f"Encargado: {nombre_encargado}")
 
-    # Fecha completa
-    fecha_actual = datetime.datetime.now().strftime("%d de %B de %Y %I:%M %p")
-    pdf.drawString(350, 700, f"Fecha: {fecha_actual}")
-def draw_pie_de_pagina(pdf):
-    # Puedes personalizar el diseño del pie de página aquí
-    pdf.setFillColorRGB(0.2, 0.2, 0.5)  # Color de fondo
+    # Dentro de la función que genera el PDF
+    fecha_actual = datetime.datetime.now()
+
+    # Configurar el locale para obtener la fecha en español
+    locale.setlocale(locale.LC_TIME, 'es_ES.UTF-8')
+
+    # Obtener la fecha y la hora por separado
+    fecha_formateada = fecha_actual.strftime("%d de %B de %Y")
+    hora_formateada = fecha_actual.strftime("%I:%M")
+
+    # Agregar AM o PM manualmente
+    am_pm = "AM" if fecha_actual.hour < 12 else "PM"
+
+    pdf.drawString(465, 725, f"{fecha_formateada}")
+    pdf.drawString(430, 700, f"Hora de Impresión: {hora_formateada} {am_pm}")
+def draw_pie_de_pagina(pdf, numero_pagina):
+    # Diseño del pie de página aquí
+    pdf.setFillColorRGB(0.427, 0.102, 0.259)  # Color de fondo
     pdf.rect(0, 0, 612, 50, fill=True)
 
     pdf.setFont("Helvetica", 8)
     pdf.setFillColorRGB(1, 1, 1)  # Color del texto
     pdf.drawString(30, 20, "Instituto Politécnico Nacional - Esime Culhuacan")
 
-    # Otros elementos del pie de página según tus necesidades
+    # Agregar el número de página
+    pdf.drawRightString(580, 20, f"Página {numero_pagina}")
 def generar_computadoras(request):
     buffer = io.BytesIO()
     p = canvas.Canvas(buffer, pagesize=letter)
@@ -934,8 +991,10 @@ def generar_computadoras(request):
     encargado = Encargado.objects.get(id=encargado_id)
     nombre_encargado = f"{encargado.nombre} {encargado.apellido_p} {encargado.apellido_m}" if encargado else "Nombre del Encargado"
 
+    pagina_actual = 1
+
     draw_encabezado(p, titulo, nombre_encargado)
-    draw_pie_de_pagina(p)
+    draw_pie_de_pagina(p, pagina_actual)
 
     data = Computadora.objects.all()
 
@@ -959,7 +1018,7 @@ def generar_computadoras(request):
     y = page_height - 130
 
     header_style = TableStyle([
-        ('BACKGROUND', (0, 0), (-1, 0), colors.grey),
+        ('BACKGROUND', (0, 0), (-1, 0), (0.427, 0.102, 0.259)),  # Cambiar a tu primer color RGB
         ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
         ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
         ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
@@ -970,7 +1029,7 @@ def generar_computadoras(request):
     table_header.setStyle(header_style)
 
     # Añadir la propiedad repeatRows para repetir el encabezado en todas las páginas
-    header_style.add('BACKGROUND', (0, 0), (-1, 0), colors.grey)
+    header_style.add('BACKGROUND', (0, 0), (-1, 0), (0.427, 0.102, 0.259))
     header_style.add('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke)
     header_style.add('ALIGN', (0, 0), (-1, -1), 'CENTER')
     header_style.add('BOTTOMPADDING', (0, 0), (-1, 0), 12)
@@ -981,7 +1040,6 @@ def generar_computadoras(request):
     table_header.drawOn(p, x, y)
 
     y -= 20
-    pagina_actual = 1
 
     for row in table_data:
         table_row_data = [row]
@@ -997,7 +1055,7 @@ def generar_computadoras(request):
             p.showPage()
             pagina_actual += 1
             draw_encabezado(p, titulo, nombre_encargado)
-            draw_pie_de_pagina(p)
+            draw_pie_de_pagina(p, pagina_actual)
 
             if pagina_actual != 1:
                 y = page_height - 130
@@ -1011,7 +1069,7 @@ def generar_computadoras(request):
         table_row.drawOn(p, x, y)
         y -= 20
 
-    draw_pie_de_pagina(p)
+    draw_pie_de_pagina(p, pagina_actual)
     p.save()
 
     pdf_content = buffer.getvalue()
