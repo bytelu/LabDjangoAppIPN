@@ -1,37 +1,47 @@
 {% extends "adminlte/acceso.html" %} {% load static %} {% block body %}
 <!-- Content Header (TITULO PRINCIPAL) -->
+<br>
 <div class="content-header">
   <div class="container-fluid">
-    <div class="row mb-2">
-      <div class="col-sm-6">
-        <h1 class="m-0">Menú Principal</h1>
-      </div>
-      <!-- /.col -->
-      <!-- <div class="col-sm-6"> AQUI VA LETRAS A LA DERECHA DE MENU PRINCIPAL
-        <ol class="breadcrumb float-sm-right">
-          <li class="breadcrumb-item"><a href="#">Home</a></li>
-          <li class="breadcrumb-item active">Dashboard v1</li>
-        </ol>
-      </div>.col -->
-    </div>
-    <!-- /.row -->
+      <h1>Instituto Politécnico Nacional</h1>
   </div>
-  <!-- /.container-fluid -->
 </div>
+
+<div class="slider-container">
+  <div class="slider">
+    <div class="slide"><a href="https://www.ipn.mx/"><img src="{% static 'img/imagenipn.jpg' %}" alt="Noticia 1"></a></div>
+    <div class="slide"><a href="https://www.esimecu.ipn.mx/"><img src="{% static 'img/esimeculhuacan.png' %}" alt="Noticia 2"></a></div>
+    <div class="slide"><a href="{% url 'computadoras' %}"><img src="{% static 'img/computerlabs.jpg' %}" alt="Noticia 3"></a></div>
+    <div class="slide"><a href="{% static 'img/calendarioEscol.png' %}"><img src="{% static 'img/escolarizada.png' %}" alt="Noticia 4"></a></div>
+    <div class="slide"><a href="{% static 'img/calendarioNoEscolpng.png' %}"><img src="{% static 'img/noescolarizada.png' %}" alt="Noticia 5"></a></div>
+</div>
+  <button class="arrow left" onclick="prevSlide()">&#10094;</button>
+  <button class="arrow right" onclick="nextSlide()">&#10095;</button>
+</div>
+<br>
+
+<script>
+  let currentIndex = 0;
+
+    function nextSlide() {
+        currentIndex = (currentIndex + 1) % 5; // 5 es el número total de slides
+        updateSlider();
+    }
+
+    function prevSlide() {
+        currentIndex = (currentIndex - 1 + 5) % 5; // 5 es el número total de slides
+        updateSlider();
+    }
+
+    function updateSlider() {
+        const slider = document.querySelector('.slider');
+        const slideWidth = document.querySelector('.slide').offsetWidth;
+        const newPosition = -currentIndex * slideWidth;
+        slider.style.transform = `translateX(${newPosition}px)`;
+    }
+</script>
+
 <!-- /.content-header -->
-<!-- Main row -->
-<div class="row">
-  <div class="card">
-    <div class="card-header">
-      <h3 class="card-title">
-        <i class="ion ion-clipboard mr-1"></i>Aqui van las computadoras
-      </h3>
-      <div class="card-body">
-        <h4>tambien imagenes</h4>
-      </div>
-    </div>
-  </div>
-</div>
 <div class="row">
   <!-- Left col -->
   <section class="col-lg-7 connectedSortable">
@@ -137,32 +147,7 @@
     <!-- /.card -->
   </section>
   <!-- /.Left col -->
-  <!-- right col (We are only adding the ID to make the widgets sortable)-->
-  <section class="col-lg-5 connectedSortable">
-    <!-- Calendar -->
-    <div class="card bg-gradient-success">
-      <div class="card-header border-0">
-        <h3 class="card-title">
-          <i class="far fa-calendar-alt"></i>
-          Calendar
-        </h3>
-        <!-- tools card -->
-        <div class="card-tools">
-          <button type="button" class="btn btn-success btn-sm" data-card-widget="collapse">
-            <i class="fas fa-minus"></i>
-          </button>
-        </div>
-        <!-- /. tools -->
-      </div>
-      <!-- /.card-header -->
-      <div class="card-body pt-0">
-        <!--The calendar -->
-        <div id="calendar" style="width: 100%"></div>
-      </div>
-      <!-- /.card-body -->
-    </div>
-    <!-- /.card -->
-  </section>
   <!-- right col -->
 </div>
+
 {% endblock %}

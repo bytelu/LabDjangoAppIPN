@@ -1,14 +1,20 @@
+import os, io, datetime
 import re
+from django.conf import settings
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.contrib.auth.hashers import make_password
 from django.contrib.auth.hashers import check_password
 from django.db import transaction
 from .models import Encargado, Computadora, Profesor, Estudiante, Carrera, Reporte, Sesion
-from datetime import datetime
 from django.db.models import Q
 from django.contrib.auth import logout
-
+from reportlab.pdfgen import canvas
+from django.http import HttpResponse
+from reportlab.lib.pagesizes import letter
+from reportlab.lib import colors
+from reportlab.lib.styles import getSampleStyleSheet
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle
 
 # Create your views here.
 def login (request):
@@ -866,3 +872,176 @@ def cerrar_sesion(request):
      # Cerrar la sesión del usuario
     logout(request)
     return redirect('login')  # Redirigir al usuario a la página de inicio de sesión
+
+##################################### REPORTE ############################################
+def draw_encabezado(pdf, titulo, nombre_encargado):
+    # Color de fondo más grueso
+    pdf.setFillColorRGB(0.74, 0, 0.56)  # Color fiusha (ajustar según tus preferencias)
+    pdf.rect(0, 742, 612, 50, fill=True)
+
+    # Texto "EDUCACION" en la sección superior IZQUIERDA
+    pdf.setFont("Helvetica-Bold", 12)
+    pdf.setFillColorRGB(1, 1, 1)  # Texto en color blanco
+    pdf.drawString(10, 780, "LOGO IPN")
+    
+    # Otros elemento
+    pdf.drawString(10, 750, "Otro elemento")
+    
+    # Texto "EDUCACION del IPN" en la sección superior DERECHA
+    pdf.setFont("Helvetica-Bold", 12)
+    pdf.setFillColorRGB(1, 1, 1)  # Texto en color blanco
+    pdf.drawString(500, 780, "LOGO IPN")
+
+    # Otros elemento
+    pdf.drawString(500, 750, "Otro elemento")
+
+
+    # Título del reporte
+    pdf.setFont("Helvetica-Bold", 16)
+    pdf.setFillColorRGB(0.74, 0, 0.56)  # Color fiusha
+    pdf.drawString(200, 720, titulo)
+
+    # Nombre del encargado
+    pdf.setFont("Helvetica", 12)
+    pdf.setFillColorRGB(0, 0, 0)  # Texto en negro
+    pdf.drawString(50, 700, f"Encargado: {nombre_encargado}")
+
+    # Fecha completa
+    fecha_actual = datetime.datetime.now().strftime("%d de %B de %Y %I:%M %p")
+    pdf.drawString(350, 700, f"Fecha: {fecha_actual}")
+
+def draw_pie_de_pagina(pdf):
+    # Puedes personalizar el diseño del pie de página aquí
+    pdf.setFillColorRGB(0.2, 0.2, 0.5)  # Color de fondo
+    pdf.rect(0, 50, 612, 50, fill=True)
+
+    pdf.setFont("Helvetica", 8)
+    pdf.setFillColorRGB(1, 1, 1)  # Color del texto
+    pdf.drawString(30, 70, "Instituto Politécnico Nacional - Esime Culhuacan")
+
+    # Otros elementos del pie de página según tus necesidades
+
+
+def generar_computadoras(request):
+    # Create a file-like buffer to receive PDF data.
+    buffer = io.BytesIO()
+
+    # Create the PDF object, using the buffer as its "file."
+    p = canvas.Canvas(buffer, pagesize=letter)
+
+    # Set the font and font size for the PDF
+    p.setFont("Helvetica-Bold", 10)
+
+    # Información del encabezado
+    titulo = "Reporte de Computadoras"
+    encargado_id = request.session.get('encargado_id') 
+    encargado = Encargado.objects.get(id=encargado_id)
+    nombre_encargado = f"{encargado.nombre} {encargado.apellido_p} {encargado.apellido_m}" if encargado else "Nombre del Encargado"
+
+
+    # Dibujar el encabezado
+    draw_encabezado(p, titulo, nombre_encargado)
+
+    # Get the data from the database
+    data = Computadora.objects.all()
+
+    # Table header
+    table_header = ["Computadora", "Estado", "Laboratorio", "Código del Monitor", "Código del CPU", "Acción"]
+
+    # Calculate the width of each column based on the content
+    col_widths = [p.stringWidth(header, "Helvetica-Bold", 10) + 20 for header in table_header]
+    
+    # Ajustar el ancho de la columna "Acción"
+    col_widths[-1] += 30
+
+    # Table data (rows)
+    table_data = []
+
+    for item in data:
+        # Realiza los cambios en las columnas según las condiciones especificadas
+        estado = "Activa" if item.estado == 1 else "Apagada"
+        laboratorio = "Laboratorio 1" if item.laboratorio == 1 else "Laboratorio 2"
+        ocupada = "Ocupada" if item.ocupada == 1 else "Desocupada"
+
+        row = (str(item.numero), estado, laboratorio, item.cod_monitor, item.cod_cpu, ocupada)
+        table_data.append(row)
+
+    # Set the x and y positions to start drawing the table
+    page_width, page_height = letter
+    table_width = sum(col_widths)
+
+    # Calculate the x-position to center the table
+    x = (page_width - table_width) / 2
+
+    y = page_height - 130  # Initial y-coordinate for the table
+
+    # Draw table header with different colors for specific columns
+    header_style = TableStyle([
+        ('BACKGROUND', (0, 0), (-1, 0), colors.grey),
+        ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+        ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+        ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+    ])
+
+    table_header_data = [table_header]
+    table_header = Table(table_header_data, colWidths=col_widths)
+    table_header.setStyle(header_style)
+
+    # Draw table header on the first page
+    table_header.wrapOn(p, 0, 0)
+    table_header.drawOn(p, x, y)
+
+    # Set the y-coordinate for the table data
+    y -= 20
+
+    # Draw table data
+    for row in table_data:
+        table_row_data = [row]
+        table_row = Table(table_row_data, colWidths=col_widths)
+        table_row_style = TableStyle([
+            ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+            ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+            ('BOX', (0, 0), (-1, -1), 1, colors.black),
+        ])
+        table_row.setStyle(table_row_style)
+
+        # Check if there's enough space on the current page
+        if y <= 50:
+            # Start a new page
+            p.showPage()
+            y = page_height - 50  # Initial y-coordinate for the table
+            table_header.drawOn(p, x, y)
+            y -= 20
+
+        # Draw the table row
+        table_row.wrapOn(p, 0, 0)
+        table_row.drawOn(p, x, y)
+        y -= 20
+
+    # Dibujar el pie de página en la primera página
+    draw_pie_de_pagina(p)
+    
+    # Cambiar a la siguiente página
+    p.showPage()
+
+    # Dibujar el encabezado en la segunda página
+    draw_encabezado(p, titulo, nombre_encargado)
+    
+    # Contenido del informe en la segunda página...
+
+    # Dibujar el pie de página en la segunda página
+    draw_pie_de_pagina(p)
+
+    # Y así sucesivamente para más páginas...
+
+    # Guardar el PDF
+    p.save()
+
+    # Obtener el contenido del buffer
+    pdf_content = buffer.getvalue()
+
+    # Crear la respuesta HTTP
+    response = HttpResponse(pdf_content, content_type="application/pdf")
+    response["Content-Disposition"] = 'inline; filename="reporte.pdf"'
+
+    return response
