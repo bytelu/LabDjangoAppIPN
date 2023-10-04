@@ -7,11 +7,15 @@
         <div class="card" style="border: none; border-radius: 10px; box-shadow: 0px 0px 20px rgba(0, 0, 0, 0.2);">
             <div class="card-header" style="text-align: center; background-color: #6D1A42; color: #ffffff; border-top-left-radius: 10px; border-top-right-radius: 10px; padding: 15px;">
                 <h3 class="card-title" style="font-size: 30px;">Lista de Sesiones Grupales</h3>
-                <div class="col-sm-8 text-right">
-                    <a href="{% url 'generar_laboratoriouno' %}" class="btn btn-outline-info" target="_blank"><i class="fa fa-file-pdf"></i></a>
+                <div class="col-sm-12 text-right">
+                    <select class="form-control" id="selectLaboratorio" style="display: inline-block; width: auto;">
+                        <option value="laboratorio1">Laboratorio 1</option>
+                        <option value="laboratorio2">Laboratorio 2</option>
+                    </select>
+                    <a href="{% url 'generar_laboratoriouno' %}" class="btn btn-outline-info ml-2" target="_blank"><i class="fa fa-file-pdf"></i></a>
                 </div>
-            </div>
-            <div class="card-body" style="background-color: #ffffff; padding: 20px;">
+            </div>            
+            <div class="card-body" style="background-color: white; padding: 20px;">
                 <table id="tablita" class="table table-bordered table-hover">
                     <thead>
                         <tr>
