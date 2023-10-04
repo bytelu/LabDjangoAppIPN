@@ -50,6 +50,7 @@ urlpatterns = [
     path('cerrar-sesion/', cerrar_sesion, name='cerrar_sesion'),
     #------------------------------VISTA DE REPORTES PDF--------------------#
     path('generar-computadoras/', views.generar_computadoras, name='generar_computadoras'),
+    path('generar-laboratoriouno/', views.generar_laboratoriouno, name='generar_laboratoriouno'),
 
 ]
 
