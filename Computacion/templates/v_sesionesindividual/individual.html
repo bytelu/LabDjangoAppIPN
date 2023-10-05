@@ -1,60 +1,157 @@
 {% extends "adminlte/acceso.html" %}
 {% block body %}
+<style>
+    .enlace-laboratorio {
+        color: white;
+        background-color: #6D1A42;
+        border: none;
+        border-radius: 5px;
+        padding: 8px 15px;
+        margin-left: 5px;
+        transition: background-color 0.3s ease;
+        display: inline-block;
+        text-decoration: none;
+    }
+
+    .enlace-laboratorio:hover {
+        background-color: white;
+        color: #6D1A42;
+    }
+
+    .enlace-laboratorio.active {
+        background-color: white;
+        color: #6D1A42;
+    }
+</style>
+
 <br>
 <!-- Ventana principal MOSTRAR sesiones grupales -->
 <div class="row">
     <div class="col-md-12">
         <div class="card" style="border: none; border-radius: 10px; box-shadow: 0px 0px 20px rgba(0, 0, 0, 0.2);">
-            <div class="card-header" style="text-align: center; background-color: #6D1A42; color: #ffffff; border-top-left-radius: 10px; border-top-right-radius: 10px; padding: 15px;">
-                <h3 class="card-title" style="font-size: 30px;">Lista de Sesiones Grupales</h3>
-            </div>
-            <div class="card-body" style="background-color: #ffffff; padding: 20px;">
-                <table id="tablita" class="table table-bordered table-hover">
-                    <thead>
-                        <tr>
-                            <th>Fecha</th>
-                            <th>Encargado</th>
-                            <th>Estudiante</th>
-                            <th>Computadora</th>
-                            <th>Hora Inicio</th>
-                            <th>Hora Final</th>
-                            <th>Estado</th>
-                            <th>Acciones</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for sesion in sesiones %}
-                        {% if sesion.profesor == NULL %}
-                        <tr>
-                            <td>{{ sesion.fecha }}</td>
-                            <td>{{ sesion.encargado.nombre }} {{ sesion.encargado.apellido_p }} {{ sesion.encargado.apellido_m }}</td>
-                            <td>{{ sesion.estudiante.nombre }} {{ sesion.estudiante.apellido_p }} {{ sesion.estudiante.apellido_m }}</td>
-                            <td>{% if sesion.computadora %}No: {{ sesion.computadora.numero }} Lab: {{ sesion.computadora.laboratorio }}{% else %}Sin computadora{% endif %}</td>
-                            <td>{{ sesion.hora_inicio }}</td>
-                            <td>{% if sesion.hora_final %}{{ sesion.hora_final }}{% else %}Sin finalizar{% endif %}</td>
-                            <td>{% if sesion.activo == 1 %}Sesión Activa{% else %}Sesión Finalizada{% endif %}</td>
-                            <td>
-                                <button class="btn btn-primary btn-sm btn-editar"
-                                    data-toggle="modal"
-                                    data-target="#editarModal"
-                                    data-id="{{ sesion.id }}"
-                                    data-fecha="{{ sesion.fecha }}"
-                                    data-encargado="{{ sesion.encargado.id }}"
-                                    data-estudiante="{{ sesion.estudiante.id }}"
-                                    data-computadora="{{ sesion.computadora.id }}"
-                                    data-hora_inicio="{{ sesion.hora_inicio }}"
-                                    data-hora_final="{{ sesion.hora_final }}"
-                                    data-activo="{{ sesion.activo }}"><i class="fas fa-edit"></i></button>
-                                <a href="{% url 'eliminar_individual' sesion.id %}" class="btn btn-danger btn-sm" onclick="return confirm('¿Deseas eliminar esta sesión?')"><i class="fas fa-trash"></i></a>
-                            </td>
-                        </tr>
-                        {% endif %}
+            <div class="card-header" style="text-align: center; background-color: #6D1A42; color: white; border-top-left-radius: 10px; border-top-right-radius: 10px; padding: 15px;">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h3 class="card-title" style="font-size: 30px;">Lista de Sesiones Individuales</h3>
+                    </div>
+                    <ul class="nav nav-tabs">
+                        <li class="nav-item">
+                            <a class="nav-link enlace-laboratorio active" href="#laboratorio1" onclick="mostrarLaboratorio(1)">Laboratorio 1</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link enlace-laboratorio" href="#laboratorio2" onclick="mostrarLaboratorio(2)">Laboratorio 2</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>            
+            <div class="card-body" style="background-color: white; padding: 20px;">
+                <div class="tab-content">
+                    <!-- Aquí se muestra el bloque de mensajes utilizando el código que te proporcioné antes -->
+                    <div class="notification-container">
+                        {% for message in messages %}
+                            <div class="notification error-message">{{ message }}</div>
                         {% endfor %}
-                    </tbody>
-                </table>
-                <button type="button" class="btn btn-success" data-toggle="modal" data-target="#agregarModal">
-                    Agregar Sesion
-                </button>
+                    </div>
+                    <!-- Contenido del formulario de laboratorio 1 -->
+                    <div class="tab-content" id="laboratorio1">
+                        <table id="tablita" class="table table-bordered table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Fecha</th>
+                                    <th>Encargado</th>
+                                    <th>Estudiante</th>
+                                    <th>Computadora</th>
+                                    <th>Hora Inicio</th>
+                                    <th>Hora Final</th>
+                                    <th>Estado</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for sesion in sesiones %}
+                                {% if sesion.profesor == NULL and sesion.computadora.laboratorio == 1%}
+                                <tr>
+                                    <td>{{ sesion.fecha }}</td>
+                                    <td>{{ sesion.encargado.nombre }} {{ sesion.encargado.apellido_p }} {{ sesion.encargado.apellido_m }}</td>
+                                    <td>{{ sesion.estudiante.nombre }} {{ sesion.estudiante.apellido_p }} {{ sesion.estudiante.apellido_m }}</td>
+                                    <td>{% if sesion.computadora %}No: {{ sesion.computadora.numero }} Lab: {{ sesion.computadora.laboratorio }}{% else %}Sin computadora{% endif %}</td>
+                                    <td>{{ sesion.hora_inicio }}</td>
+                                    <td>{% if sesion.hora_final %}{{ sesion.hora_final }}{% else %}Sin finalizar{% endif %}</td>
+                                    <td>{% if sesion.activo == 1 %}Sesión Activa{% else %}Sesión Finalizada{% endif %}</td>
+                                    <td>
+                                        <button class="btn btn-primary btn-sm btn-editar"
+                                            data-toggle="modal"
+                                            data-target="#editarModal"
+                                            data-id="{{ sesion.id }}"
+                                            data-fecha="{{ sesion.fecha }}"
+                                            data-encargado="{{ sesion.encargado.id }}"
+                                            data-estudiante="{{ sesion.estudiante.id }}"
+                                            data-computadora="{{ sesion.computadora.id }}"
+                                            data-hora_inicio="{{ sesion.hora_inicio }}"
+                                            data-hora_final="{{ sesion.hora_final }}"
+                                            data-activo="{{ sesion.activo }}" style="padding:5px 8px;"><i class="fas fa-edit"></i></button>
+                                        <a href="{% url 'eliminar_individual' sesion.id %}" class="btn btn-danger btn-sm" onclick="return confirm('¿Deseas eliminar esta sesión?')"><i class="fas fa-trash"></i></a>
+                                        <a href="{% url 'generar_individual' sesion.id %}" class="btn btn-outline-info" target="_blank" style="padding: 3px 8px;"><i class="fa fa-file-pdf"></i></a>
+                                    </td>
+                                </tr>
+                                {% endif %}
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                        <button type="button" class="btn btn-success" data-toggle="modal" data-target="#agregarModal">
+                            Agregar Sesion
+                        </button>
+                    </div>
+                    <!-- Contenido del formulario de laboratorio 2 -->
+                    <div class="tab-content" id="laboratorio2">
+                        <table id="tablita" class="table table-bordered table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Fecha</th>
+                                    <th>Encargado</th>
+                                    <th>Estudiante</th>
+                                    <th>Computadora</th>
+                                    <th>Hora Inicio</th>
+                                    <th>Hora Final</th>
+                                    <th>Estado</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for sesion in sesiones %}
+                                {% if sesion.profesor == NULL and sesion.computadora.laboratorio == 2 %}
+                                <tr>
+                                    <td>{{ sesion.fecha }}</td>
+                                    <td>{{ sesion.encargado.nombre }} {{ sesion.encargado.apellido_p }} {{ sesion.encargado.apellido_m }}</td>
+                                    <td>{{ sesion.estudiante.nombre }} {{ sesion.estudiante.apellido_p }} {{ sesion.estudiante.apellido_m }}</td>
+                                    <td>{% if sesion.computadora %}No: {{ sesion.computadora.numero }} Lab: {{ sesion.computadora.laboratorio }}{% else %}Sin computadora{% endif %}</td>
+                                    <td>{{ sesion.hora_inicio }}</td>
+                                    <td>{% if sesion.hora_final %}{{ sesion.hora_final }}{% else %}Sin finalizar{% endif %}</td>
+                                    <td>{% if sesion.activo == 1 %}Sesión Activa{% else %}Sesión Finalizada{% endif %}</td>
+                                    <td>
+                                        <button class="btn btn-primary btn-sm btn-editar"
+                                            data-toggle="modal"
+                                            data-target="#editarModal"
+                                            data-id="{{ sesion.id }}"
+                                            data-fecha="{{ sesion.fecha }}"
+                                            data-encargado="{{ sesion.encargado.id }}"
+                                            data-estudiante="{{ sesion.estudiante.id }}"
+                                            data-computadora="{{ sesion.computadora.id }}"
+                                            data-hora_inicio="{{ sesion.hora_inicio }}"
+                                            data-hora_final="{{ sesion.hora_final }}"
+                                            data-activo="{{ sesion.activo }}"><i class="fas fa-edit"></i></button>
+                                        <a href="{% url 'eliminar_individual' sesion.id %}" class="btn btn-danger btn-sm" onclick="return confirm('¿Deseas eliminar esta sesión?')"><i class="fas fa-trash"></i></a>
+                                    </td>
+                                </tr>
+                                {% endif %}
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                        <button type="button" class="btn btn-success" data-toggle="modal" data-target="#agregarModal">
+                            Agregar Sesion
+                        </button>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -235,5 +332,31 @@
             $('#agregarForm').submit();
         });
     });
+</script>
+
+<script>
+    function mostrarLaboratorio(laboratorio) {
+        // Elimina la clase 'active' de todas las opciones
+        document.querySelectorAll('.enlace-laboratorio').forEach(function (enlace) {
+            enlace.classList.remove('active');
+        });
+
+        // Agrega la clase 'active' a la opción seleccionada
+        document.querySelector(`.enlace-laboratorio[href="#laboratorio${laboratorio}"]`).classList.add('active');
+
+        // Tu lógica actual
+        if (laboratorio === 1) {
+            document.getElementById('laboratorio1').style.display = 'block';
+            document.getElementById('laboratorio2').style.display = 'none';
+        } else if (laboratorio === 2) {
+            document.getElementById('laboratorio1').style.display = 'none';
+            document.getElementById('laboratorio2').style.display = 'block';
+        }
+    }
+
+    // Llama a la función con el valor predeterminado (1) al cargar la página
+    window.onload = function () {
+        mostrarLaboratorio(1);
+    };
 </script>
 {% endblock %}

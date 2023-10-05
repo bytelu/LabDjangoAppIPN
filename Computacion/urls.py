@@ -51,6 +51,8 @@ urlpatterns = [
     #------------------------------VISTA DE REPORTES PDF--------------------#
     path('generar-computadoras/', views.generar_computadoras, name='generar_computadoras'),
     path('generar-laboratoriouno/', views.generar_laboratoriouno, name='generar_laboratoriouno'),
+    path('generar-laboratoriodos/', views.generar_laboratoriodos, name='generar_laboratoriodos'),
+    path('generar-individual/<int:sesion_id>/', views.generar_individual, name='generar_individual'),
 
 ]
 

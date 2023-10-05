@@ -43,13 +43,13 @@
 .btn-editar,
 .btn-danger,
 .btn-success{
-    padding: 5px 10px;
+    padding: 2px 4px;
     margin-right: 5px;
     border: none; /* Quitamos el borde para dar un estilo más limpio */
     cursor: pointer;
     transition: background-color 0.3s ease; /* Transición suave para el cambio de color */
     background-color: #b38e5d;/* Color de fondo normal */
-    color: #ffffff; /* Color de texto normal */
+    color: white; /* Color de texto normal */
 }
 
 /* Estilo de los botones de acción al pasar el ratón sobre ellos */

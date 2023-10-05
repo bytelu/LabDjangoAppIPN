@@ -19,6 +19,7 @@ from django.http import HttpResponse
 from reportlab.platypus import Image
 from io import BytesIO
 import requests
+from django.shortcuts import get_object_or_404
 
 # Create your views here.
 def login (request):
@@ -1186,6 +1187,242 @@ def generar_laboratoriouno(request):
                 y = page_height - 150
 
             # Dibujar el encabezado de la tabla en todas las páginas
+            table_header.wrapOn(p, 0, 0)
+            table_header.drawOn(p, x, y)
+            y -= 20
+
+        table_row.wrapOn(p, 0, 0)
+        table_row.drawOn(p, x, y)
+        y -= 20
+
+    draw_pie_de_pagina(p, pagina_actual)
+    p.save()
+
+    pdf_content = buffer.getvalue()
+    response = HttpResponse(pdf_content, content_type="application/pdf")
+    response["Content-Disposition"] = 'inline; filename="reporte_sesiones.pdf"'
+
+    return response
+def generar_laboratoriodos(request):
+    buffer = io.BytesIO()
+    p = canvas.Canvas(buffer, pagesize=letter)
+    p.setFont("Helvetica-Bold", 10)
+
+    titulo = "Sesion de Laboratorio 1"
+    encargado_id = request.session.get('encargado_id') 
+    encargado = Encargado.objects.get(id=encargado_id)
+    nombre_encargado = f"{encargado.nombre} {encargado.apellido_p} {encargado.apellido_m}" if encargado else "Nombre del Encargado"
+
+    pagina_actual = 1
+
+    draw_encabezado(p, titulo, nombre_encargado)
+    draw_pie_de_pagina(p, pagina_actual)
+
+    sesion = Sesion.objects.filter(activo=1, computadora__laboratorio=2).order_by('id').first()
+
+    if sesion:
+        print("sesion encontrada")
+        p.setFont("Helvetica", 10) # Cambiado a un tipo de letra cursiva
+        p.setFillColorRGB(0, 0, 0)  # Texto en color negro
+        #fecha_info = sesion.fecha.strftime("%d de %B de %Y")
+        profesor_informacion = f"{sesion.profesor.nombre} {sesion.profesor.apellido_p} {sesion.profesor.apellido_m}"
+        hora_inicio_informacion = sesion.hora_inicio.strftime("%I:%M %p")
+        hora_final_informacion = sesion.hora_final.strftime("%I:%M %p") if sesion.hora_final else "Sin finalizar"
+
+        # Obtener AM o PM manualmente
+        am_pm_inicio = "AM" if sesion.hora_inicio.hour < 12 else "PM"
+        am_pm_final = "AM" if (sesion.hora_final.hour if sesion.hora_final else 0) < 12 else "PM"
+
+        #laboratorio_info = sesion.computadora.laboratorio if sesion.computadora else "Sin computadora"
+
+        x_position = 50
+        y_position = 690
+
+        #p.drawString(x_position, y_position, f"Fecha de Sesión: {fecha_info}")
+        p.drawString(x_position, y_position-3, f"Profesor: {profesor_informacion}")
+        p.drawString(x_position + 305, y_position-3, f"Hora Inicio: {hora_inicio_informacion} {am_pm_inicio} |")
+        p.drawString(x_position + 413, y_position-3, f"Hora Final: {hora_final_informacion} {am_pm_final}")
+        #p.drawString(x_position, y_position - 60, f"Laboratorio: {laboratorio_info}")
+    else:
+        p.drawString(100, 700, "No se encontró ninguna sesión que cumpla con los criterios.")
+
+    data = Sesion.objects.filter(activo=1,computadora__laboratorio=2)
+    table_header = ["Estudiante", "No. Computadora", "Carrera"]
+    col_widths = [200,  # Ancho de la primera columna
+              100,   # Ancho de la segunda columna
+              150]  # Ancho de la tercera columna
+    col_widths[-1] += 30  # Ajuste del último valor si es necesario
+
+    table_data = []
+
+    for sesion in data:
+        estudiante_info = f"{sesion.estudiante.nombre} {sesion.estudiante.apellido_p} {sesion.estudiante.apellido_m}"
+        carrera_info = f"{sesion.estudiante.carrera.carrera}"
+        no_computadora_info = sesion.computadora.numero if sesion.computadora else "Sin computadora"
+        row = [estudiante_info, no_computadora_info, carrera_info]
+        table_data.append(row)
+
+    page_width, page_height = letter
+    table_width = sum(col_widths)
+    x = (page_width - table_width) / 2
+    y = page_height - 150
+
+    header_style = TableStyle([
+        ('BACKGROUND', (0, 0), (-1, 0), (0.427, 0.102, 0.259)),  # Cambiar a tu primer color RGB
+        ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+        ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+        ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+    ])
+
+    table_header_data = [table_header]
+    table_header = Table(table_header_data, colWidths=col_widths)
+    table_header.setStyle(header_style)
+
+    # Añadir la propiedad repeatRows para repetir el encabezado en todas las páginas
+    header_style.add('BACKGROUND', (0, 0), (-1, 0), (0.427, 0.102, 0.259))
+    header_style.add('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke)
+    header_style.add('ALIGN', (0, 0), (-1, -1), 'CENTER')
+    header_style.add('BOTTOMPADDING', (0, 0), (-1, 0), 12)
+    header_style.add('LINEABOVE', (0, 0), (-1, 0), 1, colors.black)
+    table_header.setStyle(header_style)
+
+    table_header.wrapOn(p, 0, 0)
+    table_header.drawOn(p, x, y)
+
+    y -= 20
+
+    for row in table_data:
+        table_row_data = [row]
+        table_row = Table(table_row_data, colWidths=col_widths)
+        table_row_style = TableStyle([
+            ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+            ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+            ('BOX', (0, 0), (-1, -1), 1, colors.black),
+        ])
+        table_row.setStyle(table_row_style)
+
+        if y <= 50:
+            p.showPage()
+            pagina_actual += 1
+            draw_encabezado(p, titulo, nombre_encargado)
+            draw_pie_de_pagina(p, pagina_actual)
+
+            if pagina_actual != 1:
+                y = page_height - 150
+
+            # Dibujar el encabezado de la tabla en todas las páginas
+            table_header.wrapOn(p, 0, 0)
+            table_header.drawOn(p, x, y)
+            y -= 20
+
+        table_row.wrapOn(p, 0, 0)
+        table_row.drawOn(p, x, y)
+        y -= 20
+
+    draw_pie_de_pagina(p, pagina_actual)
+    p.save()
+
+    pdf_content = buffer.getvalue()
+    response = HttpResponse(pdf_content, content_type="application/pdf")
+    response["Content-Disposition"] = 'inline; filename="reporte_sesiones.pdf"'
+
+    return response
+
+def generar_individual(request, sesion_id):
+    buffer = io.BytesIO()
+    p = canvas.Canvas(buffer, pagesize=letter)
+    p.setFont("Helvetica-Bold", 10)
+
+    # Buscar la sesión específica o devolver un error 404 si no se encuentra
+    sesion = get_object_or_404(Sesion, id=sesion_id)
+    print("sesion encontrada")
+    titulo = f"Sesión Individual de Laboratorio {sesion.computadora.laboratorio}"
+    encargado_id = request.session.get('encargado_id') 
+    encargado = Encargado.objects.get(id=encargado_id)
+    nombre_encargado = f"{encargado.nombre} {encargado.apellido_p} {encargado.apellido_m}" if encargado else "Nombre del Encargado"
+
+    pagina_actual = 1
+
+    draw_encabezado(p, titulo, nombre_encargado)
+    draw_pie_de_pagina(p, pagina_actual)
+    p.setFont("Helvetica", 10) # Cambiado a un tipo de letra cursiva
+    p.setFillColorRGB(0, 0, 0)  # Texto en color negro
+
+    hora_inicio_informacion = sesion.hora_inicio.strftime("%I:%M %p")
+    hora_final_informacion = sesion.hora_final.strftime("%I:%M %p") if sesion.hora_final else "Sin finalizar"
+
+    # Obtener AM o PM manualmente
+    am_pm_inicio = "AM" if sesion.hora_inicio.hour < 12 else "PM"
+    am_pm_final = "AM" if (sesion.hora_final.hour if sesion.hora_final else 0) < 12 else "PM"
+
+    x_position = 50
+    y_position = 690
+
+    p.drawString(x_position + 305, y_position-3, f"Hora Inicio: {hora_inicio_informacion} {am_pm_inicio} |")
+    p.drawString(x_position + 413, y_position-3, f"Hora Final: {hora_final_informacion} {am_pm_final}")
+
+    data = [sesion]  # Utilizar solo la sesión específica
+
+    table_header = ["Estudiante", "No. Computadora", "Carrera"]
+    col_widths = [200, 100, 150]  # Ancho de las columnas
+    col_widths[-1] += 30  # Ajuste del último valor si es necesario
+
+    table_data = []
+
+    for sesion in data:
+        estudiante_info = f"{sesion.estudiante.nombre} {sesion.estudiante.apellido_p} {sesion.estudiante.apellido_m}"
+        carrera_info = f"{sesion.estudiante.carrera.carrera}"
+        no_computadora_info = sesion.computadora.numero if sesion.computadora else "Sin computadora"
+        row = [estudiante_info, no_computadora_info, carrera_info]
+        table_data.append(row)
+
+    page_width, page_height = letter
+    table_width = sum(col_widths)
+    x = (page_width - table_width) / 2
+    y = page_height - 150
+
+    header_style = TableStyle([
+        ('BACKGROUND', (0, 0), (-1, 0), (0.427, 0.102, 0.259)),
+        ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+        ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+        ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+    ])
+
+    table_header_data = [table_header]
+    table_header = Table(table_header_data, colWidths=col_widths)
+    table_header.setStyle(header_style)
+
+    header_style.add('BACKGROUND', (0, 0), (-1, 0), (0.427, 0.102, 0.259))
+    header_style.add('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke)
+    header_style.add('ALIGN', (0, 0), (-1, -1), 'CENTER')
+    header_style.add('BOTTOMPADDING', (0, 0), (-1, 0), 12)
+    header_style.add('LINEABOVE', (0, 0), (-1, 0), 1, colors.black)
+    table_header.setStyle(header_style)
+
+    table_header.wrapOn(p, 0, 0)
+    table_header.drawOn(p, x, y)
+
+    y -= 20
+
+    for row in table_data:
+        table_row_data = [row]
+        table_row = Table(table_row_data, colWidths=col_widths)
+        table_row_style = TableStyle([
+            ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+            ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+            ('BOX', (0, 0), (-1, -1), 1, colors.black),
+        ])
+        table_row.setStyle(table_row_style)
+
+        if y <= 50:
+            p.showPage()
+            pagina_actual += 1
+            draw_encabezado(p, titulo, nombre_encargado)
+            draw_pie_de_pagina(p, pagina_actual)
+
+            if pagina_actual != 1:
+                y = page_height - 150
+
             table_header.wrapOn(p, 0, 0)
             table_header.drawOn(p, x, y)
             y -= 20
