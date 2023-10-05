@@ -57,6 +57,7 @@
                                     data-encargado="{{ reporte.encargado.id }}"
                                     data-computadora="{{ reporte.computadora.id }}"><i class="fas fa-edit"></i></button>
                                 <a href="{% url 'eliminar_reporte' reporte.id %}" class="btn btn-danger btn-sm" onclick="return confirm('¿Deseas eliminar este reporte?')"><i class="fas fa-trash"></i></a>
+                                <a href="{% url 'generar_reporte' reporte.id %}" class="btn btn-outline-info" target="_blank" style="padding: 3px 8px;"><i class="fa fa-file-pdf"></i></a>
                             </td>
                         </tr>
                         {% endfor %}

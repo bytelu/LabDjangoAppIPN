@@ -879,7 +879,6 @@ def cerrar_sesion(request):
     return redirect('login')  # Redirigir al usuario a la página de inicio de sesión
 
 ##################################### REPORTE ############################################
-
 def draw_encabezado(pdf, titulo, nombre_encargado):
 
     # Color de fondo más grueso
@@ -1076,7 +1075,7 @@ def generar_computadoras(request):
 
     pdf_content = buffer.getvalue()
     response = HttpResponse(pdf_content, content_type="application/pdf")
-    response["Content-Disposition"] = 'inline; filename="reporte.pdf"'
+    response["Content-Disposition"] = 'inline; filename="reporte_computadoras.pdf"'
 
     return response
 def generar_laboratoriouno(request):
@@ -1084,7 +1083,7 @@ def generar_laboratoriouno(request):
     p = canvas.Canvas(buffer, pagesize=letter)
     p.setFont("Helvetica-Bold", 10)
 
-    titulo = "Sesion de Laboratorio 1"
+    titulo = "Sesión de Laboratorio 1"
     encargado_id = request.session.get('encargado_id') 
     encargado = Encargado.objects.get(id=encargado_id)
     nombre_encargado = f"{encargado.nombre} {encargado.apellido_p} {encargado.apellido_m}" if encargado else "Nombre del Encargado"
@@ -1200,7 +1199,7 @@ def generar_laboratoriouno(request):
 
     pdf_content = buffer.getvalue()
     response = HttpResponse(pdf_content, content_type="application/pdf")
-    response["Content-Disposition"] = 'inline; filename="reporte_sesiones.pdf"'
+    response["Content-Disposition"] = 'inline; filename="reporte_SesionGrupal1.pdf"'
 
     return response
 def generar_laboratoriodos(request):
@@ -1208,7 +1207,7 @@ def generar_laboratoriodos(request):
     p = canvas.Canvas(buffer, pagesize=letter)
     p.setFont("Helvetica-Bold", 10)
 
-    titulo = "Sesion de Laboratorio 1"
+    titulo = "Sesión de Laboratorio 2"
     encargado_id = request.session.get('encargado_id') 
     encargado = Encargado.objects.get(id=encargado_id)
     nombre_encargado = f"{encargado.nombre} {encargado.apellido_p} {encargado.apellido_m}" if encargado else "Nombre del Encargado"
@@ -1324,10 +1323,9 @@ def generar_laboratoriodos(request):
 
     pdf_content = buffer.getvalue()
     response = HttpResponse(pdf_content, content_type="application/pdf")
-    response["Content-Disposition"] = 'inline; filename="reporte_sesiones.pdf"'
+    response["Content-Disposition"] = 'inline; filename="reporte_SesionGrupal2.pdf"'
 
     return response
-
 def generar_individual(request, sesion_id):
     buffer = io.BytesIO()
     p = canvas.Canvas(buffer, pagesize=letter)
@@ -1436,6 +1434,123 @@ def generar_individual(request, sesion_id):
 
     pdf_content = buffer.getvalue()
     response = HttpResponse(pdf_content, content_type="application/pdf")
-    response["Content-Disposition"] = 'inline; filename="reporte_sesiones.pdf"'
+    response["Content-Disposition"] = 'inline; filename="reporte_Individual.pdf"'
+
+    return response
+def generar_reporte(request, reporte_id):
+    buffer = io.BytesIO()
+    p = canvas.Canvas(buffer, pagesize=letter)
+    p.setFont("Helvetica-Bold", 10)
+
+    # Buscar la sesión específica o devolver un error 404 si no se encuentra
+    sesion = get_object_or_404(Reporte, id=reporte_id)
+    print("sesion encontrada")
+    titulo = f"Reporte: {sesion.titulo}"
+    encargado_id = request.session.get('encargado_id') 
+    encargado = Encargado.objects.get(id=encargado_id)
+    nombre_encargado = f"{encargado.nombre} {encargado.apellido_p} {encargado.apellido_m}" if encargado else "Nombre del Encargado"
+
+    pagina_actual = 1
+
+    draw_encabezado(p, titulo, nombre_encargado)
+    draw_pie_de_pagina(p, pagina_actual)
+    p.setFont("Helvetica", 10) # Cambiado a un tipo de letra cursiva
+    p.setFillColorRGB(0, 0, 0)  # Texto en color negro
+
+    hora_inicio_informacion = sesion.hora.strftime("%I:%M %p")
+    fecha_formateada = sesion.fecha.strftime("%d de %B de %Y")
+
+    # Obtener AM o PM manualmente
+    am_pm_inicio = "AM" if sesion.hora.hour < 12 else "PM"
+
+    x_position = 50
+    y_position = 690
+
+    p.drawString(x_position, y_position-3, f"Generado el: {fecha_formateada} a las {hora_inicio_informacion}{am_pm_inicio} ")
+
+    data = [sesion]  # Utilizar solo la sesión específica
+
+    table_header = ["Encargado","Descripción", "Seguimiento", "Computadora"]
+    col_widths = [130, 220, 100, 50]  # Ancho de las columnas
+    col_widths[-1] += 30  # Ajuste del último valor si es necesario
+
+    limite_caracteres = 30
+    table_data = []
+
+    for sesion in data:
+        encargado_info = f"{sesion.encargado.nombre} {sesion.encargado.apellido_p} {sesion.encargado.apellido_m}"
+        # Verificar si la descripción supera el límite de caracteres
+        if len(sesion.descripcion) > limite_caracteres:
+            # Dividir la descripción en partes más pequeñas
+            partes_descripcion = [sesion.descripcion[i:i+limite_caracteres] for i in range(0, len(sesion.descripcion), limite_caracteres)]
+            descripcion_info = "\n".join(partes_descripcion)
+        else:
+            descripcion_info = sesion.descripcion
+        seguimiento_info = f"{sesion.seguimiento}"
+        no_computadora_info = sesion.computadora.numero if sesion.computadora else "Ninguna"
+        row = [encargado_info, descripcion_info, seguimiento_info,no_computadora_info]
+        table_data.append(row)
+
+    page_width, page_height = letter
+    table_width = sum(col_widths)
+    x = (page_width - table_width) / 2
+    y = page_height - 150
+
+    header_style = TableStyle([
+        ('BACKGROUND', (0, 0), (-1, 0), (0.427, 0.102, 0.259)),
+        ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+        ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+        ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+    ])
+
+    table_header_data = [table_header]
+    table_header = Table(table_header_data, colWidths=col_widths)
+    table_header.setStyle(header_style)
+
+    header_style.add('BACKGROUND', (0, 0), (-1, 0), (0.427, 0.102, 0.259))
+    header_style.add('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke)
+    header_style.add('ALIGN', (0, 0), (-1, -1), 'CENTER')
+    header_style.add('BOTTOMPADDING', (0, 0), (-1, 0), 12)
+    header_style.add('LINEABOVE', (0, 0), (-1, 0), 1, colors.black)
+    table_header.setStyle(header_style)
+
+    table_header.wrapOn(p, 0, 0)
+    table_header.drawOn(p, x, y)
+
+    y -= 45
+
+    for row in table_data:
+        table_row_data = [row]
+        table_row = Table(table_row_data, colWidths=col_widths)
+        table_row_style = TableStyle([
+            ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+            ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+            ('BOX', (0, 0), (-1, -1), 1, colors.black),
+        ])
+        table_row.setStyle(table_row_style)
+
+        if y <= 50:
+            p.showPage()
+            pagina_actual += 1
+            draw_encabezado(p, titulo, nombre_encargado)
+            draw_pie_de_pagina(p, pagina_actual)
+
+            if pagina_actual != 1:
+                y = page_height - 150
+
+            table_header.wrapOn(p, 0, 0)
+            table_header.drawOn(p, x, y)
+            y -= 20
+
+        table_row.wrapOn(p, 0, 0)
+        table_row.drawOn(p, x, y)
+        y -= 20
+
+    draw_pie_de_pagina(p, pagina_actual)
+    p.save()
+
+    pdf_content = buffer.getvalue()
+    response = HttpResponse(pdf_content, content_type="application/pdf")
+    response["Content-Disposition"] = 'inline; filename="reporte_Reportes.pdf"'
 
     return response
