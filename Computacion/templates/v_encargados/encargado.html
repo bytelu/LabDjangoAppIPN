@@ -8,6 +8,9 @@
             <div class="card-header" style="text-align: center; background-color: #6D1A42; color: #ffffff; border-top-left-radius: 10px; border-top-right-radius: 10px; padding: 15px;">
                 <h3 class="card-title" style="font-size: 30px;">Lista de Encargados</h3>
             </div>
+            {% for message in messages %}
+                <div class="notification {% if message.tags == 'error' %}error-message{% elif message.tags == 'success' %}success-message{% endif %}">{{ message }}</div>
+            {% endfor %}
             <div class="card-body" style="background-color: #ffffff; padding: 20px;">
                 <table class="table table-bordered table-hover" id="tablita">
                     <thead>
@@ -18,7 +21,6 @@
                             <th>Hora de entrada</th>
                             <th>Hora de salida</th>
                             <th>Usuario</th>
-                            <th>Estado</th>
                             <th>Acciones</th>
                         </tr>
                     </thead>
@@ -43,13 +45,6 @@
                                 {% endif %}
                             </td>
                             <td>{{ encargado.usuario }}</td>
-                            <td>
-                                {% if encargado.estado == 1 %}
-                                    Activo
-                                {% else %}
-                                    Inactivo
-                                {% endif %}
-                            </td>
                             <td>
                                 <button class="btn btn-primary btn-sm btn-editar"
                                     data-toggle="modal"
@@ -99,12 +94,8 @@
                     Usuario: <input type="text" name="usuario" id="id_usuario" class="form-control my-2" required>
                     Contraseña: <input type="password" name="contrasenia" id= "id_contrasenia" class="form-control my-2" required>
                     Repetir Contraseña: <input type="password" name="repcontrasenia" id="id_repcontrasenia" class="form-control my-2" required>
-                    Hora Entrada: <input type="time" name="hora_entrada" id="id_hora_entrada" class="form-control my-2" required placeholder="HH:mm">
-                    Hora Salida: <input type="time" name="hora_salida" id="id_hora_salida" class="form-control my-2" required placeholder="HH:mm">
-
-                    <label for="activo">Activo:</label>
-                    <input type="checkbox" name="activo" id="activo" value="1">
-                    <input type="hidden" name="activo" value="0">
+                    Hora Entrada: <input type="time" name="hora_entrada" id="id_hora_entrada" class="form-control my-2" required>
+                    Hora Salida: <input type="time" name="hora_salida" id="id_hora_salida" class="form-control my-2" required>
                 </form>
             </div>
             <div class="modal-footer">
@@ -132,12 +123,8 @@
                     Usuario: <input type="text" name="usuario" id="id_usuario" class="form-control my-2" required>
                     Contraseña: <input type="password" name="contrasenia" id= "id_contrasenia" class="form-control my-2" required>
                     Repetir Contraseña: <input type="password" name="repcontrasenia" id="id_repcontrasenia" class="form-control my-2" required>
-                    Hora Entrada: <input type="time" name="hora_entrada" id="id_hora_entrada" class="form-control my-2" required placeholder="HH:mm">
-                    Hora Salida: <input type="time" name="hora_salida" id="id_hora_salida" class="form-control my-2" required placeholder="HH:mm">
-
-                    <label for="activo">Activo:</label>
-                    <input type="checkbox" name="activo" id="activo" value="1">
-                    <input type="hidden" name="activo" value="0">
+                    Hora Entrada: <input type="time" name="hora_entrada" id="id_hora_entrada" class="form-control my-2" required placeholder="HH:mm" pattern="(?:0[7-9]|1[0-9]|20):[0-5][0-9]">
+                    Hora Salida: <input type="time" name="hora_salida" id="id_hora_salida" class="form-control my-2" required placeholder="HH:mm" pattern="(?:0[7-9]|1[0-9]|20):[0-5][0-9]">
                 </form>
             </div>
             <div class="modal-footer">
@@ -167,7 +154,8 @@
             var contrasenia = $(this).data("contrasenia");
             var repcontrasenia = $(this).data("contrasenia");
             var estado = $(this).data("estado");
-            var activo = $(this).data("activo");
+            //var activo = $(this).data("activo");
+            //console.log("Valor activo:", $(this).data("activo"));
             var id = $(this).data("id");
 
             // Rellenar el formulario de la ventana modal con los datos del encargado
@@ -180,8 +168,7 @@
             $("#editarForm #id_contrasenia").val(contrasenia);
             $("#editarForm #id_repcontrasenia").val(repcontrasenia);
             $("#editarForm #id_encargado").val(id);
-
-            $("#activo").prop("checked", activo === 1);
+            //$("#editarForm #id_activo").val(activo ? "1" : "0");
 
         });
     });

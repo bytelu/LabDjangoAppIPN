@@ -8,6 +8,9 @@
             <div class="card-header" style="text-align: center; background-color: #6D1A42; color: #ffffff; border-top-left-radius: 10px; border-top-right-radius: 10px; padding: 15px;">
                 <h3 class="card-title" style="font-size: 30px;">Lista de Profesores</h3>
             </div>
+            {% for message in messages %}
+                <div class="notification {% if message.tags == 'error' %}error-message{% elif message.tags == 'success' %}success-message{% endif %}">{{ message }}</div>
+            {% endfor %}
             <div class="card-body" style="background-color: #ffffff; padding: 20px;">
                 <table id="tablita" class="table table-bordered table-hover">
                     <thead>

@@ -1,5 +1,6 @@
 import os, io, datetime, locale
 import re
+from datetime import datetime
 from django.conf import settings
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
@@ -142,85 +143,57 @@ def encargados(request):
     }
 
     return render(request, 'v_encargados/encargado.html', context)
+def validar_horas(hora):
+    try:
+        hora_datetime = datetime.strptime(hora, "%H:%M")
+        return hora_datetime.time() >= datetime.strptime("07:00", "%H:%M").time() and \
+               hora_datetime.time() <= datetime.strptime("22:00", "%H:%M").time()
+    except ValueError:
+        return False
 def validacionA_encargado(request):
-    nombre = request.POST.get("nombre")
-    apellido_p = request.POST.get("apellido_p")
-    apellido_m = request.POST.get("apellido_m")
+    nombre = request.POST.get("nombre").capitalize()
+    apellido_p = request.POST.get("apellido_p").capitalize()
+    apellido_m = request.POST.get("apellido_m").capitalize()
     hora_entrada = request.POST.get("hora_entrada")
     hora_salida = request.POST.get("hora_salida")
     usuario = request.POST.get("usuario")
     contrasenia = request.POST.get("contrasenia")
     repcontrasenia = request.POST.get("repcontrasenia")
-    
-    # Verificar y formatear hora de entrada
-    if not hora_entrada or not re.match(r'^\d{2}:\d{2}$', hora_entrada):
-        hora_entrada = '00:00'
-    # Verificar y formatear hora de salida
-    if not hora_salida or not re.match(r'^\d{2}:\d{2}$', hora_salida):
-        hora_salida = '00:00'
 
-    # Reemplaza 'midnight' con '00:00' si es necesario
-    if hora_entrada == 'midnight':
-        hora_entrada = '00:00'
-    if hora_salida == 'midnight':
-        hora_salida = '00:00'
+    if validar_horas(hora_entrada) and validar_horas(hora_salida):
+         # Verificar si el usuario ya existe en la base de datos por nombre completo
+        if Encargado.objects.filter(Q(nombre=nombre) & Q(apellido_p=apellido_p) & Q(apellido_m=apellido_m)).exists():
+            messages.error(request, "El encargado ya esta registrado.")
+            return redirect('encargados')
+        # Si no existe por nombre completo, verifica por el nombre de usuario
+        if Encargado.objects.filter(usuario=usuario).exists():
+            messages.error(request, "El nombre de usuario ya existe.")
+            return redirect('encargados')
 
-     # Verificar si el usuario ya existe en la base de datos por nombre completo
-    if Encargado.objects.filter(Q(nombre=nombre) & Q(apellido_p=apellido_p) & Q(apellido_m=apellido_m)).exists():
-        messages.error(request, "El encargado ya esta registrado.")
-        return render(request, 'v_encargados/encargado.html', {
-            'nombre': nombre,
-            'apellido_p': apellido_p,
-            'apellido_m': apellido_m,
-            'hora_entrada': hora_entrada,
-            'hora_salida': hora_salida,
-            'usuario': usuario,
-            'contrasenia': contrasenia,
-            'repcontrasenia': repcontrasenia,
-        })
+        if contrasenia == repcontrasenia:
+            # Crear el encargado con la contraseña segura
+            with transaction.atomic():
+                encargado = Encargado(
+                    usuario=usuario,
+                    contrasenia=contrasenia,
+                    nombre=nombre,
+                    apellido_m=apellido_m,
+                    apellido_p=apellido_p,
+                    estado=1,
+                    hora_entrada=hora_entrada,
+                    hora_salida=hora_salida,
+                )
+                encargado.save()
 
-    # Si no existe por nombre completo, verifica por el nombre de usuario
-    if Encargado.objects.filter(usuario=usuario).exists():
-        messages.error(request, "El nombre de usuario ya existe.")
-        return render(request, 'v_encargados/encargados.html', {
-            'nombre': nombre,
-            'apellido_p': apellido_p,
-            'apellido_m': apellido_m,
-            'hora_entrada': hora_entrada,
-            'hora_salida': hora_salida,
-            'usuario': usuario,
-            'contrasenia': contrasenia,
-            'repcontrasenia': repcontrasenia,
-        })
-
-    if contrasenia == repcontrasenia:
-        # Crear el encargado con la contraseña segura
-        with transaction.atomic():
-            encargado = Encargado(
-                usuario=usuario,
-                contrasenia=contrasenia,
-                nombre=nombre,
-                apellido_m=apellido_m,
-                apellido_p=apellido_p,
-                estado=1,
-                hora_entrada=hora_entrada,
-                hora_salida=hora_salida,
-            )
-            encargado.save()
-
-        # Redireccionar al usuario a la página de inicio de sesión con mensaje de éxito
-        messages.success(request, "Usuario registrado correctamente.")
-        return redirect('encargados')  # Cambia 'pagina_de_inicio' al nombre de la URL adecuada
+            # Redireccionar al usuario a la página de inicio de sesión con mensaje de éxito
+            messages.success(request, "Usuario registrado correctamente.")
+            return redirect('encargados')  # Cambia 'pagina_de_inicio' al nombre de la URL adecuada
+        else:
+            messages.error(request, "Las contraseñas no coinciden.")
+            return redirect('encargados')
     else:
-        messages.error(request, "Las contraseñas no coinciden.")
-        return render(request, 'v_encargados/agregar_encargado.html', {
-            'nombre': nombre,
-            'apellido_p': apellido_p,
-            'apellido_m': apellido_m,
-            'hora_entrada': hora_entrada,
-            'hora_salida': hora_salida,
-            'usuario': usuario,
-        })
+        messages.error(request, "La asignacion de horas es de 7 am a 10 pm.")
+        return redirect('encargados')      
 def validacionE_encargado(request):
     id = request.POST.get("id")
     nombre = request.POST.get("nombre")
@@ -232,33 +205,17 @@ def validacionE_encargado(request):
     contrasenia = request.POST.get("contrasenia")
     repcontrasenia = request.POST.get("repcontrasenia")
     
-    # Verificar y formatear hora de entrada
-    if not hora_entrada or not re.match(r'^\d{2}:\d{2}$', hora_entrada):
-        hora_entrada = '00:00'
-    # Verificar y formatear hora de salida
-    if not hora_salida or not re.match(r'^\d{2}:\d{2}$', hora_salida):
-        hora_salida = '00:00'
-
-    # Reemplaza 'midnight' con '00:00' si es necesario
-    if hora_entrada == 'midnight':
-        hora_entrada = '00:00'
-    if hora_salida == 'midnight':
-        hora_salida = '00:00'
-    
-    if contrasenia == repcontrasenia:
-        Encargado.objects.filter(pk=id).update(nombre=nombre, apellido_m=apellido_m, apellido_p=apellido_p, hora_entrada=hora_entrada, hora_salida=hora_salida,usuario=usuario,contrasenia=contrasenia)
-        messages.success(request, 'Encargado actualizado')
-        return redirect('encargados')
+    if validar_horas(hora_entrada) and validar_horas(hora_salida):
+        if contrasenia == repcontrasenia:
+            Encargado.objects.filter(pk=id).update(nombre=nombre, apellido_m=apellido_m, apellido_p=apellido_p, hora_entrada=hora_entrada, hora_salida=hora_salida,usuario=usuario,contrasenia=contrasenia)
+            messages.success(request, 'Encargado actualizado')
+            return redirect('encargados')
+        else:
+            messages.error(request, "Las contraseñas no coinciden.")
+            return redirect('encargados')
     else:
-        messages.error(request, "Las contraseñas no coinciden.")
-        return render(request, 'v_encargados/editar_encargado.html', {
-            'nombre': nombre,
-            'apellido_p': apellido_p,
-            'apellido_m': apellido_m,
-            'hora_entrada': hora_entrada,
-            'hora_salida': hora_salida,
-            'usuario': usuario,
-        })
+        messages.error(request, "La asignacion de horas es de 7 am a 10 pm.")
+        return redirect('encargados')
 def eliminar_encargado(request, id):
     encargado = Encargado.objects.filter(pk=id)
     encargado.delete()
@@ -294,21 +251,15 @@ def profesores(request):
 
     return render(request, 'v_profesores/profesor.html', context)
 def validacionA_profesor(request):
-    nombre = request.POST.get("nombre")
-    apellido_p = request.POST.get("apellido_p")
-    apellido_m = request.POST.get("apellido_m")
+    nombre = request.POST.get("nombre").capitalize()
+    apellido_p = request.POST.get("apellido_p").capitalize()
+    apellido_m = request.POST.get("apellido_m").capitalize()
     boleta = request.POST.get("boleta")
 
     # Verificar si el profesor ya existe en la base de datos
     if Profesor.objects.filter(Q(nombre=nombre) & Q(apellido_p=apellido_p) & Q(apellido_m=apellido_m)).exists():
         messages.error(request, "El profesor ya existe.")
-        return render(request, 'v_profesores/profesor.html', {
-            'nombre': nombre,
-            'apellido_p': apellido_p,
-            'apellido_m': apellido_m,
-            'boleta': boleta,
-        })
-    
+        return redirect('profesores')
     else:
         # Crear el computadora si no existe
         profesor = Profesor(
@@ -323,9 +274,9 @@ def validacionA_profesor(request):
         return redirect('profesores')  # Cambia 'pagina_de_inicio' al nombre de la URL adecuada 
 def validacionE_profesor(request):
     id = request.POST.get("id")
-    nombre = request.POST.get("nombre")
-    apellido_p = request.POST.get("apellido_p")
-    apellido_m = request.POST.get("apellido_m")
+    nombre = request.POST.get("nombre").capitalize()
+    apellido_p = request.POST.get("apellido_p").capitalize()
+    apellido_m = request.POST.get("apellido_m").capitalize()
     boleta = request.POST.get("boleta")
     
     Profesor.objects.filter(pk=id).update(nombre=nombre, apellido_p=apellido_p, apellido_m=apellido_m, boleta=boleta)
@@ -368,9 +319,9 @@ def alumnos(request):
 
     return render(request, 'v_alumnos/alumno.html', context)
 def validacionA_alumno(request):
-    nombre = request.POST.get("nombre")
-    apellido_p = request.POST.get("apellido_p")
-    apellido_m = request.POST.get("apellido_m")
+    nombre = request.POST.get("nombre").capitalize()
+    apellido_p = request.POST.get("apellido_p").capitalize()
+    apellido_m = request.POST.get("apellido_m").capitalize()
     boleta = request.POST.get("boleta")
     id_carrera_id = request.POST.get("carrera")
     carrera = get_object_or_404(Carrera, id=id_carrera_id)
@@ -378,22 +329,12 @@ def validacionA_alumno(request):
     # Verificar si el alumno ya existe en la base de datos
     if Estudiante.objects.filter(Q(nombre=nombre) & Q(apellido_p=apellido_p) & Q(apellido_m=apellido_m)).exists():
         messages.error(request, "El alumno ya esta registrado.")
-        return render(request, 'v_alumnos/alumno.html', {
-            'nombre': nombre,
-            'apellido_p': apellido_p,
-            'apellido_m': apellido_m,
-            'boleta': boleta,
-        })
+        return redirect('alumnos') 
         
     # Verificar si el alumno ya existe en la base de datos
     if Estudiante.objects.filter(Q(boleta=boleta)).exists():
         messages.error(request, "El numero de boleta ya esta asignado.")
-        return render(request, 'v_alumnos/alumno.html', {
-            'nombre': nombre,
-            'apellido_p': apellido_p,
-            'apellido_m': apellido_m,
-            'boleta': boleta,
-        })
+        return redirect('alumnos') 
     
     else:
         # Crear el alumno si no existe
@@ -410,9 +351,9 @@ def validacionA_alumno(request):
         return redirect('alumnos')  # Cambia 'pagina_de_inicio' al nombre de la URL adecuada    
 def validacionE_alumno(request):
     id = request.POST.get("id")
-    nombre = request.POST.get("nombre")
-    apellido_p = request.POST.get("apellido_p")
-    apellido_m = request.POST.get("apellido_m")
+    nombre = request.POST.get("nombre").capitalize()
+    apellido_p = request.POST.get("apellido_p").capitalize()
+    apellido_m = request.POST.get("apellido_m").capitalize()
     boleta = request.POST.get("boleta")
     id_carrera_id = request.POST.get("carrera")
     carrera = get_object_or_404(Carrera, id=id_carrera_id)
@@ -1100,7 +1041,9 @@ def generar_laboratoriouno(request):
         p.setFont("Helvetica", 10) # Cambiado a un tipo de letra cursiva
         p.setFillColorRGB(0, 0, 0)  # Texto en color negro
         #fecha_info = sesion.fecha.strftime("%d de %B de %Y")
-        profesor_informacion = f"{sesion.profesor.nombre} {sesion.profesor.apellido_p} {sesion.profesor.apellido_m}"
+        profesor_informacion = ""
+        if sesion.profesor:
+            profesor_informacion = f"{sesion.profesor.nombre} {sesion.profesor.apellido_p} {sesion.profesor.apellido_m}"
         hora_inicio_informacion = sesion.hora_inicio.strftime("%I:%M %p")
         hora_final_informacion = sesion.hora_final.strftime("%I:%M %p") if sesion.hora_final else "Sin finalizar"
 
@@ -1121,7 +1064,7 @@ def generar_laboratoriouno(request):
     else:
         p.drawString(100, 700, "No se encontró ninguna sesión que cumpla con los criterios.")
 
-    data = Sesion.objects.filter(activo=1,computadora__laboratorio=1)
+    data = Sesion.objects.filter(activo=1,computadora__laboratorio=2)
     table_header = ["Estudiante", "No. Computadora", "Carrera"]
     col_widths = [200,  # Ancho de la primera columna
               100,   # Ancho de la segunda columna

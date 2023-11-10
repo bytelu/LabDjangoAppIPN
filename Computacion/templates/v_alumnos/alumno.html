@@ -8,6 +8,9 @@
             <div class="card-header" style="text-align: center; background-color: #6D1A42; color: #ffffff; border-top-left-radius: 10px; border-top-right-radius: 10px; padding: 15px;">
                 <h3 class="card-title" style="font-size: 30px;">Lista de Alumnos</h3>
             </div>
+            {% for message in messages %}
+                <div class="notification {% if message.tags == 'error' %}error-message{% elif message.tags == 'success' %}success-message{% endif %}">{{ message }}</div>
+            {% endfor %}
             <div class="card-body" style="background-color: #ffffff; padding: 20px;">
                 <table id="tablita" class="table table-bordered table-hover">
                     <thead>
@@ -80,7 +83,7 @@
                     </div>
                     <div class="form-group">
                         <label for="id_boleta_alumno">Boleta</label>
-                        <input type="text" name="boleta" id="id_boleta_alumno" class="form-control" required>
+                        <input type="number" name="boleta" id="id_boleta_alumno" class="form-control" required>
                     </div>
                     <div class="form-group">
                         <label for="id_carrera_alumno">Carrera</label>
@@ -127,7 +130,7 @@
                     </div>
                     <div class="form-group">
                         <label for="id_boleta_alumno">Boleta</label>
-                        <input type="text" name="boleta" id="id_boleta_alumno" class="form-control" required>
+                        <input type="number" name="boleta" id="id_boleta_alumno" class="form-control" required>
                     </div>
                     <div class="form-group">
                         <label for="id_carrera_alumno">Carrera</label>
