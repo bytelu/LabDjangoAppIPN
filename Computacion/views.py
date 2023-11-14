@@ -488,7 +488,7 @@ def validacionA_grupos(request):
     fecha = request.POST.get("fecha")
     hora_inicio = request.POST.get("hora_inicio")
     hora_final = request.POST.get("hora_final")
-    activo = request.POST.get("activo")
+    activo = int(request.POST.get("activo"))
     id_encargado_id = request.POST.get("encargado")
     encargado = get_object_or_404(Encargado, id=id_encargado_id)
     id_estudiante_id = request.POST.get("estudiante")
@@ -499,6 +499,9 @@ def validacionA_grupos(request):
     # Verifica si se proporcionó una computadora
     if id_computadora_id:
         computadora = get_object_or_404(Computadora, id=id_computadora_id)
+        computadora.ocupada = 1
+        computadora.save()
+        
     else:
         computadora = None  # Establece el campo en None si no se proporcionó
 
@@ -527,7 +530,7 @@ def validacionE_grupos(request):
     fecha = request.POST.get("fecha")
     hora_inicio = request.POST.get("hora_inicio")
     hora_final = request.POST.get("hora_final")
-    activo = request.POST.get("activo")
+    activo = int(request.POST.get("activo"))
     id_encargado_id = request.POST.get("encargado")
     encargado = get_object_or_404(Encargado, id=id_encargado_id)
     id_estudiante_id = request.POST.get("estudiante")
@@ -538,6 +541,8 @@ def validacionE_grupos(request):
     # Verifica si se proporcionó una computadora
     if id_computadora_id:
         computadora = get_object_or_404(Computadora, id=id_computadora_id)
+        computadora.ocupada = 1
+        computadora.save()
     else:
         computadora = None  # Establece el campo en None si no se proporcionó
 
@@ -548,7 +553,7 @@ def validacionE_grupos(request):
         profesor = None  # Establece el campo en None si no se proporcionó
 
 
-    Sesion.objects.filter(pk=id).update(fecha=fecha, hora_inicio=hora_inicio, hora_final=hora_final, activo=activo, encargado_id=encargado, estudiante_id=estudiante,computadora_id=computadora, profesor_id=profesor)
+    Sesion.objects.filter(pk=id).update(activo=activo, encargado_id=encargado, estudiante_id=estudiante,computadora_id=computadora)
     messages.success(request, 'Sesión actualizada')
     return redirect('sesiones_grupo')
 def eliminar_grupos(request, id):
@@ -1071,7 +1076,7 @@ def generar_laboratoriouno(request):
     else:
         p.drawString(100, 700, "No se encontró ninguna sesión que cumpla con los criterios.")
 
-    data = Sesion.objects.filter(activo=1,computadora__laboratorio=2)
+    data = Sesion.objects.filter(activo=1,computadora__laboratorio=1)
     table_header = ["Estudiante", "No. Computadora", "Carrera"]
     col_widths = [200,  # Ancho de la primera columna
               100,   # Ancho de la segunda columna

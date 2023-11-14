@@ -207,10 +207,10 @@
                         <input type="text" name="hora_inicio" id="id_hora_inicio" class="form-control" required readonly>
                     </div>
                     <div class="form-group">
-                        <label>Ocupada</label>
+                        <label>Estado</label>
                         <select name="activo" id="id_activo" class="form-control" required>
                             <option value="1">Activa</option>
-                            <option value="0">Desactivo</option>
+                            <option value="0">Inactiva</option>
                         </select>
                     </div>                  
                 </form>
@@ -353,7 +353,7 @@
     
     // Llamar a la función para mostrar la hora actual en el campo de entrada cuando se cargue la página
     mostrarHoraActualEnInput();
-    </script>
+</script>
 <script>
     $(document).ready(function () {
         var tablaAlumnos = $('#tablita').DataTable({
