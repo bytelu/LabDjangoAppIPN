@@ -173,7 +173,7 @@
                     <input type="hidden" name="id" id="id_sesion" value="">
                     <div class="form-group">
                         <label>Fecha</label>
-                        <input type="date" name="fecha" id="id_fecha" class="form-control" required>
+                        <input type="text" name="fecha" id="id_fecha" class="form-control" required readonly>
                     </div>
                     <div class="form-group">
                         <label>Encargado</label>
@@ -196,7 +196,7 @@
                     <div class="form-group">
                         <label>Computadora</label>
                         <select name="computadora" id="id_computadora" class="form-control" required>
-                            <option value="" disabled selected>Seleccione No. de Computadora</option>
+                            <option value="0" disabled selected>Seleccione No. de Computadora</option>
                             {% for computadoraa in computadora %}
                             <option value="{{ computadoraa.id }}">No.: {{ computadoraa.numero }}, Laboratorio:{{ computadoraa.laboratorio }}</option>
                             {% endfor %}
@@ -204,15 +204,14 @@
                     </div>
                     <div class="form-group">
                         <label>Hora Inicio</label>
-                        <input type="time" name="hora_inicio" id="id_hora_inicio" class="form-control" required>
+                        <input type="text" name="hora_inicio" id="id_hora_inicio" class="form-control" required readonly>
                     </div>
                     <div class="form-group">
-                        <label>Hora Final</label>
-                        <input type="time" name="hora_final" id="id_hora_final" class="form-control" required>
-                    </div> 
-                    <div class="form-group">
-                        <label>Estado</label>
-                        <input type="text" name="activo" id="id_activo" class="form-control" required>
+                        <label>Ocupada</label>
+                        <select name="activo" id="id_activo" class="form-control" required>
+                            <option value="1">Activa</option>
+                            <option value="0">Desactivo</option>
+                        </select>
                     </div>                  
                 </form>
             </div>
@@ -238,47 +237,57 @@
                     {% csrf_token %}
                     <div class="form-group">
                         <label>Fecha</label>
-                        <input type="date" name="fecha" id="id_fecha" class="form-control" required>
+                        <input type="text" name="fecha" id="id_fecha_automatico" class="form-control" required readonly>
                     </div>
                     <div class="form-group">
                         <label>Encargado</label>
                         <select name="encargado" id="id_encargado" class="form-control" required>
-                            <option value="" disabled selected>Seleccione Encargado</option>
+                            <option value="{{ encargado_principal.id }}" selected>
+                                {{ encargado_principal.nombre }} {{ encargado_principal.apellido_p }} {{ encargado_principal.apellido_m }}
+                            </option>
+                            <option value="" disabled>Seleccione Encargado</option>
                             {% for encargadoo in encargado %}
-                            <option value="{{ encargadoo.id }}">{{ encargadoo.nombre }} {{ encargadoo.apellido_p }} {{ encargadoo.apellido_m }}</option>
+                                {% if encargadoo != encargado_principal %}
+                                    <option value="{{ encargadoo.id }}">
+                                        {{ encargadoo.nombre }} {{ encargadoo.apellido_p }} {{ encargadoo.apellido_m }}
+                                    </option>
+                                {% endif %}
                             {% endfor %}
                         </select>
-                    </div>
+                    </div> 
                     <div class="form-group">
-                        <label>Estudiante</label>
-                        <select name="estudiante" id="id_estudiante" class="form-control" required>
-                            <option value="" disabled selected>Seleccione Estudiante</option>
+                        <label for="selectEstudiante">Buscar o seleccionar Estudiante</label>
+                        <input type="text" id="searchEstudiante" class="form-control" placeholder="Buscar estudiante">
+                        <select name="estudiante" id="selectEstudiante" class="form-control">
+                            <option value="0" disabled selected>Buscar o seleccionar Estudiante</option>
                             {% for estudiantee in estudiante %}
-                            <option value="{{ estudiantee.id }}">{{ estudiantee.nombre }} {{ estudiantee.apellido_p }} {{ estudiantee.apellido_m }}</option>
+                                <option value="{{ estudiantee.id }}">{{ estudiantee.nombre }} {{ estudiantee.apellido_p }} {{ estudiantee.apellido_m }}</option>
                             {% endfor %}
                         </select>
                     </div>
                     <div class="form-group">
                         <label>Computadora</label>
                         <select name="computadora" id="id_computadora" class="form-control" required>
-                            <option value="" disabled selected>Seleccione No. de Computadora</option>
+                            <option value="0" disabled selected>Seleccione No. de Computadora</option>
                             {% for computadoraa in computadora %}
-                            <option value="{{ computadoraa.id }}">No.: {{ computadoraa.numero }}, Laboratorio:{{ computadoraa.laboratorio }}</option>
+                                {% if computadoraa.ocupada == 0 and computadoraa.estado == 1 %}
+                                    <option value="{{ computadoraa.id }}">No.: {{ computadoraa.numero }}, Laboratorio:{{ computadoraa.laboratorio }}</option>
+                                {% endif %}
                             {% endfor %}
                         </select>
                     </div>
                     <div class="form-group">
-                        <label>Hora Inicio</label>
-                        <input type="time" name="hora_inicio" id="id_hora_inicio" class="form-control" required>
-                    </div>
-                    <div class="form-group">
-                        <label>Hora Final</label>
-                        <input type="time" name="hora_final" id="id_hora_final" class="form-control" required>
-                    </div> 
+                        <label for="id_hora_inicio">Hora Inicio</label>
+                        <input type="text" name="hora_inicio" id="id_hora_inicioo" class="form-control" required readonly>
+                    </div>                                        
                     <div class="form-group">
                         <label>Estado</label>
-                        <input type="text" name="activo" id="id_activo" class="form-control" required>
-                    </div>                  
+                        <select name="activo" id="id_activo" class="form-control" required disabled>
+                            <option value="1" selected>Activo</option>
+                        </select>
+                        <!-- Agregar un campo oculto para enviar el valor "1" -->
+                        <input type="hidden" name="activo" value="1">
+                    </div>              
                 </form>
             </div>
             <div class="modal-footer">
@@ -289,6 +298,62 @@
 </div>
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        var today = new Date();
+        var year = today.getFullYear();
+        var month = String(today.getMonth() + 1).padStart(2, '0');
+        var day = String(today.getDate()).padStart(2, '0');
+    
+        var formattedDate = year + '-' + month + '-' + day;
+    
+        document.getElementById('id_fecha_automatico').value = formattedDate;
+    });
+    
+</script>
+<script>
+    $(document).ready(function() {
+        $('#searchEstudiante').on('keyup', function() {
+            var searchText = $(this).val().toLowerCase();
+            $('#selectEstudiante option').each(function() {
+                var optionText = $(this).text().toLowerCase();
+                var selectElement = $('#selectEstudiante');
+                if (optionText.indexOf(searchText) !== -1) {
+                    $(this).show();
+                } else {
+                    $(this).hide();
+                }
+                var visibleOptions = selectElement.find('option:visible').length;
+                if (visibleOptions === 1) {
+                    selectElement.val('').trigger('change');
+                }
+            });
+        });
+    });
+</script>
+<script>
+    function mostrarHoraActualEnInput() {
+        var fecha = new Date();
+        var horas = fecha.getHours();
+        var minutos = fecha.getMinutes();
+        var amOpm = horas >= 12 ? 'PM' : 'AM';
+    
+        // Convertir a formato de 12 horas
+        horas = horas % 12;
+        horas = horas ? horas : 12; // Si es 0, lo cambia a 12
+    
+        // Agregar un cero delante si los minutos son menores a 10
+        minutos = minutos < 10 ? '0' + minutos : minutos;
+    
+        var horaActual = horas + ':' + minutos + ' ' + amOpm;
+        
+        // Actualizar el valor del campo de entrada hora_inicio
+        document.getElementById('id_hora_inicioo').setAttribute('value', horaActual);
+    }
+    
+    // Llamar a la función para mostrar la hora actual en el campo de entrada cuando se cargue la página
+    mostrarHoraActualEnInput();
+    </script>
 <script>
     $(document).ready(function () {
         var tablaAlumnos = $('#tablita').DataTable({

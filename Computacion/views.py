@@ -1,6 +1,5 @@
 import os, io, datetime, locale
 import re
-from datetime import datetime
 from django.conf import settings
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
@@ -144,6 +143,7 @@ def encargados(request):
 
     return render(request, 'v_encargados/encargado.html', context)
 def validar_horas(hora):
+    from datetime import datetime
     try:
         hora_datetime = datetime.strptime(hora, "%H:%M")
         return hora_datetime.time() >= datetime.strptime("07:00", "%H:%M").time() and \
@@ -159,6 +159,7 @@ def validacionA_encargado(request):
     usuario = request.POST.get("usuario")
     contrasenia = request.POST.get("contrasenia")
     repcontrasenia = request.POST.get("repcontrasenia")
+    estado = int(request.POST.get("estado"))
 
     if validar_horas(hora_entrada) and validar_horas(hora_salida):
          # Verificar si el usuario ya existe en la base de datos por nombre completo
@@ -179,7 +180,7 @@ def validacionA_encargado(request):
                     nombre=nombre,
                     apellido_m=apellido_m,
                     apellido_p=apellido_p,
-                    estado=1,
+                    estado=estado,
                     hora_entrada=hora_entrada,
                     hora_salida=hora_salida,
                 )
@@ -204,10 +205,11 @@ def validacionE_encargado(request):
     usuario = request.POST.get("usuario")
     contrasenia = request.POST.get("contrasenia")
     repcontrasenia = request.POST.get("repcontrasenia")
+    estado = int(request.POST.get("estado"))
     
     if validar_horas(hora_entrada) and validar_horas(hora_salida):
         if contrasenia == repcontrasenia:
-            Encargado.objects.filter(pk=id).update(nombre=nombre, apellido_m=apellido_m, apellido_p=apellido_p, hora_entrada=hora_entrada, hora_salida=hora_salida,usuario=usuario,contrasenia=contrasenia)
+            Encargado.objects.filter(pk=id).update(nombre=nombre, apellido_m=apellido_m, apellido_p=apellido_p, hora_entrada=hora_entrada, hora_salida=hora_salida,usuario=usuario,contrasenia=contrasenia, estado=estado)
             messages.success(request, 'Encargado actualizado')
             return redirect('encargados')
         else:
@@ -397,11 +399,11 @@ def computadoras(request):
     return render(request, 'v_computadoras/computadora.html', context)
 def validacionA_computadora(request):
     numero = request.POST.get("numero")
-    estado = request.POST.get("estado")
-    laboratorio = request.POST.get("laboratorio")
+    estado = int(request.POST.get("estado"))
+    laboratorio = int(request.POST.get("laboratorio"))
     cod_monitor = request.POST.get("cod_monitor")
     cod_cpu = request.POST.get("cod_cpu")
-    ocupada = request.POST.get("ocupada")
+    ocupada = int(request.POST.get("ocupada"))
 
     # Verificar si el la computadora ya existe en la base de datos
     if Computadora.objects.filter(Q(numero=numero) & Q(laboratorio=laboratorio)).exists():
@@ -432,11 +434,11 @@ def validacionA_computadora(request):
 def validacionE_computadora(request):
     id = request.POST.get("id")
     numero = request.POST.get("numero")
-    estado = request.POST.get("estado")
-    laboratorio = request.POST.get("laboratorio")
+    estado = int(request.POST.get("estado"))
+    laboratorio = int(request.POST.get("laboratorio"))
     cod_monitor = request.POST.get("cod_monitor")
     cod_cpu = request.POST.get("cod_cpu")
-    ocupada = request.POST.get("ocupada")
+    ocupada = int(request.POST.get("ocupada"))
     
     Computadora.objects.filter(pk=id).update(numero=numero, estado=estado, laboratorio=laboratorio, cod_monitor=cod_monitor, cod_cpu=cod_cpu, ocupada=ocupada)
     messages.success(request, 'Computadora actualizada')
@@ -592,7 +594,7 @@ def validacionA_individual(request):
     fecha = request.POST.get("fecha")
     hora_inicio = request.POST.get("hora_inicio")
     hora_final = request.POST.get("hora_final")
-    activo = request.POST.get("activo")
+    activo =int(request.POST.get("activo"))
     id_encargado_id = request.POST.get("encargado")
     encargado = get_object_or_404(Encargado, id=id_encargado_id)
     id_estudiante_id = request.POST.get("estudiante")
@@ -602,6 +604,9 @@ def validacionA_individual(request):
     # Verifica si se proporcionó una computadora
     if id_computadora_id:
         computadora = get_object_or_404(Computadora, id=id_computadora_id)
+         # Actualiza el estado de la computadora a ocupada = 1
+        computadora.ocupada = 1
+        computadora.save()
     else:
         computadora = None  # Establece el campo en None si no se proporcionó
 
@@ -624,7 +629,7 @@ def validacionE_individual(request):
     fecha = request.POST.get("fecha")
     hora_inicio = request.POST.get("hora_inicio")
     hora_final = request.POST.get("hora_final")
-    activo = request.POST.get("activo")
+    activo = int(request.POST.get("activo"))
     id_encargado_id = request.POST.get("encargado")
     encargado = get_object_or_404(Encargado, id=id_encargado_id)
     id_estudiante_id = request.POST.get("estudiante")
@@ -634,10 +639,12 @@ def validacionE_individual(request):
     # Verifica si se proporcionó una computadora
     if id_computadora_id:
         computadora = get_object_or_404(Computadora, id=id_computadora_id)
+        computadora.ocupada = 1
+        computadora.save()
     else:
         computadora = None  # Establece el campo en None si no se proporcionó
 
-    Sesion.objects.filter(pk=id).update(fecha=fecha, hora_inicio=hora_inicio, hora_final=hora_final, activo=activo, encargado_id=encargado, estudiante_id=estudiante,computadora_id=computadora, profesor_id=None)
+    Sesion.objects.filter(pk=id).update(activo=activo, encargado_id=encargado, estudiante_id=estudiante,computadora_id=computadora, profesor_id=None)
     messages.success(request, 'Sesión actualizada')
     return redirect('sesiones_individual')
 def eliminar_individual(request, id):

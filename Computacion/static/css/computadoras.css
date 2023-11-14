@@ -44,7 +44,7 @@
     background-size: 74px 38px;;
     color: transparent; /* Oculta el texto del ícono */
     position: absolute;
-    top: 28%; /* Coloca el ícono verticalmente en el centro */
+    top: 34%; /* Coloca el ícono verticalmente en el centro */
     left: 50%; /* Coloca el ícono horizontalmente en el centro */
     transform: translate(-50%, -50%); /* Centra el ícono completamente */
     z-index: 1; /* Coloca el ícono del estudiante encima del ícono de la computadora */

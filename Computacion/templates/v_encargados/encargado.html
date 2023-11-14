@@ -21,6 +21,7 @@
                             <th>Hora de entrada</th>
                             <th>Hora de salida</th>
                             <th>Usuario</th>
+                            <th>Estado</th>
                             <th>Acciones</th>
                         </tr>
                     </thead>
@@ -45,6 +46,13 @@
                                 {% endif %}
                             </td>
                             <td>{{ encargado.usuario }}</td>
+                            <td>
+                                {% if encargado.estado == 1 %}
+                                    Activo
+                                {% else %}
+                                    Inactivo
+                                {% endif %}
+                            </td>
                             <td>
                                 <button class="btn btn-primary btn-sm btn-editar"
                                     data-toggle="modal"
@@ -96,6 +104,13 @@
                     Repetir Contraseña: <input type="password" name="repcontrasenia" id="id_repcontrasenia" class="form-control my-2" required>
                     Hora Entrada: <input type="time" name="hora_entrada" id="id_hora_entrada" class="form-control my-2" required>
                     Hora Salida: <input type="time" name="hora_salida" id="id_hora_salida" class="form-control my-2" required>
+                    <div class="form-group">
+                        <label>Estado</label>
+                        <select name="estado" id="id_estado" class="form-control" required>
+                            <option value="1">Activo</option>
+                            <option value="0">Inactivo</option>
+                        </select>
+                    </div>
                 </form>
             </div>
             <div class="modal-footer">
@@ -125,6 +140,13 @@
                     Repetir Contraseña: <input type="password" name="repcontrasenia" id="id_repcontrasenia" class="form-control my-2" required>
                     Hora Entrada: <input type="time" name="hora_entrada" id="id_hora_entrada" class="form-control my-2" required placeholder="HH:mm" pattern="(?:0[7-9]|1[0-9]|20):[0-5][0-9]">
                     Hora Salida: <input type="time" name="hora_salida" id="id_hora_salida" class="form-control my-2" required placeholder="HH:mm" pattern="(?:0[7-9]|1[0-9]|20):[0-5][0-9]">
+                    <div class="form-group">
+                        <label>Estado</label>
+                        <select name="estado" id="id_estado" class="form-control" required>
+                            <option value="1">Activo</option>
+                            <option value="0">Inactivo</option>
+                        </select>
+                    </div>
                 </form>
             </div>
             <div class="modal-footer">
@@ -168,6 +190,7 @@
             $("#editarForm #id_contrasenia").val(contrasenia);
             $("#editarForm #id_repcontrasenia").val(repcontrasenia);
             $("#editarForm #id_encargado").val(id);
+            $("#editarForm #id_estado").val(estado);
             //$("#editarForm #id_activo").val(activo ? "1" : "0");
 
         });
