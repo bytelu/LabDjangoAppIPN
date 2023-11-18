@@ -20,8 +20,12 @@ from reportlab.platypus import Image
 from io import BytesIO
 import requests
 from django.shortcuts import get_object_or_404
+from .decorators import encargado_required
+from django.db.models.deletion import ProtectedError
 
 # Create your views here.
+def pagina_error(request):
+    return render(request, 'adminlte/pagina_error.html')
 def login (request):
     return render(request, 'login/login.html', {'es_registro': False})
 def conn(request):
@@ -38,9 +42,9 @@ def conn(request):
             return redirect('login')
 
         # Comparar la contraseña ingresada 
-        if (contrasenia, encargado.contrasenia):
+        if encargado.contrasenia == contrasenia:
             request.session['encargado_id'] = encargado.id
-            return redirect('acceso')  # Aquí 'acceso' es el nombre de la URL a la que deseas redirigir
+            return redirect('acceso')
         else:
             # Las credenciales son inválidas, mostrar un mensaje de error
             messages.error(request, 'Usuario o contraseña incorrectos.')
@@ -48,6 +52,7 @@ def conn(request):
 
     # Si no es una solicitud POST, renderizar el formulario de inicio de sesión
     return redirect('login')
+@encargado_required
 def acceso(request):
     # Obtener el número de registros de tablas
     num_computadoras = Computadora.objects.count()
@@ -114,6 +119,7 @@ def registro(request):
     # sin datos ingresados, para que el usuario pueda comenzar a registrarse.
     return render(request, 'login/login.html', {'es_registro': True})
 # ----------------------------- VISTA DE ENCARGADOS ----------------------------------------- #
+@encargado_required
 def encargados(request):
     # Obtener el número de registros de tablas
     num_computadoras = Computadora.objects.count()
@@ -142,6 +148,7 @@ def encargados(request):
     }
 
     return render(request, 'v_encargados/encargado.html', context)
+@encargado_required
 def validar_horas(hora):
     from datetime import datetime
     try:
@@ -150,695 +157,816 @@ def validar_horas(hora):
                hora_datetime.time() <= datetime.strptime("22:00", "%H:%M").time()
     except ValueError:
         return False
+@encargado_required
 def validacionA_encargado(request):
-    nombre = request.POST.get("nombre").capitalize()
-    apellido_p = request.POST.get("apellido_p").capitalize()
-    apellido_m = request.POST.get("apellido_m").capitalize()
-    hora_entrada = request.POST.get("hora_entrada")
-    hora_salida = request.POST.get("hora_salida")
-    usuario = request.POST.get("usuario")
-    contrasenia = request.POST.get("contrasenia")
-    repcontrasenia = request.POST.get("repcontrasenia")
-    estado = int(request.POST.get("estado"))
+    try:
+        nombre = request.POST.get("nombre").capitalize()
+        apellido_p = request.POST.get("apellido_p").capitalize()
+        apellido_m = request.POST.get("apellido_m").capitalize()
+        hora_entrada = request.POST.get("hora_entrada")
+        hora_salida = request.POST.get("hora_salida")
+        usuario = request.POST.get("usuario")
+        contrasenia = request.POST.get("contrasenia")
+        repcontrasenia = request.POST.get("repcontrasenia")
+        estado = int(request.POST.get("estado"))
 
-    if validar_horas(hora_entrada) and validar_horas(hora_salida):
-         # Verificar si el usuario ya existe en la base de datos por nombre completo
-        if Encargado.objects.filter(Q(nombre=nombre) & Q(apellido_p=apellido_p) & Q(apellido_m=apellido_m)).exists():
-            messages.error(request, "El encargado ya esta registrado.")
-            return redirect('encargados')
-        # Si no existe por nombre completo, verifica por el nombre de usuario
-        if Encargado.objects.filter(usuario=usuario).exists():
-            messages.error(request, "El nombre de usuario ya existe.")
-            return redirect('encargados')
+        if validar_horas(hora_entrada) and validar_horas(hora_salida):
+            # Verificar si el usuario ya existe en la base de datos por nombre completo
+            if Encargado.objects.filter(Q(nombre=nombre) & Q(apellido_p=apellido_p) & Q(apellido_m=apellido_m)).exists():
+                messages.error(request, "El encargado ya esta registrado.")
+                return redirect('encargados')
+            # Si no existe por nombre completo, verifica por el nombre de usuario
+            if Encargado.objects.filter(usuario=usuario).exists():
+                messages.error(request, "El nombre de usuario ya existe.")
+                return redirect('encargados')
 
-        if contrasenia == repcontrasenia:
-            # Crear el encargado con la contraseña segura
-            with transaction.atomic():
-                encargado = Encargado(
-                    usuario=usuario,
-                    contrasenia=contrasenia,
-                    nombre=nombre,
-                    apellido_m=apellido_m,
-                    apellido_p=apellido_p,
-                    estado=estado,
-                    hora_entrada=hora_entrada,
-                    hora_salida=hora_salida,
-                )
-                encargado.save()
+            if contrasenia == repcontrasenia:
+                # Crear el encargado con la contraseña segura
+                with transaction.atomic():
+                    encargado = Encargado(
+                        usuario=usuario,
+                        contrasenia=contrasenia,
+                        nombre=nombre,
+                        apellido_m=apellido_m,
+                        apellido_p=apellido_p,
+                        estado=estado,
+                        hora_entrada=hora_entrada,
+                        hora_salida=hora_salida,
+                    )
+                    encargado.save()
 
-            # Redireccionar al usuario a la página de inicio de sesión con mensaje de éxito
-            messages.success(request, "Usuario registrado correctamente.")
-            return redirect('encargados')  # Cambia 'pagina_de_inicio' al nombre de la URL adecuada
+                # Redireccionar al usuario a la página de inicio de sesión con mensaje de éxito
+                messages.success(request, "Usuario registrado correctamente.")
+                return redirect('encargados')  # Cambia 'pagina_de_inicio' al nombre de la URL adecuada
+            else:
+                messages.error(request, "Las contraseñas no coinciden.")
+                return redirect('encargados')
         else:
-            messages.error(request, "Las contraseñas no coinciden.")
-            return redirect('encargados')
-    else:
-        messages.error(request, "La asignacion de horas es de 7 am a 10 pm.")
-        return redirect('encargados')      
+            messages.error(request, "La asignacion de horas es de 7 am a 10 pm.")
+            return redirect('encargados')  
+    except Exception as e:
+        return render(request, 'adminlte/error.html', {'error_message': str(e)})    
+@encargado_required
 def validacionE_encargado(request):
-    id = request.POST.get("id")
-    nombre = request.POST.get("nombre")
-    apellido_p = request.POST.get("apellido_p")
-    apellido_m = request.POST.get("apellido_m")
-    hora_entrada = request.POST.get("hora_entrada")
-    hora_salida = request.POST.get("hora_salida")
-    usuario = request.POST.get("usuario")
-    contrasenia = request.POST.get("contrasenia")
-    repcontrasenia = request.POST.get("repcontrasenia")
-    estado = int(request.POST.get("estado"))
-    
-    if validar_horas(hora_entrada) and validar_horas(hora_salida):
-        if contrasenia == repcontrasenia:
-            Encargado.objects.filter(pk=id).update(nombre=nombre, apellido_m=apellido_m, apellido_p=apellido_p, hora_entrada=hora_entrada, hora_salida=hora_salida,usuario=usuario,contrasenia=contrasenia, estado=estado)
-            messages.success(request, 'Encargado actualizado')
-            return redirect('encargados')
+    try:
+        id = request.POST.get("id")
+        nombre = request.POST.get("nombre")
+        apellido_p = request.POST.get("apellido_p")
+        apellido_m = request.POST.get("apellido_m")
+        hora_entrada = request.POST.get("hora_entrada")
+        hora_salida = request.POST.get("hora_salida")
+        usuario = request.POST.get("usuario")
+        contrasenia = request.POST.get("contrasenia")
+        repcontrasenia = request.POST.get("repcontrasenia")
+        estado = int(request.POST.get("estado"))
+        
+        if validar_horas(hora_entrada) and validar_horas(hora_salida):
+            if contrasenia == repcontrasenia:
+                Encargado.objects.filter(pk=id).update(nombre=nombre, apellido_m=apellido_m, apellido_p=apellido_p, hora_entrada=hora_entrada, hora_salida=hora_salida,usuario=usuario,contrasenia=contrasenia, estado=estado)
+                messages.success(request, 'Encargado actualizado')
+                return redirect('encargados')
+            else:
+                messages.error(request, "Las contraseñas no coinciden.")
+                return redirect('encargados')
         else:
-            messages.error(request, "Las contraseñas no coinciden.")
+            messages.error(request, "La asignacion de horas es de 7 am a 10 pm.")
             return redirect('encargados')
-    else:
-        messages.error(request, "La asignacion de horas es de 7 am a 10 pm.")
-        return redirect('encargados')
+    except Exception as e:
+        return render(request, 'adminlte/error.html', {'error_message': str(e)})
+@encargado_required
 def eliminar_encargado(request, id):
-    encargado = Encargado.objects.filter(pk=id)
-    encargado.delete()
-    messages.success(request, 'Encargado eliminado')
-    return redirect('encargados')
+    try:
+        encargado = Encargado.objects.filter(pk=id)
+        encargado.delete()
+        messages.success(request, 'Encargado eliminado')
+        return redirect('encargados')
+    except Exception as e:
+        return render(request, 'adminlte/error.html', {'error_message': str(e)})
 # ----------------------------- VISTA DE PROFESORES ----------------------------------------- #
+@encargado_required
 def profesores(request):
-     #Obtener el número de registros de tablas
-    num_computadoras = Computadora.objects.count()
-    num_profesores = Profesor.objects.count()
-    num_encargados = Encargado.objects.count()
-    num_estudiantes = Estudiante.objects.count()
+    try:
+        #Obtener el número de registros de tablas
+        num_computadoras = Computadora.objects.count()
+        num_profesores = Profesor.objects.count()
+        num_encargados = Encargado.objects.count()
+        num_estudiantes = Estudiante.objects.count()
 
-    encargado_id = request.session.get('encargado_id')
-    encargado = None
+        encargado_id = request.session.get('encargado_id')
+        encargado = None
 
-    if encargado_id:
-     # Consultar la base de datos para obtener la información del encargado
-        encargado = Encargado.objects.get(id=encargado_id)
+        if encargado_id:
+        # Consultar la base de datos para obtener la información del encargado
+            encargado = Encargado.objects.get(id=encargado_id)
 
-     #Consultar la lista de todos los encargados
-    profesores = Profesor.objects.all()
+        #Consultar la lista de todos los encargados
+        profesores = Profesor.objects.all()
 
-     # Crear un contexto con todos los datos
-    context = {
-        'computadoras_lista': num_computadoras,
-        'profesores_lista': num_profesores,
-        'encargados_lista': num_encargados,
-        'estudiantes_lista': num_estudiantes,
-        'encargado_principal': encargado,  # Incluye también el encargado autenticado en el contexto
-        'profesores': profesores,  # Incluye la lista de todos los profesores
-    }
+        # Crear un contexto con todos los datos
+        context = {
+            'computadoras_lista': num_computadoras,
+            'profesores_lista': num_profesores,
+            'encargados_lista': num_encargados,
+            'estudiantes_lista': num_estudiantes,
+            'encargado_principal': encargado,  # Incluye también el encargado autenticado en el contexto
+            'profesores': profesores,  # Incluye la lista de todos los profesores
+        }
 
-    return render(request, 'v_profesores/profesor.html', context)
+        return render(request, 'v_profesores/profesor.html', context)
+    except Exception as e:
+        return render(request, 'adminlte/error.html', {'error_message': str(e)})
+@encargado_required
 def validacionA_profesor(request):
-    nombre = request.POST.get("nombre").capitalize()
-    apellido_p = request.POST.get("apellido_p").capitalize()
-    apellido_m = request.POST.get("apellido_m").capitalize()
-    boleta = request.POST.get("boleta")
+    try:
+        nombre = request.POST.get("nombre").capitalize()
+        apellido_p = request.POST.get("apellido_p").capitalize()
+        apellido_m = request.POST.get("apellido_m").capitalize()
+        boleta = request.POST.get("boleta")
 
-    # Verificar si el profesor ya existe en la base de datos
-    if Profesor.objects.filter(Q(nombre=nombre) & Q(apellido_p=apellido_p) & Q(apellido_m=apellido_m)).exists():
-        messages.error(request, "El profesor ya existe.")
-        return redirect('profesores')
-    else:
-        # Crear el computadora si no existe
-        profesor = Profesor(
-            nombre=nombre,
-            apellido_p=apellido_p,
-            apellido_m=apellido_m,
-            boleta=boleta,
-        )
-        profesor.save()
-        # Redireccionar al usuario a la página de inicio de sesión con mensaje de éxito
-        messages.success(request, "Profesor registrado correctamente.")
-        return redirect('profesores')  # Cambia 'pagina_de_inicio' al nombre de la URL adecuada 
+        # Verificar si el profesor ya existe en la base de datos
+        if Profesor.objects.filter(Q(nombre=nombre) & Q(apellido_p=apellido_p) & Q(apellido_m=apellido_m)).exists():
+            messages.error(request, "El profesor ya existe.")
+            return redirect('profesores')
+        else:
+            # Crear el computadora si no existe
+            profesor = Profesor(
+                nombre=nombre,
+                apellido_p=apellido_p,
+                apellido_m=apellido_m,
+                boleta=boleta,
+            )
+            profesor.save()
+            # Redireccionar al usuario a la página de inicio de sesión con mensaje de éxito
+            messages.success(request, "Profesor registrado correctamente.")
+            return redirect('profesores')  # Cambia 'pagina_de_inicio' al nombre de la URL adecuada 
+    except Exception as e:
+        return render(request, 'adminlte/error.html', {'error_message': str(e)})
+@encargado_required
 def validacionE_profesor(request):
-    id = request.POST.get("id")
-    nombre = request.POST.get("nombre").capitalize()
-    apellido_p = request.POST.get("apellido_p").capitalize()
-    apellido_m = request.POST.get("apellido_m").capitalize()
-    boleta = request.POST.get("boleta")
-    
-    Profesor.objects.filter(pk=id).update(nombre=nombre, apellido_p=apellido_p, apellido_m=apellido_m, boleta=boleta)
-    messages.success(request, 'Profesor actualizado')
-    return redirect('profesores') 
+    try:
+        id = request.POST.get("id")
+        nombre = request.POST.get("nombre").capitalize()
+        apellido_p = request.POST.get("apellido_p").capitalize()
+        apellido_m = request.POST.get("apellido_m").capitalize()
+        boleta = request.POST.get("boleta")
+        
+        Profesor.objects.filter(pk=id).update(nombre=nombre, apellido_p=apellido_p, apellido_m=apellido_m, boleta=boleta)
+        messages.success(request, 'Profesor actualizado')
+        return redirect('profesores') 
+    except Exception as e:
+        return render(request, 'adminlte/error.html', {'error_message': str(e)})
+@encargado_required
 def eliminar_profesor(request, id):
-    profesor = Profesor.objects.filter(pk=id)
-    profesor.delete()
-    messages.success(request, 'Profesor eliminado')
-    return redirect('profesores')
+    try:
+        profesor = Profesor.objects.filter(pk=id)
+        profesor.delete()
+        messages.success(request, 'Profesor eliminado')
+        return redirect('profesores')
+    except Exception as e:
+        return render(request, 'adminlte/error.html', {'error_message': str(e)})
 # ----------------------------- VISTA DE ALUMNOS ----------------------------------------- #
+@encargado_required
 def alumnos(request):
-   #  Obtener el número de registros de tablas
-    num_computadoras = Computadora.objects.count()
-    num_profesores = Profesor.objects.count()
-    num_encargados = Encargado.objects.count()
-    num_estudiantes = Estudiante.objects.count()
-    carrera = Carrera.objects.all()
+    try:
+        #  Obtener el número de registros de tablas
+        num_computadoras = Computadora.objects.count()
+        num_profesores = Profesor.objects.count()
+        num_encargados = Encargado.objects.count()
+        num_estudiantes = Estudiante.objects.count()
+        carrera = Carrera.objects.all()
 
-    encargado_id = request.session.get('encargado_id')
-    encargado = None
+        encargado_id = request.session.get('encargado_id')
+        encargado = None
 
-    if encargado_id:
-     # Consultar la base de datos para obtener la información del encargado
-       encargado = Encargado.objects.get(id=encargado_id)
+        if encargado_id:
+        # Consultar la base de datos para obtener la información del encargado
+            encargado = Encargado.objects.get(id=encargado_id)
 
-     #Consultar la lista de todos los encargados
-    alumnos = Estudiante.objects.all()
+        #Consultar la lista de todos los encargados
+        alumnos = Estudiante.objects.all()
 
-    # Crear un contexto con todos los datos
-    context = {
-        'computadoras_lista': num_computadoras,
-        'profesores_lista': num_profesores,
-        'encargados_lista': num_encargados,
-        'estudiantes_lista': num_estudiantes,
-        'encargado_principal': encargado,  # Incluye también el encargado autenticado en el contexto
-        'alumnos': alumnos,  # Incluye la lista de todos los encargados
-        'carrera' : carrera, 
-    }
+        # Crear un contexto con todos los datos
+        context = {
+            'computadoras_lista': num_computadoras,
+            'profesores_lista': num_profesores,
+            'encargados_lista': num_encargados,
+            'estudiantes_lista': num_estudiantes,
+            'encargado_principal': encargado,  # Incluye también el encargado autenticado en el contexto
+            'alumnos': alumnos,  # Incluye la lista de todos los encargados
+            'carrera' : carrera, 
+        }
 
-    return render(request, 'v_alumnos/alumno.html', context)
+        return render(request, 'v_alumnos/alumno.html', context)
+    except Exception as e:
+        return render(request, 'adminlte/error.html', {'error_message': str(e)})
+@encargado_required
 def validacionA_alumno(request):
-    nombre = request.POST.get("nombre").capitalize()
-    apellido_p = request.POST.get("apellido_p").capitalize()
-    apellido_m = request.POST.get("apellido_m").capitalize()
-    boleta = request.POST.get("boleta")
-    id_carrera_id = request.POST.get("carrera")
-    carrera = get_object_or_404(Carrera, id=id_carrera_id)
-    
-    # Verificar si el alumno ya existe en la base de datos
-    if Estudiante.objects.filter(Q(nombre=nombre) & Q(apellido_p=apellido_p) & Q(apellido_m=apellido_m)).exists():
-        messages.error(request, "El alumno ya esta registrado.")
-        return redirect('alumnos') 
+    try:
+        nombre = request.POST.get("nombre").capitalize()
+        apellido_p = request.POST.get("apellido_p").capitalize()
+        apellido_m = request.POST.get("apellido_m").capitalize()
+        boleta = request.POST.get("boleta")
+        id_carrera_id = request.POST.get("carrera")
+        carrera = get_object_or_404(Carrera, id=id_carrera_id)
         
-    # Verificar si el alumno ya existe en la base de datos
-    if Estudiante.objects.filter(Q(boleta=boleta)).exists():
-        messages.error(request, "El numero de boleta ya esta asignado.")
-        return redirect('alumnos') 
-    
-    else:
-        # Crear el alumno si no existe
-        alumno = Estudiante(
-            nombre=nombre,
-            apellido_p=apellido_p,
-            apellido_m=apellido_m,
-            boleta=boleta,
-            carrera=carrera,
-        )
-        alumno.save()
-        # Redireccionar al usuario a la página de inicio de sesión con mensaje de éxito
-        messages.success(request, "Alumno registrado correctamente.")
-        return redirect('alumnos')  # Cambia 'pagina_de_inicio' al nombre de la URL adecuada    
+        # Verificar si el alumno ya existe en la base de datos
+        if Estudiante.objects.filter(Q(nombre=nombre) & Q(apellido_p=apellido_p) & Q(apellido_m=apellido_m)).exists():
+            messages.error(request, "El alumno ya esta registrado.")
+            return redirect('alumnos') 
+            
+        # Verificar si el alumno ya existe en la base de datos
+        if Estudiante.objects.filter(Q(boleta=boleta)).exists():
+            messages.error(request, "El numero de boleta ya esta asignado.")
+            return redirect('alumnos') 
+        
+        else:
+            # Crear el alumno si no existe
+            alumno = Estudiante(
+                nombre=nombre,
+                apellido_p=apellido_p,
+                apellido_m=apellido_m,
+                boleta=boleta,
+                carrera=carrera,
+            )
+            alumno.save()
+            # Redireccionar al usuario a la página de inicio de sesión con mensaje de éxito
+            messages.success(request, "Alumno registrado correctamente.")
+            return redirect('alumnos')  # Cambia 'pagina_de_inicio' al nombre de la URL adecuada   
+    except Exception as e:
+        return render(request, 'adminlte/error.html', {'error_message': str(e)}) 
+@encargado_required
 def validacionE_alumno(request):
-    id = request.POST.get("id")
-    nombre = request.POST.get("nombre").capitalize()
-    apellido_p = request.POST.get("apellido_p").capitalize()
-    apellido_m = request.POST.get("apellido_m").capitalize()
-    boleta = request.POST.get("boleta")
-    id_carrera_id = request.POST.get("carrera")
-    carrera = get_object_or_404(Carrera, id=id_carrera_id)
-    
-    Estudiante.objects.filter(pk=id).update(nombre=nombre, apellido_m=apellido_m, apellido_p=apellido_p, boleta=boleta, carrera_id = carrera)
-    messages.success(request, 'Alumno actualizado')
-    return redirect('alumnos') 
-def eliminar_alumno(request,id):
-    alumno = Estudiante.objects.filter(pk=id)
-    alumno.delete()
-    messages.success(request, 'Alumno eliminado')
-    return redirect('alumnos')
-# ----------------------------- VISTA DE COMPUTADORAS ----------------------------------------- #
-def computadoras(request):
-      # Obtener el número de registros de tablas
-    num_computadoras = Computadora.objects.count()
-    num_profesores = Profesor.objects.count()
-    num_encargados = Encargado.objects.count()
-    num_estudiantes = Estudiante.objects.count()
-
-    encargado_id = request.session.get('encargado_id')
-    encargado = None
-
-    if encargado_id:
-        # Consultar la base de datos para obtener la información del encargado
-        encargado = Encargado.objects.get(id=encargado_id)
-
-    # Consultar la lista de todos los encargados
-    computadoras = Computadora.objects.all()
-
-    # Crear un contexto con todos los datos
-    context = {
-        'computadoras_lista': num_computadoras,
-        'profesores_lista': num_profesores,
-        'encargados_lista': num_encargados,
-        'estudiantes_lista': num_estudiantes,
-        'encargado_principal': encargado,  # Incluye también el encargado autenticado en el contexto
-        'computadoras': computadoras,  # Incluye la lista de todas las computadoras
-    }
-
-    return render(request, 'v_computadoras/computadora.html', context)
-def validacionA_computadora(request):
-    numero = request.POST.get("numero")
-    estado = int(request.POST.get("estado"))
-    laboratorio = int(request.POST.get("laboratorio"))
-    cod_monitor = request.POST.get("cod_monitor")
-    cod_cpu = request.POST.get("cod_cpu")
-    ocupada = int(request.POST.get("ocupada"))
-
-    # Verificar si el la computadora ya existe en la base de datos
-    if Computadora.objects.filter(Q(numero=numero) & Q(laboratorio=laboratorio)).exists():
-        messages.error(request, "La computadora ya existe.")
-        return render(request, 'v_computadoras/computadora.html', {
-            'numero': numero,
-            'estado': estado,
-            'laboratorio': laboratorio,
-            'cod_monitor': cod_monitor,
-            'cod_cpu': cod_cpu,
-            'ocupada': ocupada,
-        })
-    
-    else:
-        # Crear el computadora si no existe
-        computadora = Computadora(
-            numero=numero,
-            estado=estado,
-            laboratorio=laboratorio,
-            cod_monitor=cod_monitor,
-            cod_cpu=cod_cpu,
-            ocupada=ocupada,
-        )
-        computadora.save()
-        # Redireccionar al usuario a la página de inicio de sesión con mensaje de éxito
-        messages.success(request, "Computadora registrada correctamente.")
-        return redirect('computadoras')  # Cambia 'pagina_de_inicio' al nombre de la URL adecuada 
-def validacionE_computadora(request):
-    id = request.POST.get("id")
-    numero = request.POST.get("numero")
-    estado = int(request.POST.get("estado"))
-    laboratorio = int(request.POST.get("laboratorio"))
-    cod_monitor = request.POST.get("cod_monitor")
-    cod_cpu = request.POST.get("cod_cpu")
-    ocupada = int(request.POST.get("ocupada"))
-    
-    Computadora.objects.filter(pk=id).update(numero=numero, estado=estado, laboratorio=laboratorio, cod_monitor=cod_monitor, cod_cpu=cod_cpu, ocupada=ocupada)
-    messages.success(request, 'Computadora actualizada')
-    return redirect('computadoras') 
-def eliminar_computadora(request, id):
-    computadora = Computadora.objects.filter(pk=id)
-    computadora.delete()
-    messages.success(request, 'Computadora eliminada')
-    return redirect('computadoras')
-# ----------------------------- VISTA DE SESIONES DE GRUPO ----------------------------------------- #
-def sesiones_grupo(request):
-     #  Obtener el número de registros de tablas
-    num_computadoras = Computadora.objects.count()
-    num_profesores = Profesor.objects.count()
-    num_encargados = Encargado.objects.count()
-    num_estudiantes = Estudiante.objects.count()
-    sesiones = Sesion.objects.all()
-
-    encargado_id = request.session.get('encargado_id')
-    encargado = None
-
-    if encargado_id:
-     # Consultar la base de datos para obtener la información del encargado
-       encargado = Encargado.objects.get(id=encargado_id)
-
-    encargados = Encargado.objects.all()
-    computadoras = Computadora.objects.all()
-    estudiantes = Estudiante.objects.all()
-    profesores = Profesor.objects.all()
-    
-    # Crear un contexto con todos los datos
-    context = {
-        'computadoras_lista': num_computadoras,
-        'profesores_lista': num_profesores,
-        'encargados_lista': num_encargados,
-        'estudiantes_lista': num_estudiantes,
-        'encargado_principal': encargado,  # Incluye también el encargado autenticado en el contexto
-        'sesiones': sesiones,
-        'encargado':encargados,
-        'computadora':computadoras,
-        'estudiante':estudiantes,
-        'profesor':profesores,
-    }
-
-    return render(request, 'v_sesionesgrupo/grupo.html', context)
-def validacionA_grupos(request):
-    fecha = request.POST.get("fecha")
-    hora_inicio = request.POST.get("hora_inicio")
-    hora_final = request.POST.get("hora_final")
-    activo = int(request.POST.get("activo"))
-    id_encargado_id = request.POST.get("encargado")
-    encargado = get_object_or_404(Encargado, id=id_encargado_id)
-    id_estudiante_id = request.POST.get("estudiante")
-    estudiante = get_object_or_404(Estudiante, id=id_estudiante_id)
-    id_computadora_id = request.POST.get("computadora")
-    id_profesor_id = request.POST.get("profesor")
-
-    # Verifica si se proporcionó una computadora
-    if id_computadora_id:
-        computadora = get_object_or_404(Computadora, id=id_computadora_id)
-        computadora.ocupada = 1
-        computadora.save()
+    try:
+        id = request.POST.get("id")
+        nombre = request.POST.get("nombre").capitalize()
+        apellido_p = request.POST.get("apellido_p").capitalize()
+        apellido_m = request.POST.get("apellido_m").capitalize()
+        boleta = request.POST.get("boleta")
+        id_carrera_id = request.POST.get("carrera")
+        carrera = get_object_or_404(Carrera, id=id_carrera_id)
         
-    else:
-        computadora = None  # Establece el campo en None si no se proporcionó
+        Estudiante.objects.filter(pk=id).update(nombre=nombre, apellido_m=apellido_m, apellido_p=apellido_p, boleta=boleta, carrera_id = carrera)
+        messages.success(request, 'Alumno actualizado')
+        return redirect('alumnos') 
+    except Exception as e:
+        return render(request, 'adminlte/error.html', {'error_message': str(e)})
+@encargado_required
+def eliminar_alumno(request,id):
+    try:
+        alumno = Estudiante.objects.filter(pk=id)
+        alumno.delete()
+        messages.success(request, 'Alumno eliminado')
+        return redirect('alumnos')
+    except Exception as e:
+        return render(request, 'adminlte/error.html', {'error_message': str(e)})
+# ----------------------------- VISTA DE COMPUTADORAS ----------------------------------------- #
+@encargado_required
+def computadoras(request):
+    try:
+        # Obtener el número de registros de tablas
+        num_computadoras = Computadora.objects.count()
+        num_profesores = Profesor.objects.count()
+        num_encargados = Encargado.objects.count()
+        num_estudiantes = Estudiante.objects.count()
 
-    # Verifica si se proporcionó una computadora
-    if id_profesor_id:
-        profesor = get_object_or_404(Profesor, id=id_profesor_id)
-    else:
-        profesor = None  # Establece el campo en None si no se proporcionó
+        encargado_id = request.session.get('encargado_id')
+        encargado = None
 
-    sesion = Sesion(
-        fecha=fecha,
-        hora_final=hora_final,
-        hora_inicio=hora_inicio,
-        activo=activo,
-        encargado=encargado,
-        estudiante=estudiante,
-        computadora=computadora,
-        profesor=profesor,
-    )
-    sesion.save()
-    # Redireccionar al usuario a la página de inicio de sesión con mensaje de éxito
-    messages.success(request, "Sesion registrada correctamente.")
-    return redirect('sesiones_grupo')  # Cambia 'pagina_de_inicio' al nombre de la URL adecuada
-def validacionE_grupos(request):
-    id = request.POST.get("id")
-    fecha = request.POST.get("fecha")
-    hora_inicio = request.POST.get("hora_inicio")
-    hora_final = request.POST.get("hora_final")
-    activo = int(request.POST.get("activo"))
-    id_encargado_id = request.POST.get("encargado")
-    encargado = get_object_or_404(Encargado, id=id_encargado_id)
-    id_estudiante_id = request.POST.get("estudiante")
-    estudiante = get_object_or_404(Estudiante, id=id_estudiante_id)
-    id_computadora_id = request.POST.get("computadora")
-    id_profesor_id = request.POST.get("profesor")
+        if encargado_id:
+            # Consultar la base de datos para obtener la información del encargado
+            encargado = Encargado.objects.get(id=encargado_id)
 
-    # Verifica si se proporcionó una computadora
-    if id_computadora_id:
-        computadora = get_object_or_404(Computadora, id=id_computadora_id)
-        computadora.ocupada = 1
-        computadora.save()
-    else:
-        computadora = None  # Establece el campo en None si no se proporcionó
+        # Consultar la lista de todos los encargados
+        computadoras = Computadora.objects.all()
 
-    # Verifica si se proporcionó una computadora
-    if id_profesor_id:
-        profesor = get_object_or_404(Profesor, id=id_profesor_id)
-    else:
-        profesor = None  # Establece el campo en None si no se proporcionó
+        # Crear un contexto con todos los datos
+        context = {
+            'computadoras_lista': num_computadoras,
+            'profesores_lista': num_profesores,
+            'encargados_lista': num_encargados,
+            'estudiantes_lista': num_estudiantes,
+            'encargado_principal': encargado,  # Incluye también el encargado autenticado en el contexto
+            'computadoras': computadoras,  # Incluye la lista de todas las computadoras
+        }
 
+        return render(request, 'v_computadoras/computadora.html', context)
+    except Exception as e:
+        return render(request, 'adminlte/error.html', {'error_message': str(e)})
+@encargado_required
+def validacionA_computadora(request):
+    try:
+        numero = request.POST.get("numero")
+        estado = int(request.POST.get("estado"))
+        laboratorio = int(request.POST.get("laboratorio"))
+        cod_monitor = request.POST.get("cod_monitor")
+        cod_cpu = request.POST.get("cod_cpu")
+        ocupada = int(request.POST.get("ocupada"))
 
-    Sesion.objects.filter(pk=id).update(activo=activo, encargado_id=encargado, estudiante_id=estudiante,computadora_id=computadora)
-    messages.success(request, 'Sesión actualizada')
-    return redirect('sesiones_grupo')
-def eliminar_grupos(request, id):
-    sesion = Sesion.objects.filter(pk=id)
-    sesion.delete()
-    messages.success(request, 'Sesión eliminada')
-    return redirect('sesiones_grupo')
-# ----------------------------- VISTA DE SESIONES INDIVIDUALES ----------------------------------------- #
-def sesiones_individual(request):
-     #  Obtener el número de registros de tablas
-    num_computadoras = Computadora.objects.count()
-    num_profesores = Profesor.objects.count()
-    num_encargados = Encargado.objects.count()
-    num_estudiantes = Estudiante.objects.count()
-    sesiones = Sesion.objects.all()
+        # Verificar si el la computadora ya existe en la base de datos
+        if Computadora.objects.filter(Q(numero=numero) & Q(laboratorio=laboratorio)).exists():
+            messages.error(request, "La computadora ya existe.")
+            return render(request, 'v_computadoras/computadora.html', {
+                'numero': numero,
+                'estado': estado,
+                'laboratorio': laboratorio,
+                'cod_monitor': cod_monitor,
+                'cod_cpu': cod_cpu,
+                'ocupada': ocupada,
+            })
+        
+        else:
+            # Crear el computadora si no existe
+            computadora = Computadora(
+                numero=numero,
+                estado=estado,
+                laboratorio=laboratorio,
+                cod_monitor=cod_monitor,
+                cod_cpu=cod_cpu,
+                ocupada=ocupada,
+            )
+            computadora.save()
+            # Redireccionar al usuario a la página de inicio de sesión con mensaje de éxito
+            messages.success(request, "Computadora registrada correctamente.")
+            return redirect('computadoras')  # Cambia 'pagina_de_inicio' al nombre de la URL adecuada 
+    except Exception as e:
+        return render(request, 'adminlte/error.html', {'error_message': str(e)})
+@encargado_required
+def validacionE_computadora(request):
+    try:
+        id = request.POST.get("id")
+        numero = request.POST.get("numero")
+        estado = int(request.POST.get("estado"))
+        laboratorio = int(request.POST.get("laboratorio"))
+        cod_monitor = request.POST.get("cod_monitor")
+        cod_cpu = request.POST.get("cod_cpu")
+        ocupada = int(request.POST.get("ocupada"))
+        
+        Computadora.objects.filter(pk=id).update(numero=numero, estado=estado, laboratorio=laboratorio, cod_monitor=cod_monitor, cod_cpu=cod_cpu, ocupada=ocupada)
+        messages.success(request, 'Computadora actualizada')
+        return redirect('computadoras') 
+    except Exception as e:
+        return render(request, 'adminlte/error.html', {'error_message': str(e)})
+@encargado_required
+def eliminar_computadora(request, id):
+    try:
+        computadora = Computadora.objects.filter(pk=id)
+        computadora.delete()
+        messages.success(request, 'Computadora eliminada')
+        return redirect('computadoras')
+    except Exception as e:
+        return render(request, 'adminlte/error.html', {'error_message': str(e)})
+# ----------------------------- VISTA DE SESIONES DE GRUPO ----------------------------------------- #
+@encargado_required
+def sesiones_grupo(request):
+    try:
+        #  Obtener el número de registros de tablas
+        num_computadoras = Computadora.objects.count()
+        num_profesores = Profesor.objects.count()
+        num_encargados = Encargado.objects.count()
+        num_estudiantes = Estudiante.objects.count()
+        sesiones = Sesion.objects.all()
 
-    encargado_id = request.session.get('encargado_id')
-    encargado = None
+        encargado_id = request.session.get('encargado_id')
+        encargado = None
 
-    if encargado_id:
-     # Consultar la base de datos para obtener la información del encargado
-       encargado = Encargado.objects.get(id=encargado_id)
-
-    encargados = Encargado.objects.all()
-    computadoras = Computadora.objects.all()
-    estudiantes = Estudiante.objects.all()
-    
-    # Crear un contexto con todos los datos
-    context = {
-        'computadoras_lista': num_computadoras,
-        'profesores_lista': num_profesores,
-        'encargados_lista': num_encargados,
-        'estudiantes_lista': num_estudiantes,
-        'encargado_principal': encargado,  # Incluye también el encargado autenticado en el contexto
-        'sesiones': sesiones,
-        'encargado':encargados,
-        'computadora':computadoras,
-        'estudiante':estudiantes,
-    }
-
-    return render(request, 'v_sesionesindividual/individual.html', context)
-def validacionA_individual(request):
-    fecha = request.POST.get("fecha")
-    hora_inicio = request.POST.get("hora_inicio")
-    hora_final = request.POST.get("hora_final")
-    activo =int(request.POST.get("activo"))
-    id_encargado_id = request.POST.get("encargado")
-    encargado = get_object_or_404(Encargado, id=id_encargado_id)
-    id_estudiante_id = request.POST.get("estudiante")
-    estudiante = get_object_or_404(Estudiante, id=id_estudiante_id)
-    id_computadora_id = request.POST.get("computadora")
-
-    # Verifica si se proporcionó una computadora
-    if id_computadora_id:
-        computadora = get_object_or_404(Computadora, id=id_computadora_id)
-         # Actualiza el estado de la computadora a ocupada = 1
-        computadora.ocupada = 1
-        computadora.save()
-    else:
-        computadora = None  # Establece el campo en None si no se proporcionó
-
-    sesion = Sesion(
-        fecha=fecha,
-        hora_final=hora_final,
-        hora_inicio=hora_inicio,
-        activo=activo,
-        encargado=encargado,
-        estudiante=estudiante,
-        computadora=computadora,
-        profesor=None,
-    )
-    sesion.save()
-    # Redireccionar al usuario a la página de inicio de sesión con mensaje de éxito
-    messages.success(request, "Sesion registrada correctamente.")
-    return redirect('sesiones_individual')  # Cambia 'pagina_de_inicio' al nombre de la URL adecuada
-def validacionE_individual(request):
-    id = request.POST.get("id")
-    fecha = request.POST.get("fecha")
-    hora_inicio = request.POST.get("hora_inicio")
-    hora_final = request.POST.get("hora_final")
-    activo = int(request.POST.get("activo"))
-    id_encargado_id = request.POST.get("encargado")
-    encargado = get_object_or_404(Encargado, id=id_encargado_id)
-    id_estudiante_id = request.POST.get("estudiante")
-    estudiante = get_object_or_404(Estudiante, id=id_estudiante_id)
-    id_computadora_id = request.POST.get("computadora")
-
-    # Verifica si se proporcionó una computadora
-    if id_computadora_id:
-        computadora = get_object_or_404(Computadora, id=id_computadora_id)
-        computadora.ocupada = 1
-        computadora.save()
-    else:
-        computadora = None  # Establece el campo en None si no se proporcionó
-
-    Sesion.objects.filter(pk=id).update(activo=activo, encargado_id=encargado, estudiante_id=estudiante,computadora_id=computadora, profesor_id=None)
-    messages.success(request, 'Sesión actualizada')
-    return redirect('sesiones_individual')
-def eliminar_individual(request, id):
-    sesion = Sesion.objects.filter(pk=id)
-    sesion.delete()
-    messages.success(request, 'Sesión eliminada')
-    return redirect('sesiones_individual')
-# ----------------------------- VISTA DE LABORATORIO 1 ----------------------------------------- #
-def laboratorio_uno(request):
-    #  Obtener el número de registros de tablas
-    num_computadoras = Computadora.objects.count()
-    num_profesores = Profesor.objects.count()
-    num_encargados = Encargado.objects.count()
-    num_estudiantes = Estudiante.objects.count()
-    computadora = Computadora.objects.all()
-    sesiones = Sesion.objects.all()
-    
-    encargado_id = request.session.get('encargado_id')
-    encargado = None
-
-    if encargado_id:
-     # Consultar la base de datos para obtener la información del encargado
-       encargado = Encargado.objects.get(id=encargado_id)
-
-    # Crear un contexto con todos los datos
-    context = {
-        'computadoras_lista': num_computadoras,
-        'profesores_lista': num_profesores,
-        'encargados_lista': num_encargados,
-        'estudiantes_lista': num_estudiantes,
-        'encargado_principal': encargado,  # Incluye también el encargado autenticado en el contexto
-        'computadoras' : computadora,
-        'sesiones': sesiones
-    }
-
-    return render(request, 'v_labuno/labuno.html', context)
-# ----------------------------- VISTA DE LABORATORIO 2 ----------------------------------------- #
-def laboratorio_dos(request):
-    #  Obtener el número de registros de tablas
-    num_computadoras = Computadora.objects.count()
-    num_profesores = Profesor.objects.count()
-    num_encargados = Encargado.objects.count()
-    num_estudiantes = Estudiante.objects.count()
-    computadora = Computadora.objects.all()
-    sesiones = Sesion.objects.all()
-    
-    encargado_id = request.session.get('encargado_id')
-    encargado = None
-
-    if encargado_id:
-     # Consultar la base de datos para obtener la información del encargado
-       encargado = Encargado.objects.get(id=encargado_id)
-
-    # Crear un contexto con todos los datos
-    context = {
-        'computadoras_lista': num_computadoras,
-        'profesores_lista': num_profesores,
-        'encargados_lista': num_encargados,
-        'estudiantes_lista': num_estudiantes,
-        'encargado_principal': encargado,  # Incluye también el encargado autenticado en el contexto
-        'computadoras' : computadora,
-        'sesiones': sesiones
-    }
-
-    return render(request, 'v_labdos/labdos.html', context)
-# ----------------------------- VISTA DE REPORTES ----------------------------------------- #
-def reportes(request):
-    #  Obtener el número de registros de tablas
-    num_computadoras = Computadora.objects.count()
-    num_profesores = Profesor.objects.count()
-    num_encargados = Encargado.objects.count()
-    num_estudiantes = Estudiante.objects.count()
-    encargadoo = Encargado.objects.all()
-    computadora = Computadora.objects.all()
-
-    encargado_id = request.session.get('encargado_id')
-    encargado = None
-
-    if encargado_id:
-     # Consultar la base de datos para obtener la información del encargado
-       encargado = Encargado.objects.get(id=encargado_id)
-
-     #Consultar la lista de todos los encargados
-    reportes = Reporte.objects.all()
-
-    # Crear un contexto con todos los datos
-    context = {
-        'computadoras_lista': num_computadoras,
-        'profesores_lista': num_profesores,
-        'encargados_lista': num_encargados,
-        'estudiantes_lista': num_estudiantes,
-        'encargado_principal': encargado,  # Incluye también el encargado autenticado en el contexto
-        'encargado': encargadoo,
-        'computadora' : computadora,
-        'reportes':reportes,
-    }
-
-    return render(request, 'v_reportes/reporte.html', context)
-def validacionA_reportes(request):
-    titulo = request.POST.get("titulo")
-    descripcion = request.POST.get("descripcion")
-    fecha = request.POST.get("fecha")
-    hora = request.POST.get("hora")
-    seguimiento = request.POST.get("seguimiento")
-    id_encargado_id = request.POST.get("encargado")
-    encargado = get_object_or_404(Encargado, id=id_encargado_id)
-    id_computadora_id = request.POST.get("computadora")
-
-    # Verifica si se proporcionó una computadora
-    if id_computadora_id:
-        computadora = get_object_or_404(Computadora, id=id_computadora_id)
-    else:
-        computadora = None  # Establece el campo en None si no se proporcionó
-
-    reporte = Reporte(
-        titulo=titulo,
-        descripcion=descripcion,
-        fecha=fecha,
-        hora=hora,
-        seguimiento=seguimiento,
-        encargado=encargado,
-        computadora=computadora,
-    )
-    reporte.save()
-    # Redireccionar al usuario a la página de inicio de sesión con mensaje de éxito
-    messages.success(request, "Reporte registrado correctamente.")
-    return redirect('reportes')  # Cambia 'pagina_de_inicio' al nombre de la URL adecuada
-def validacionE_reportes(request):
-    id = request.POST.get("id")
-    titulo = request.POST.get("titulo")
-    descripcion = request.POST.get("descripcion")
-    seguimiento = request.POST.get("seguimiento")
-    id_encargado_id = request.POST.get("encargado")
-    encargado = get_object_or_404(Encargado, id=id_encargado_id)
-    id_computadora_id = request.POST.get("computadora")
-
-    # Verifica si se proporcionó una computadora
-    if id_computadora_id:
-        computadora = get_object_or_404(Computadora, id=id_computadora_id)
-    else:
-        computadora = None  # Establece el campo en None si no se proporcionó
-
-    Reporte.objects.filter(pk=id).update(titulo=titulo, descripcion=descripcion, seguimiento=seguimiento, encargado_id=encargado, computadora_id=computadora)
-    messages.success(request, 'Reporte actualizado')
-    return redirect('reportes')
-def eliminar_reporte(request, id):
-    reporte = Reporte.objects.filter(pk=id)
-    reporte.delete()
-    messages.success(request, 'Reporte eliminado')
-    return redirect('reportes')
-# ----------------------------- VISTA DE AYUDA ----------------------------------------- #
-def ayuda(request):
-      # Obtener el número de registros de tablas
-    num_computadoras = Computadora.objects.count()
-    num_profesores = Profesor.objects.count()
-    num_encargados = Encargado.objects.count()
-    num_estudiantes = Estudiante.objects.count()
-
-    encargado_id = request.session.get('encargado_id')
-    encargado = None
-
-    if encargado_id:
+        if encargado_id:
         # Consultar la base de datos para obtener la información del encargado
-        encargado = Encargado.objects.get(id=encargado_id)
+            encargado = Encargado.objects.get(id=encargado_id)
 
-    # Crear un contexto con todos los datos
-    context = {
-        'computadoras_lista': num_computadoras,
-        'profesores_lista': num_profesores,
-        'encargados_lista': num_encargados,
-        'estudiantes_lista': num_estudiantes,
-        'encargado_principal': encargado,  # Incluye también el encargado autenticado en el contexto
-    }
+        encargados = Encargado.objects.all()
+        computadoras = Computadora.objects.all()
+        estudiantes = Estudiante.objects.all()
+        profesores = Profesor.objects.all()
+        
+        # Crear un contexto con todos los datos
+        context = {
+            'computadoras_lista': num_computadoras,
+            'profesores_lista': num_profesores,
+            'encargados_lista': num_encargados,
+            'estudiantes_lista': num_estudiantes,
+            'encargado_principal': encargado,  # Incluye también el encargado autenticado en el contexto
+            'sesiones': sesiones,
+            'encargado':encargados,
+            'computadora':computadoras,
+            'estudiante':estudiantes,
+            'profesor':profesores,
+        }
 
-    return render(request, 'v_ayuda/ayuda.html', context)
+        return render(request, 'v_sesionesgrupo/grupo.html', context)
+    except Exception as e:
+        return render(request, 'adminlte/error.html', {'error_message': str(e)})
+@encargado_required
+def validacionA_grupos(request):
+    try:
+        fecha = request.POST.get("fecha")
+        hora_inicio = request.POST.get("hora_inicio")
+        hora_final = request.POST.get("hora_final")
+        activo = int(request.POST.get("activo"))
+        id_encargado_id = request.POST.get("encargado")
+        encargado = get_object_or_404(Encargado, id=id_encargado_id)
+        id_estudiante_id = request.POST.get("estudiante")
+        estudiante = get_object_or_404(Estudiante, id=id_estudiante_id)
+        id_computadora_id = request.POST.get("computadora")
+        id_profesor_id = request.POST.get("profesor")
+
+        # Verifica si se proporcionó una computadora
+        if id_computadora_id:
+            computadora = get_object_or_404(Computadora, id=id_computadora_id)
+            computadora.ocupada = 1
+            computadora.save()
+            
+        else:
+            computadora = None  # Establece el campo en None si no se proporcionó
+
+        # Verifica si se proporcionó una computadora
+        if id_profesor_id:
+            profesor = get_object_or_404(Profesor, id=id_profesor_id)
+        else:
+            profesor = None  # Establece el campo en None si no se proporcionó
+
+        sesion = Sesion(
+            fecha=fecha,
+            hora_final=hora_final,
+            hora_inicio=hora_inicio,
+            activo=activo,
+            encargado=encargado,
+            estudiante=estudiante,
+            computadora=computadora,
+            profesor=profesor,
+        )
+        sesion.save()
+        # Redireccionar al usuario a la página de inicio de sesión con mensaje de éxito
+        messages.success(request, "Sesion registrada correctamente.")
+        return redirect('sesiones_grupo')  # Cambia 'pagina_de_inicio' al nombre de la URL adecuada
+    except Exception as e:
+        return render(request, 'adminlte/error.html', {'error_message': str(e)})
+@encargado_required
+def validacionE_grupos(request):
+    try:
+        
+        id = request.POST.get("id")
+        fecha = request.POST.get("fecha")
+        hora_inicio = request.POST.get("hora_inicio")
+        hora_final = request.POST.get("hora_final")
+        activo = int(request.POST.get("activo"))
+        id_encargado_id = request.POST.get("encargado")
+        encargado = get_object_or_404(Encargado, id=id_encargado_id)
+        id_estudiante_id = request.POST.get("estudiante")
+        estudiante = get_object_or_404(Estudiante, id=id_estudiante_id)
+        id_computadora_id = request.POST.get("computadora")
+        id_profesor_id = request.POST.get("profesor")
+
+        # Verifica si se proporcionó una computadora
+        if id_computadora_id:
+            computadora = get_object_or_404(Computadora, id=id_computadora_id)
+            computadora.ocupada = 1
+            computadora.save()
+        else:
+            computadora = None  # Establece el campo en None si no se proporcionó
+
+        # Verifica si se proporcionó una computadora
+        if id_profesor_id:
+            profesor = get_object_or_404(Profesor, id=id_profesor_id)
+        else:
+            profesor = None  # Establece el campo en None si no se proporcionó
+
+
+        Sesion.objects.filter(pk=id).update(activo=activo, encargado_id=encargado, estudiante_id=estudiante,computadora_id=computadora)
+        messages.success(request, 'Sesión actualizada')
+        return redirect('sesiones_grupo')
+    except Exception as e:
+        return render(request, 'adminlte/error.html', {'error_message': str(e)})
+@encargado_required
+def eliminar_grupos(request, id):
+    try:
+        sesion = Sesion.objects.filter(pk=id)
+        sesion.delete()
+        messages.success(request, 'Sesión eliminada')
+        return redirect('sesiones_grupo')
+    except Exception as e:
+        return render(request, 'adminlte/error.html', {'error_message': str(e)})
+# ----------------------------- VISTA DE SESIONES INDIVIDUALES ----------------------------------------- #
+@encargado_required
+def sesiones_individual(request):
+    try:
+        #  Obtener el número de registros de tablas
+        num_computadoras = Computadora.objects.count()
+        num_profesores = Profesor.objects.count()
+        num_encargados = Encargado.objects.count()
+        num_estudiantes = Estudiante.objects.count()
+        sesiones = Sesion.objects.all()
+
+        encargado_id = request.session.get('encargado_id')
+        encargado = None
+
+        if encargado_id:
+        # Consultar la base de datos para obtener la información del encargado
+            encargado = Encargado.objects.get(id=encargado_id)
+
+        encargados = Encargado.objects.all()
+        computadoras = Computadora.objects.all()
+        estudiantes = Estudiante.objects.all()
+        
+        # Crear un contexto con todos los datos
+        context = {
+            'computadoras_lista': num_computadoras,
+            'profesores_lista': num_profesores,
+            'encargados_lista': num_encargados,
+            'estudiantes_lista': num_estudiantes,
+            'encargado_principal': encargado,  # Incluye también el encargado autenticado en el contexto
+            'sesiones': sesiones,
+            'encargado':encargados,
+            'computadora':computadoras,
+            'estudiante':estudiantes,
+        }
+
+        return render(request, 'v_sesionesindividual/individual.html', context)
+    except Exception as e:
+        return render(request, 'adminlte/error.html', {'error_message': str(e)})
+@encargado_required
+def validacionA_individual(request):
+    try:
+        fecha = request.POST.get("fecha")
+        hora_inicio = request.POST.get("hora_inicio")
+        hora_final = request.POST.get("hora_final")
+        activo =int(request.POST.get("activo"))
+        id_encargado_id = request.POST.get("encargado")
+        encargado = get_object_or_404(Encargado, id=id_encargado_id)
+        id_estudiante_id = request.POST.get("estudiante")
+        estudiante = get_object_or_404(Estudiante, id=id_estudiante_id)
+        id_computadora_id = request.POST.get("computadora")
+
+        # Verifica si se proporcionó una computadora
+        if id_computadora_id:
+            computadora = get_object_or_404(Computadora, id=id_computadora_id)
+            # Actualiza el estado de la computadora a ocupada = 1
+            computadora.ocupada = 1
+            computadora.save()
+        else:
+            computadora = None  # Establece el campo en None si no se proporcionó
+
+        sesion = Sesion(
+            fecha=fecha,
+            hora_final=hora_final,
+            hora_inicio=hora_inicio,
+            activo=activo,
+            encargado=encargado,
+            estudiante=estudiante,
+            computadora=computadora,
+            profesor=None,
+        )
+        sesion.save()
+        # Redireccionar al usuario a la página de inicio de sesión con mensaje de éxito
+        messages.success(request, "Sesion registrada correctamente.")
+        return redirect('sesiones_individual')  # Cambia 'pagina_de_inicio' al nombre de la URL adecuada
+    except Exception as e:
+        return render(request, 'adminlte/error.html', {'error_message': str(e)})
+@encargado_required
+def validacionE_individual(request):
+    try:
+        id = request.POST.get("id")
+        fecha = request.POST.get("fecha")
+        hora_inicio = request.POST.get("hora_inicio")
+        hora_final = request.POST.get("hora_final")
+        activo = int(request.POST.get("activo"))
+        id_encargado_id = request.POST.get("encargado")
+        encargado = get_object_or_404(Encargado, id=id_encargado_id)
+        id_estudiante_id = request.POST.get("estudiante")
+        estudiante = get_object_or_404(Estudiante, id=id_estudiante_id)
+        id_computadora_id = request.POST.get("computadora")
+
+        # Verifica si se proporcionó una computadora
+        if id_computadora_id:
+            computadora = get_object_or_404(Computadora, id=id_computadora_id)
+            computadora.ocupada = 1
+            computadora.save()
+        else:
+            computadora = None  # Establece el campo en None si no se proporcionó
+
+        Sesion.objects.filter(pk=id).update(activo=activo, encargado_id=encargado, estudiante_id=estudiante,computadora_id=computadora, profesor_id=None)
+        messages.success(request, 'Sesión actualizada')
+        return redirect('sesiones_individual')
+    except Exception as e:
+        return render(request, 'adminlte/error.html', {'error_message': str(e)})
+@encargado_required
+def eliminar_individual(request, id):
+    try:
+        sesion = Sesion.objects.filter(pk=id)
+        sesion.delete()
+        messages.success(request, 'Sesión eliminada')
+        return redirect('sesiones_individual')
+    except Exception as e:
+        return render(request, 'adminlte/error.html', {'error_message': str(e)})
+# ----------------------------- VISTA DE LABORATORIO 1 ----------------------------------------- #
+@encargado_required
+def laboratorio_uno(request):
+    try:
+        #  Obtener el número de registros de tablas
+        num_computadoras = Computadora.objects.count()
+        num_profesores = Profesor.objects.count()
+        num_encargados = Encargado.objects.count()
+        num_estudiantes = Estudiante.objects.count()
+        computadora = Computadora.objects.all()
+        sesiones = Sesion.objects.all()
+        
+        encargado_id = request.session.get('encargado_id')
+        encargado = None
+
+        if encargado_id:
+        # Consultar la base de datos para obtener la información del encargado
+            encargado = Encargado.objects.get(id=encargado_id)
+
+        # Crear un contexto con todos los datos
+        context = {
+            'computadoras_lista': num_computadoras,
+            'profesores_lista': num_profesores,
+            'encargados_lista': num_encargados,
+            'estudiantes_lista': num_estudiantes,
+            'encargado_principal': encargado,  # Incluye también el encargado autenticado en el contexto
+            'computadoras' : computadora,
+            'sesiones': sesiones
+        }
+
+        return render(request, 'v_labuno/labuno.html', context)
+    except Exception as e:
+        return render(request, 'adminlte/error.html', {'error_message': str(e)})
+# ----------------------------- VISTA DE LABORATORIO 2 ----------------------------------------- #
+@encargado_required
+def laboratorio_dos(request):
+    try:
+        #  Obtener el número de registros de tablas
+        num_computadoras = Computadora.objects.count()
+        num_profesores = Profesor.objects.count()
+        num_encargados = Encargado.objects.count()
+        num_estudiantes = Estudiante.objects.count()
+        computadora = Computadora.objects.all()
+        sesiones = Sesion.objects.all()
+        
+        encargado_id = request.session.get('encargado_id')
+        encargado = None
+
+        if encargado_id:
+        # Consultar la base de datos para obtener la información del encargado
+            encargado = Encargado.objects.get(id=encargado_id)
+
+        # Crear un contexto con todos los datos
+        context = {
+            'computadoras_lista': num_computadoras,
+            'profesores_lista': num_profesores,
+            'encargados_lista': num_encargados,
+            'estudiantes_lista': num_estudiantes,
+            'encargado_principal': encargado,  # Incluye también el encargado autenticado en el contexto
+            'computadoras' : computadora,
+            'sesiones': sesiones
+        }
+
+        return render(request, 'v_labdos/labdos.html', context)
+    except Exception as e:
+        return render(request, 'adminlte/error.html', {'error_message': str(e)})
+# ----------------------------- VISTA DE REPORTES ----------------------------------------- #
+@encargado_required
+def reportes(request):
+    try:
+        #  Obtener el número de registros de tablas
+        num_computadoras = Computadora.objects.count()
+        num_profesores = Profesor.objects.count()
+        num_encargados = Encargado.objects.count()
+        num_estudiantes = Estudiante.objects.count()
+        encargadoo = Encargado.objects.all()
+        computadora = Computadora.objects.all()
+
+        encargado_id = request.session.get('encargado_id')
+        encargado = None
+
+        if encargado_id:
+        # Consultar la base de datos para obtener la información del encargado
+            encargado = Encargado.objects.get(id=encargado_id)
+
+        #Consultar la lista de todos los encargados
+        reportes = Reporte.objects.all()
+
+        # Crear un contexto con todos los datos
+        context = {
+            'computadoras_lista': num_computadoras,
+            'profesores_lista': num_profesores,
+            'encargados_lista': num_encargados,
+            'estudiantes_lista': num_estudiantes,
+            'encargado_principal': encargado,  # Incluye también el encargado autenticado en el contexto
+            'encargado': encargadoo,
+            'computadora' : computadora,
+            'reportes':reportes,
+        }
+
+        return render(request, 'v_reportes/reporte.html', context)
+    except Exception as e:
+        return render(request, 'adminlte/error.html', {'error_message': str(e)})
+@encargado_required
+def validacionA_reportes(request):
+    try:
+        titulo = request.POST.get("titulo")
+        descripcion = request.POST.get("descripcion")
+        fecha = request.POST.get("fecha")
+        hora = request.POST.get("hora")
+        seguimiento = request.POST.get("seguimiento")
+        id_encargado_id = request.POST.get("encargado")
+        encargado = get_object_or_404(Encargado, id=id_encargado_id)
+        id_computadora_id = request.POST.get("computadora")
+
+        # Verifica si se proporcionó una computadora
+        if id_computadora_id:
+            computadora = get_object_or_404(Computadora, id=id_computadora_id)
+        else:
+            computadora = None  # Establece el campo en None si no se proporcionó
+
+        reporte = Reporte(
+            titulo=titulo,
+            descripcion=descripcion,
+            fecha=fecha,
+            hora=hora,
+            seguimiento=seguimiento,
+            encargado=encargado,
+            computadora=computadora,
+        )
+        reporte.save()
+        # Redireccionar al usuario a la página de inicio de sesión con mensaje de éxito
+        messages.success(request, "Reporte registrado correctamente.")
+        return redirect('reportes')  # Cambia 'pagina_de_inicio' al nombre de la URL adecuada
+    except Exception as e:
+        return render(request, 'adminlte/error.html', {'error_message': str(e)})
+@encargado_required
+def validacionE_reportes(request):
+    try:
+        id = request.POST.get("id")
+        titulo = request.POST.get("titulo")
+        descripcion = request.POST.get("descripcion")
+        seguimiento = request.POST.get("seguimiento")
+        id_encargado_id = request.POST.get("encargado")
+        encargado = get_object_or_404(Encargado, id=id_encargado_id)
+        id_computadora_id = request.POST.get("computadora")
+
+        # Verifica si se proporcionó una computadora
+        if id_computadora_id:
+            computadora = get_object_or_404(Computadora, id=id_computadora_id)
+        else:
+            computadora = None  # Establece el campo en None si no se proporcionó
+
+        Reporte.objects.filter(pk=id).update(titulo=titulo, descripcion=descripcion, seguimiento=seguimiento, encargado_id=encargado, computadora_id=computadora)
+        messages.success(request, 'Reporte actualizado')
+        return redirect('reportes')
+    except Exception as e:
+        return render(request, 'adminlte/error.html', {'error_message': str(e)})
+@encargado_required
+def eliminar_reporte(request, id):
+    try:
+        reporte = Reporte.objects.filter(pk=id)
+        reporte.delete()
+        messages.success(request, 'Reporte eliminado')
+        return redirect('reportes')
+    except Exception as e:
+        return render(request, 'adminlte/error.html', {'error_message': str(e)})
+# ----------------------------- VISTA DE AYUDA ----------------------------------------- #
+@encargado_required
+def ayuda(request):
+    try:
+        # Obtener el número de registros de tablas
+        num_computadoras = Computadora.objects.count()
+        num_profesores = Profesor.objects.count()
+        num_encargados = Encargado.objects.count()
+        num_estudiantes = Estudiante.objects.count()
+
+        encargado_id = request.session.get('encargado_id')
+        encargado = None
+
+        if encargado_id:
+            # Consultar la base de datos para obtener la información del encargado
+            encargado = Encargado.objects.get(id=encargado_id)
+
+        # Crear un contexto con todos los datos
+        context = {
+            'computadoras_lista': num_computadoras,
+            'profesores_lista': num_profesores,
+            'encargados_lista': num_encargados,
+            'estudiantes_lista': num_estudiantes,
+            'encargado_principal': encargado,  # Incluye también el encargado autenticado en el contexto
+        }
+
+        return render(request, 'v_ayuda/ayuda.html', context)
+    except Exception as e:
+        return render(request, 'adminlte/error.html', {'error_message': str(e)})
 # ----------------------------- VISTA DE CERRAR SESION ----------------------------------------- #
+@encargado_required
 def cerrar_sesion(request):
-     # Cerrar la sesión del usuario
-    logout(request)
-    return redirect('login')  # Redirigir al usuario a la página de inicio de sesión
+    try:
+        # Cerrar la sesión del usuario
+        logout(request)
+        return redirect('login')  # Redirigir al usuario a la página de inicio de sesión
+    except Exception as e:
+        return render(request, 'adminlte/error.html', {'error_message': str(e)})
 
 ##################################### REPORTE ############################################
+@encargado_required
 def draw_encabezado(pdf, titulo, nombre_encargado):
-
-    # Color de fondo más grueso
-    #pdf.setFillColorRGB(0.74, 0, 0.56)  # Color fiusha (ajustar según tus preferencias)
-    #pdf.rect(0, 742, 612, 50, fill=True)
-
-    # Ruta de la imagen en tu proyecto Django
+    
     imagen_url = 'http://localhost:8000/static/img/educacion.jpg'  # Ajusta la URL según tu estructura de carpetas
 
     # Reducir las dimensiones de la imagen
@@ -924,6 +1052,7 @@ def draw_encabezado(pdf, titulo, nombre_encargado):
     pdf.drawString(485, 725, f"{fecha_formateada}")
     pdf.setFont("Helvetica", 10)
     pdf.drawString(430, 700, f"Hora de Impresión: {hora_formateada} {am_pm}")
+@encargado_required
 def draw_pie_de_pagina(pdf, numero_pagina):
     # Diseño del pie de página aquí
     pdf.setFillColorRGB(0.427, 0.102, 0.259)  # Color de fondo
@@ -935,6 +1064,7 @@ def draw_pie_de_pagina(pdf, numero_pagina):
 
     # Agregar el número de página
     pdf.drawRightString(580, 20, f"Página {numero_pagina}")
+@encargado_required
 def generar_computadoras(request):
     buffer = io.BytesIO()
     p = canvas.Canvas(buffer, pagesize=letter)
@@ -1031,6 +1161,7 @@ def generar_computadoras(request):
     response["Content-Disposition"] = 'inline; filename="reporte_computadoras.pdf"'
 
     return response
+@encargado_required
 def generar_laboratoriouno(request):
     buffer = io.BytesIO()
     p = canvas.Canvas(buffer, pagesize=letter)
@@ -1157,6 +1288,7 @@ def generar_laboratoriouno(request):
     response["Content-Disposition"] = 'inline; filename="reporte_SesionGrupal1.pdf"'
 
     return response
+@encargado_required
 def generar_laboratoriodos(request):
     buffer = io.BytesIO()
     p = canvas.Canvas(buffer, pagesize=letter)
@@ -1281,6 +1413,7 @@ def generar_laboratoriodos(request):
     response["Content-Disposition"] = 'inline; filename="reporte_SesionGrupal2.pdf"'
 
     return response
+@encargado_required
 def generar_individual(request, sesion_id):
     buffer = io.BytesIO()
     p = canvas.Canvas(buffer, pagesize=letter)
@@ -1392,6 +1525,7 @@ def generar_individual(request, sesion_id):
     response["Content-Disposition"] = 'inline; filename="reporte_Individual.pdf"'
 
     return response
+@encargado_required
 def generar_reporte(request, reporte_id):
     buffer = io.BytesIO()
     p = canvas.Canvas(buffer, pagesize=letter)

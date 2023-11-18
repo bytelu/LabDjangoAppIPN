@@ -1,0 +1,52 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Error - Lo sentimos</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f2f2f2;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        .error-container {
+            text-align: center;
+            max-width: 600px;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        .error-message {
+            font-size: 24px;
+            color: #FF0000;
+            margin-bottom: 20px;
+        }
+        .error-image img {
+            max-width: 100%;
+            height: auto;
+            margin-bottom: 20px;
+        }
+        .contact {
+            font-size: 16px;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <div class="error-container">
+        <div class="error-image">
+            <img src="{% static 'img/error.jpg' %}" alt="Error">
+        </div>
+        <p class="error-message">¡Lo sentimos! Ha ocurrido un error.</p>
+        <p>{{ error_message }}</p>
+        <p class="contact">Por favor, contacte al administrador del sistema.</p>
+    </div>
+</body>
+</html>

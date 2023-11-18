@@ -54,6 +54,7 @@ urlpatterns = [
     path('generar-laboratoriodos/', views.generar_laboratoriodos, name='generar_laboratoriodos'),
     path('generar-individual/<int:sesion_id>/', views.generar_individual, name='generar_individual'),
     path('generar-reporte/<int:reporte_id>/', views.generar_reporte, name='generar_reporte'),
-
+    #------------------------------PAGINA ERRO--------------------#
+    path('pagina_error/', views.pagina_error, name='pagina_error'),
 ]
 
